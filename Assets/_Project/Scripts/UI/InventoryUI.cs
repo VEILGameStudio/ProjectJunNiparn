@@ -121,9 +121,9 @@ public class InventoryUI : MonoBehaviour
         RefreshSlots();
         RefreshDetails();
 
-        if (GameManager.Instance != null)
+        if (PauseManager.Instance != null)
         {
-            GameManager.Instance.Pause();
+            PauseManager.Instance.Pause(this);
         }
     }
 
@@ -136,9 +136,9 @@ public class InventoryUI : MonoBehaviour
             panel.SetActive(false);
         }
 
-        if (GameManager.Instance != null)
+        if (PauseManager.Instance != null)
         {
-            GameManager.Instance.Resume();
+            PauseManager.Instance.Resume(this);
         }
     }
 

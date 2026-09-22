@@ -17,6 +17,10 @@ public class GameSaveData
     public float playerPositionZ;       // save a Vector3 by itself here).
     public float playTimeSeconds;       // Total time played so far.
     public List<InventoryEntry> inventoryEntries = new List<InventoryEntry>();
+
+    public bool hasTimer;               // True if a puzzle timer was saved.
+    public float timerRemaining;        // Seconds left on the puzzle timer.
+    public bool timerRunning;           // Whether that timer was counting down.
 }
 
 // One line of the inventory: which item, and how many.

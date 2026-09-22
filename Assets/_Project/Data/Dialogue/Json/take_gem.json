@@ -1,0 +1,7 @@
+{
+  "id": "take_gem",
+  "type": "choice",
+  "question": { "en": "Take the glowing gem?", "th": "จะหยิบอัญมณีเรืองแสงไหม?" },
+  "yesLabel": { "en": "Yes", "th": "ใช่" },
+  "noLabel": { "en": "No", "th": "ไม่" }
+}

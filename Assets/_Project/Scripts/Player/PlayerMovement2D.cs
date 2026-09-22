@@ -29,6 +29,9 @@ public class PlayerMovement2D : MonoBehaviour
     [Tooltip("Speed while the Run button is held, in units per second.")]
     [SerializeField] private float runSpeed = 6f;
 
+    [Tooltip("Optional. If assigned, the player can only run while stamina allows it.")]
+    [SerializeField] private PlayerStamina stamina;
+
     [Header("Depth Limits (up/down movement)")]
     [Tooltip("The lowest Y position the player is allowed to walk to (closest to the camera).")]
     [SerializeField] private float minDepth = -1f;
@@ -88,13 +91,19 @@ public class PlayerMovement2D : MonoBehaviour
         }
 
         Vector2 input = inputReader.MoveInput;
-        float speed = inputReader.RunHeld ? runSpeed : walkSpeed;
+        float speed = IsRunning() ? runSpeed : walkSpeed;
 
         Vector2 targetPosition = body.position + input * (speed * Time.fixedDeltaTime);
         targetPosition.y = Mathf.Clamp(targetPosition.y, minDepth, maxDepth);
         body.MovePosition(targetPosition);
 
         UpdateFacing(input.x);
+    }
+
+    // True when the player is holding Run and stamina allows it (if stamina is used).
+    private bool IsRunning()
+    {
+        return inputReader.RunHeld && (stamina == null || stamina.CanRun);
     }
 
     // The player can only move during normal gameplay.

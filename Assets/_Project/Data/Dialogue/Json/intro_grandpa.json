@@ -1,0 +1,14 @@
+{
+  "id": "intro_grandpa",
+  "type": "full",
+  "lines": [
+    {
+      "speaker": { "en": "Grandpa", "th": "คุณปู่" },
+      "text": { "en": "Welcome home, child.", "th": "ยินดีต้อนรับกลับบ้านนะ" }
+    },
+    {
+      "speaker": { "en": "Grandpa", "th": "คุณปู่" },
+      "text": { "en": "The old shed holds a secret.", "th": "โรงเก็บของเก่ามีความลับซ่อนอยู่" }
+    }
+  ]
+}

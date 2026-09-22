@@ -12,9 +12,11 @@
 // Put this on: the "Managers" GameObject (the prefab that lives in every scene).
 // Assign in Inspector: nothing required.
 
+using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 public class SaveManager : Singleton<SaveManager>
 {
@@ -31,6 +33,14 @@ public class SaveManager : Singleton<SaveManager>
     // True if an autosave file already exists on disk.
     public bool HasSave => File.Exists(GameSavePath);
 
+    // True while a saved game is being loaded and restored. Other systems (like the
+    // SceneLoader) check this so they do not autosave over the file mid-load.
+    public bool IsRestoring { get; private set; }
+
+    // The save being restored right now, and whether a restore is in progress.
+    private GameSaveData loadingData;
+    private bool restorePending;
+
     private string GameSavePath => Path.Combine(Application.persistentDataPath, GameSaveFileName);
     private string SettingsPath => Path.Combine(Application.persistentDataPath, SettingsFileName);
 
@@ -38,14 +48,30 @@ public class SaveManager : Singleton<SaveManager>
     {
         base.Awake();
         LoadSettings(); // Settings should always be ready as soon as the game starts.
+        GameEvents.SceneLoadFinished += HandleSceneLoadFinished;
     }
 
-    // A system asks to be included in the autosave.
+    protected override void OnDestroy()
+    {
+        base.OnDestroy();
+        GameEvents.SceneLoadFinished -= HandleSceneLoadFinished;
+    }
+
+    // A system asks to be included in the autosave. If a load is in progress, the
+    // system is restored right away (this handles per-scene objects that appear
+    // after the saved scene has loaded).
     public void Register(ISaveParticipant participant)
     {
-        if (participant != null && !participants.Contains(participant))
+        if (participant == null || participants.Contains(participant))
         {
-            participants.Add(participant);
+            return;
+        }
+
+        participants.Add(participant);
+
+        if (restorePending && loadingData != null)
+        {
+            participant.RestoreState(loadingData);
         }
     }
 
@@ -56,9 +82,11 @@ public class SaveManager : Singleton<SaveManager>
     }
 
     // Collects data from every registered system and writes the autosave file.
+    // Call this to autosave (scene load, item pickup, level complete).
     public void SaveGame()
     {
         GameSaveData data = new GameSaveData();
+        data.sceneName = SceneManager.GetActiveScene().name;
 
         foreach (ISaveParticipant participant in participants)
         {
@@ -68,27 +96,66 @@ public class SaveManager : Singleton<SaveManager>
         WriteJson(GameSavePath, data);
     }
 
-    // Reads the autosave file and gives the data back to every registered system.
-    // Returns false if there was no save to load.
-    public bool LoadGame()
+    // Loads the saved game: reads the file, loads the saved scene, and restores all
+    // systems (inventory, player position, timer). Use this for a "Continue" button
+    // or to reload after game over. Returns false if there is no save.
+    public bool ContinueGame()
     {
         if (!HasSave)
         {
-            Debug.LogWarning("SaveManager: LoadGame was called but no save file exists yet.");
+            Debug.LogWarning("SaveManager: ContinueGame was called but no save file exists yet.");
             return false;
         }
 
-        GameSaveData data = ReadJson<GameSaveData>(GameSavePath);
-        if (data == null)
+        loadingData = ReadJson<GameSaveData>(GameSavePath);
+        if (loadingData == null)
         {
             return false;
         }
 
+        restorePending = true;
+        IsRestoring = true;
+
+        // Restore systems that already exist (like the inventory, which lives on the
+        // Managers object). Per-scene systems are restored as they register after load.
         foreach (ISaveParticipant participant in participants)
         {
-            participant.RestoreState(data);
+            participant.RestoreState(loadingData);
+        }
+
+        if (SceneLoader.Instance != null)
+        {
+            SceneLoader.Instance.LoadScene(loadingData.sceneName, null);
+        }
+        else
+        {
+            ClearRestore();
         }
         return true;
+    }
+
+    // After the saved scene has loaded, give its new objects a couple of frames to
+    // register (and be restored), then finish the restore.
+    private void HandleSceneLoadFinished()
+    {
+        if (restorePending)
+        {
+            StartCoroutine(FinishRestore());
+        }
+    }
+
+    private IEnumerator FinishRestore()
+    {
+        yield return null; // Let new objects' Start run and register.
+        yield return null;
+        ClearRestore();
+    }
+
+    private void ClearRestore()
+    {
+        restorePending = false;
+        IsRestoring = false;
+        loadingData = null;
     }
 
     // Writes the current settings to the settings file.
@@ -124,7 +191,10 @@ public class SaveManager : Singleton<SaveManager>
         {
             LocalizationManager.Instance.SetLanguage(Settings.language);
         }
-        // Brightness is applied by the BrightnessController (added in a later milestone).
+        if (BrightnessController.Instance != null)
+        {
+            BrightnessController.Instance.ApplyBrightness(Settings.brightness);
+        }
     }
 
     // Turns any data object into JSON text and writes it to a file.

@@ -70,7 +70,7 @@ public class SceneLoader : Singleton<SceneLoader>
 
         PlacePlayerAtSpawnPoint();
 
-        if (autosaveOnLoad && SaveManager.Instance != null)
+        if (autosaveOnLoad && SaveManager.Instance != null && !SaveManager.Instance.IsRestoring)
         {
             SaveManager.Instance.SaveGame();
         }

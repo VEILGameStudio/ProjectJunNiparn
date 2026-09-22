@@ -31,6 +31,9 @@ public class PlayerMovement25D : MonoBehaviour
     [Tooltip("Speed while the Run button is held, in units per second.")]
     [SerializeField] private float runSpeed = 7f;
 
+    [Tooltip("Optional. If assigned, the player can only run while stamina allows it.")]
+    [SerializeField] private PlayerStamina stamina;
+
     [Header("Gravity")]
     [Tooltip("Downward pull that keeps the player on the ground. Use a negative number.")]
     [SerializeField] private float gravity = -20f;
@@ -90,7 +93,7 @@ public class PlayerMovement25D : MonoBehaviour
             horizontalMove.Normalize(); // Stops diagonal movement from being faster.
         }
 
-        float speed = inputReader.RunHeld ? runSpeed : walkSpeed;
+        float speed = IsRunning() ? runSpeed : walkSpeed;
         ApplyGravity();
 
         Vector3 motion = horizontalMove * speed + Vector3.up * verticalVelocity;
@@ -103,6 +106,12 @@ public class PlayerMovement25D : MonoBehaviour
     private bool CanMove()
     {
         return GameManager.Instance == null || GameManager.Instance.IsPlaying;
+    }
+
+    // True when the player is holding Run and stamina allows it (if stamina is used).
+    private bool IsRunning()
+    {
+        return inputReader.RunHeld && (stamina == null || stamina.CanRun);
     }
 
     // Builds up downward speed, but presses the player gently onto the ground when grounded.

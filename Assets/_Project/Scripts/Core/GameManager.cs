@@ -33,30 +33,6 @@ public class GameManager : Singleton<GameManager>
         GameEvents.RaiseGameStateChanged(newState);
     }
 
-    // Opens a menu/inventory: freezes time and switches to the Paused state.
-    // UI must use unscaled time so buttons still work while time is frozen.
-    public void Pause()
-    {
-        if (currentState != GameState.Playing)
-        {
-            return;
-        }
-
-        Time.timeScale = 0f;
-        SetState(GameState.Paused);
-        GameEvents.RaiseGamePaused();
-    }
-
-    // Closes the menu/inventory: unfreezes time and returns to normal play.
-    public void Resume()
-    {
-        if (currentState != GameState.Paused)
-        {
-            return;
-        }
-
-        Time.timeScale = 1f;
-        SetState(GameState.Playing);
-        GameEvents.RaiseGameResumed();
-    }
+    // Note: freezing time (opening a menu or inventory) is handled by PauseManager,
+    // which sets the Paused state here. GameManager only tracks the state.
 }
