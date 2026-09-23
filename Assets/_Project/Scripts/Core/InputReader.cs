@@ -1,9 +1,12 @@
 // InputReader
 // One shared place that reads the player's controls (keyboard + gamepad) and
 // hands the results to the rest of the game. Movement scripts read MoveInput and
-// RunHeld every frame; other scripts listen to the events (Interact, etc.).
-// Using one asset means every script gets the same controls and Intern B only
-// wires the input in a single place.
+// RunHeld every frame; other scripts poll InteractPressed / ToggleInventoryPressed
+// / PausePressed once per frame.
+//
+// It reads the actions LIVE from the Controls asset every time (no cached copies).
+// This avoids a bug where a cached action map could point at a stale copy after a
+// domain reload, so input silently stopped working.
 //
 // This is a ScriptableObject asset, not a component. Create the asset with:
 //   Right-click in Project > Create > Game > Input Reader
@@ -12,7 +15,6 @@
 //
 // Assign in Inspector: "Controls" (the GameControls.inputactions asset).
 
-using System;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
@@ -23,101 +25,85 @@ public class InputReader : ScriptableObject
     [Tooltip("Drag the GameControls Input Actions asset here.")]
     [SerializeField] private InputActionAsset controls;
 
-    // Live values that movement scripts read every frame.
-    public Vector2 MoveInput { get; private set; }
-    public bool RunHeld { get; private set; }
+    [Header("Debug")]
+    [Tooltip("Turn on to print input logs to the Console. Turn off after debugging.")]
+    [SerializeField] private bool logInput;
 
-    // One-shot events other scripts listen to. Remember to subscribe in OnEnable
-    // and unsubscribe in OnDisable.
-    public event Action OnInteract;
-    public event Action OnToggleInventory;
-    public event Action OnPause;
+    private const string GameplayMapName = "Gameplay";
 
-    private InputActionMap gameplayMap;
-    private InputAction moveAction;
-    private InputAction runAction;
-    private InputAction interactAction;
-    private InputAction inventoryAction;
-    private InputAction pauseAction;
+    // Live movement values, read straight from the actions each time.
+    public Vector2 MoveInput
+    {
+        get { InputAction action = GetGameplayAction("Move"); return action != null ? action.ReadValue<Vector2>() : Vector2.zero; }
+    }
 
-    // True while gameplay controls are turned on. Stops us subscribing twice.
-    private bool isGameplayEnabled;
+    public bool RunHeld
+    {
+        get { InputAction action = GetGameplayAction("Run"); return action != null && action.IsPressed(); }
+    }
 
-    // Finds all the actions inside the assigned Controls asset. Call this once
-    // before using the reader (EnableGameplay does it automatically).
-    private void CacheActions()
+    // One-shot checks: true only on the frame the button goes down. Poll these once
+    // per frame from Update (they replace the old OnInteract / OnToggleInventory events).
+    public bool InteractPressed => WasPressedThisFrame("Interact");
+    public bool ToggleInventoryPressed => WasPressedThisFrame("OpenInventory");
+    public bool PausePressed => WasPressedThisFrame("Pause");
+
+    // Turns the gameplay controls on. Call when normal gameplay begins.
+    public void EnableGameplay()
+    {
+        InputActionMap map = GetGameplayMap();
+        if (map == null)
+        {
+            return;
+        }
+
+        map.Enable();
+        if (logInput)
+        {
+            Debug.Log($"InputReader '{name}': EnableGameplay -> map.enabled = {map.enabled}");
+        }
+    }
+
+    // Turns the gameplay controls off (for example during a cutscene).
+    public void DisableGameplay()
+    {
+        InputActionMap map = GetGameplayMap();
+        if (map != null)
+        {
+            map.Disable();
+        }
+    }
+
+    // Finds the Gameplay action map live from the Controls asset.
+    private InputActionMap GetGameplayMap()
     {
         if (controls == null)
         {
             Debug.LogError($"InputReader '{name}': Controls is not assigned. Drag the GameControls asset into the Controls field.", this);
-            return;
+            return null;
         }
-
-        if (gameplayMap != null)
-        {
-            return; // Already cached.
-        }
-
-        gameplayMap = controls.FindActionMap("Gameplay", throwIfNotFound: true);
-        moveAction = gameplayMap.FindAction("Move", throwIfNotFound: true);
-        runAction = gameplayMap.FindAction("Run", throwIfNotFound: true);
-        interactAction = gameplayMap.FindAction("Interact", throwIfNotFound: true);
-        inventoryAction = gameplayMap.FindAction("OpenInventory", throwIfNotFound: true);
-        pauseAction = gameplayMap.FindAction("Pause", throwIfNotFound: true);
+        return controls.FindActionMap(GameplayMapName);
     }
 
-    // Turns on gameplay controls and starts listening for input.
-    // Call this when normal gameplay begins (for example from the player script).
-    public void EnableGameplay()
+    // Finds one gameplay action live, making sure the map is on so it can be read.
+    private InputAction GetGameplayAction(string actionName)
     {
-        if (isGameplayEnabled)
+        InputActionMap map = GetGameplayMap();
+        if (map == null)
         {
-            return; // Already on; do not subscribe a second time.
+            return null;
         }
-
-        CacheActions();
-        if (gameplayMap == null)
+        if (!map.enabled)
         {
-            return;
+            map.Enable(); // Self-heal: guarantee the controls are on when we read them.
         }
-
-        moveAction.performed += HandleMove;
-        moveAction.canceled += HandleMove;
-        runAction.performed += HandleRun;
-        runAction.canceled += HandleRun;
-        interactAction.performed += HandleInteract;
-        inventoryAction.performed += HandleInventory;
-        pauseAction.performed += HandlePause;
-
-        gameplayMap.Enable();
-        isGameplayEnabled = true;
+        return map.FindAction(actionName);
     }
 
-    // Turns off gameplay controls (for example during a cutscene).
-    public void DisableGameplay()
+    // True only on the frame the named button is first pressed.
+    private bool WasPressedThisFrame(string actionName)
     {
-        if (gameplayMap == null || !isGameplayEnabled)
-        {
-            return;
-        }
-
-        moveAction.performed -= HandleMove;
-        moveAction.canceled -= HandleMove;
-        runAction.performed -= HandleRun;
-        runAction.canceled -= HandleRun;
-        interactAction.performed -= HandleInteract;
-        inventoryAction.performed -= HandleInventory;
-        pauseAction.performed -= HandlePause;
-
-        gameplayMap.Disable();
-        MoveInput = Vector2.zero;
-        RunHeld = false;
-        isGameplayEnabled = false;
+        InputAction action = GetGameplayAction(actionName);
+        return action != null && action.WasPressedThisFrame();
     }
-
-    private void HandleMove(InputAction.CallbackContext context) => MoveInput = context.ReadValue<Vector2>();
-    private void HandleRun(InputAction.CallbackContext context) => RunHeld = context.ReadValueAsButton();
-    private void HandleInteract(InputAction.CallbackContext context) => OnInteract?.Invoke();
-    private void HandleInventory(InputAction.CallbackContext context) => OnToggleInventory?.Invoke();
-    private void HandlePause(InputAction.CallbackContext context) => OnPause?.Invoke();
 }

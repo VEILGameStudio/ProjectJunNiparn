@@ -51,24 +51,25 @@ public class InventoryUI : MonoBehaviour
 
     private void OnEnable()
     {
-        if (inputReader != null)
-        {
-            inputReader.OnToggleInventory += Toggle;
-        }
         GameEvents.LanguageChanged += RefreshDetails;
     }
 
     private void OnDisable()
     {
-        if (inputReader != null)
-        {
-            inputReader.OnToggleInventory -= Toggle;
-        }
         GameEvents.LanguageChanged -= RefreshDetails;
 
         if (Inventory.Instance != null)
         {
             Inventory.Instance.OnInventoryChanged -= RefreshSlots;
+        }
+    }
+
+    // Opens/closes the inventory when the Inventory button is pressed (polled).
+    private void Update()
+    {
+        if (inputReader != null && inputReader.ToggleInventoryPressed)
+        {
+            Toggle();
         }
     }
 

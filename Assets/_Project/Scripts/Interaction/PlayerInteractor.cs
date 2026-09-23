@@ -52,19 +52,12 @@ public class PlayerInteractor : MonoBehaviour
         }
     }
 
-    private void OnEnable()
+    // Checks for a click each frame (polling the shared Input Reader).
+    private void Update()
     {
-        if (inputReader != null)
+        if (inputReader != null && inputReader.InteractPressed)
         {
-            inputReader.OnInteract += HandleInteract;
-        }
-    }
-
-    private void OnDisable()
-    {
-        if (inputReader != null)
-        {
-            inputReader.OnInteract -= HandleInteract;
+            HandleInteract();
         }
     }
 
