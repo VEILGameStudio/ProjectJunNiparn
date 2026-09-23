@@ -87,6 +87,11 @@ public class PlayerMovement25D : MonoBehaviour
 
         // Left/right becomes world X, up/down becomes world Z (forward on the ground).
         Vector2 input = CanMove() ? inputReader.MoveInput : Vector2.zero;
+        if (input.sqrMagnitude > 0.01f)
+        {
+            InputDebug.Log($"PlayerMovement25D '{name}': move={input}, grounded={controller.isGrounded}", this);
+        }
+
         Vector3 horizontalMove = new Vector3(input.x, 0f, input.y);
         if (horizontalMove.sqrMagnitude > 1f)
         {
