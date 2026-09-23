@@ -25,10 +25,6 @@ public class InputReader : ScriptableObject
     [Tooltip("Drag the GameControls Input Actions asset here.")]
     [SerializeField] private InputActionAsset controls;
 
-    [Header("Debug")]
-    [Tooltip("Turn on to print input logs to the Console. Turn off after debugging.")]
-    [SerializeField] private bool logInput;
-
     private const string GameplayMapName = "Gameplay";
 
     // Live movement values, read straight from the actions each time.
@@ -58,10 +54,6 @@ public class InputReader : ScriptableObject
         }
 
         map.Enable();
-        if (logInput)
-        {
-            Debug.Log($"InputReader '{name}': EnableGameplay -> map.enabled = {map.enabled}");
-        }
     }
 
     // Turns the gameplay controls off (for example during a cutscene).
