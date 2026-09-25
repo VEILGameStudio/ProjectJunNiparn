@@ -1,8 +1,9 @@
 // GameOverManager
-// The shared "you failed" sequence, used both when the player dies (PlayerHealth)
-// and when a puzzle timer runs out (PuzzleTimer). It fades the screen to black,
-// waits a short delay you set in the Inspector, then loads the last save so the
-// player continues from their most recent checkpoint.
+// The shared "you failed" sequence. It listens for GameEvents.OnGameOver, which is
+// raised both when the player dies (PlayerHealth) and when a puzzle timer runs out
+// (PuzzleTimer). It fades the screen to black, waits a short delay you set in the
+// Inspector, then loads the last save so the player continues from their most
+// recent checkpoint.
 //
 // Put this on: the "Managers" GameObject (the prefab that lives in every scene).
 // Assign in Inspector:
@@ -27,8 +28,18 @@ public class GameOverManager : Singleton<GameOverManager>
 
     private bool isGameOver;
 
-    // Starts the game over sequence. Safe to call more than once; it only runs once.
-    public void TriggerGameOver()
+    private void OnEnable()
+    {
+        GameEvents.OnGameOver += HandleGameOver;
+    }
+
+    private void OnDisable()
+    {
+        GameEvents.OnGameOver -= HandleGameOver;
+    }
+
+    // Starts the game over sequence. Safe if raised more than once; it only runs once.
+    private void HandleGameOver()
     {
         if (isGameOver)
         {
@@ -67,11 +78,19 @@ public class GameOverManager : Singleton<GameOverManager>
         bool loaded = SaveManager.Instance != null && SaveManager.Instance.ContinueGame();
         if (!loaded)
         {
-            // No save yet: just restart the current scene so the player can retry.
-            if (SceneLoader.Instance != null)
-            {
-                SceneLoader.Instance.LoadScene(SceneManager.GetActiveScene().name, null);
-            }
+            RestartCurrentScene();
         }
+    }
+
+    // No save yet: just restart the current scene so the player can retry.
+    private void RestartCurrentScene()
+    {
+        if (GameManager.Instance == null || GameManager.Instance.SceneLoader == null)
+        {
+            Debug.LogError("GameOverManager: no SceneLoader found, so the scene cannot restart. Make sure the Managers object has a SceneLoader.", this);
+            return;
+        }
+
+        GameManager.Instance.SceneLoader.LoadScene(SceneManager.GetActiveScene().name, null);
     }
 }

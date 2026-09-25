@@ -1,20 +1,20 @@
 // SceneLoader
-// Changes from one scene to another the smooth way: fade to black, (optionally)
-// autosave, load the new scene, place the player at the correct spawn point, then
-// fade back in. This is used by doors, including doors that switch between the 2D
-// and 2.5D modes (each mode is just a different scene).
+// Changes from one scene to another the smooth way: fade to black, load the new
+// scene, place the player at the correct spawn point, then fade back in. Doors use
+// this. When the new scene is ready it raises GameEvents.OnSceneReady (the
+// SaveManager listens to that to autosave).
+// Other scripts reach it with: GameManager.Instance.SceneLoader
 //
-// Put this on: the "Managers" GameObject (the prefab that lives in every scene).
+// Put this on: the "Managers" GameObject (next to the GameManager).
 // Assign in Inspector:
 //   - Screen Fader: the ScreenFader on the persistent fade Canvas.
 //   - Player Tag: the tag on your player object (default "Player").
-//   - Autosave On Load: tick to autosave every time a new scene is entered.
 
 using System.Collections;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
-public class SceneLoader : Singleton<SceneLoader>
+public class SceneLoader : MonoBehaviour
 {
     [Header("References")]
     [Tooltip("The ScreenFader used to fade the screen in and out during a scene change.")]
@@ -23,9 +23,6 @@ public class SceneLoader : Singleton<SceneLoader>
     [Header("Settings")]
     [Tooltip("The tag on your player GameObject. The loader moves this object to the spawn point.")]
     [SerializeField] private string playerTag = "Player";
-
-    [Tooltip("If ticked, the game autosaves each time a new scene finishes loading.")]
-    [SerializeField] private bool autosaveOnLoad = true;
 
     // The spawn point the player should appear at in the scene being loaded.
     private string pendingSpawnPointId;
@@ -55,7 +52,6 @@ public class SceneLoader : Singleton<SceneLoader>
     private IEnumerator LoadRoutine(string sceneName)
     {
         isLoading = true;
-        GameEvents.RaiseSceneLoadStarted();
 
         if (screenFader != null)
         {
@@ -69,13 +65,7 @@ public class SceneLoader : Singleton<SceneLoader>
         }
 
         PlacePlayerAtSpawnPoint();
-
-        if (autosaveOnLoad && SaveManager.Instance != null && !SaveManager.Instance.IsRestoring)
-        {
-            SaveManager.Instance.SaveGame();
-        }
-
-        GameEvents.RaiseSceneLoadFinished();
+        GameEvents.RaiseSceneReady();
 
         if (screenFader != null)
         {
@@ -107,7 +97,7 @@ public class SceneLoader : Singleton<SceneLoader>
             return;
         }
 
-        player.transform.SetPositionAndRotation(target.transform.position, target.transform.rotation);
+        player.transform.position = target.transform.position;
     }
 
     // Looks through the loaded scene for a spawn point with the matching id.

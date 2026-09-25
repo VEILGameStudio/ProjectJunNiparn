@@ -6,16 +6,16 @@
 // It counts how many things asked for a pause, so if BOTH the menu and the
 // inventory are open, closing just one keeps the game frozen until the last one
 // closes. Each opener passes itself as the "source":
-//   PauseManager.Instance.Pause(this);   // when a menu/inventory opens
-//   PauseManager.Instance.Resume(this);  // when it closes
+//   GameManager.Instance.PauseManager.Pause(this);   // when a menu/inventory opens
+//   GameManager.Instance.PauseManager.Resume(this);  // when it closes
 //
-// Put this on: the "Managers" GameObject (the prefab that lives in every scene).
+// Put this on: the "Managers" GameObject (next to the GameManager).
 // Assign in Inspector: nothing required.
 
 using System.Collections.Generic;
 using UnityEngine;
 
-public class PauseManager : Singleton<PauseManager>
+public class PauseManager : MonoBehaviour
 {
     // The things currently asking the game to stay paused (menu, inventory, ...).
     private readonly HashSet<object> pauseSources = new HashSet<object>();
@@ -42,7 +42,6 @@ public class PauseManager : Singleton<PauseManager>
             {
                 GameManager.Instance.SetState(GameState.Paused);
             }
-            GameEvents.RaiseGamePaused();
         }
     }
 
@@ -61,7 +60,6 @@ public class PauseManager : Singleton<PauseManager>
             {
                 GameManager.Instance.SetState(GameState.Playing);
             }
-            GameEvents.RaiseGameResumed();
         }
     }
 }

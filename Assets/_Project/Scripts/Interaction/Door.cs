@@ -1,24 +1,18 @@
 // Door
-// A door the player can click to travel to another scene. It works for normal
-// level-to-level doors AND for doors that switch between 2D and 2.5D mode,
-// because each mode is just a different scene. When used, it asks the SceneLoader
-// to load the target scene and place the player at the chosen spawn point.
+// A door that takes the player to another scene. When used, it asks the
+// SceneLoader to load the target scene and place the player at the chosen spawn
+// point. To lock it, set Required Item and Blocked Message (from InteractableBase).
 //
-// Put this on: the door GameObject (it should also have a Collider so the player
-//   can click it, plus the sprite/model).
+// Put this on: the door GameObject. Add a Collider2D first (for example a BoxCollider2D).
 // Assign in Inspector:
-//   - Prompt: the text shown to the player (for example "Enter").
 //   - Target Scene Name: the exact scene file name to load (must be in Build Settings).
 //   - Target Spawn Point Id: the SpawnPoint id in that scene to arrive at.
+//   - Activation / Max Click Distance / Required Item / Blocked Message: see InteractableBase.
 
 using UnityEngine;
 
-public class Door : MonoBehaviour, IInteractable
+public class Door : InteractableBase
 {
-    [Header("Prompt")]
-    [Tooltip("Short text shown when the player can use this door, e.g. 'Enter'.")]
-    [SerializeField] private LocalizedString prompt;
-
     [Header("Destination")]
     [Tooltip("The exact name of the scene to load. It must be added to Build Settings.")]
     [SerializeField] private string targetSceneName;
@@ -26,24 +20,20 @@ public class Door : MonoBehaviour, IInteractable
     [Tooltip("The id of the SpawnPoint in the target scene where the player will appear.")]
     [SerializeField] private string targetSpawnPointId;
 
-    // The text shown to the player (from IInteractable).
-    public LocalizedString Prompt => prompt;
-
-    // Travels to the target scene when the player interacts with the door.
-    public void Interact(GameObject interactor)
+    // Travels to the target scene.
+    protected override void OnInteract(PlayerContext player)
     {
-        if (SceneLoader.Instance == null)
-        {
-            Debug.LogError("Door: no SceneLoader was found. Make sure the Managers prefab is in the scene.", this);
-            return;
-        }
-
         if (string.IsNullOrEmpty(targetSceneName))
         {
             Debug.LogError($"Door on '{name}': Target Scene Name is empty. Type the scene name to load.", this);
             return;
         }
+        if (GameManager.Instance == null || GameManager.Instance.SceneLoader == null)
+        {
+            Debug.LogError($"Door on '{name}': no SceneLoader was found. Make sure the Managers object (with a SceneLoader) is in the scene.", this);
+            return;
+        }
 
-        SceneLoader.Instance.LoadScene(targetSceneName, targetSpawnPointId);
+        GameManager.Instance.SceneLoader.LoadScene(targetSceneName, targetSpawnPointId);
     }
 }

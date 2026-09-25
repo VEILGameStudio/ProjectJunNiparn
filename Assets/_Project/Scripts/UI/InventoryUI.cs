@@ -1,11 +1,13 @@
 // InventoryUI
 // Shows the player's bag. Press the Inventory button to open or close it (this
 // also freezes the game while open). It draws one slot per item using the slot
-// prefab, and clicking a slot shows that item's name and description. It only
-// READS the inventory and listens to its OnInventoryChanged event - it never
-// changes the inventory data itself.
+// prefab, and clicking a slot shows that item's name and description. It listens
+// to GameEvents.OnInventoryChanged and redraws itself - it never changes the
+// inventory data.
 //
-// Put this on: an "InventoryUI" GameObject under your main Canvas.
+// Put this on: an "InventoryUI" GameObject under your main Canvas that is ALWAYS
+//   active. Do NOT put it on the Panel it shows and hides, or the Inventory button
+//   stops working once the panel is hidden.
 // Assign in Inspector:
 //   - Input Reader: the shared MainInputReader asset.
 //   - Panel: the inventory window GameObject to show/hide.
@@ -44,6 +46,9 @@ public class InventoryUI : MonoBehaviour
     // The slot views currently on screen, so we can clear them on refresh.
     private readonly List<InventorySlotUI> spawnedSlots = new List<InventorySlotUI>();
 
+    // The latest slots sent by GameEvents.OnInventoryChanged.
+    private IReadOnlyList<InventorySlot> currentSlots;
+
     // The item the player last clicked, shown in the details area.
     private ItemData selectedItem;
 
@@ -51,16 +56,21 @@ public class InventoryUI : MonoBehaviour
 
     private void OnEnable()
     {
-        GameEvents.LanguageChanged += RefreshDetails;
+        GameEvents.OnInventoryChanged += HandleInventoryChanged;
+        GameEvents.OnLanguageChanged += RefreshDetails;
     }
 
     private void OnDisable()
     {
-        GameEvents.LanguageChanged -= RefreshDetails;
+        GameEvents.OnInventoryChanged -= HandleInventoryChanged;
+        GameEvents.OnLanguageChanged -= RefreshDetails;
+    }
 
-        if (Inventory.Instance != null)
+    private void Start()
+    {
+        if (panel != null)
         {
-            Inventory.Instance.OnInventoryChanged -= RefreshSlots;
+            panel.SetActive(false); // Start closed.
         }
     }
 
@@ -70,23 +80,6 @@ public class InventoryUI : MonoBehaviour
         if (inputReader != null && inputReader.ToggleInventoryPressed)
         {
             Toggle();
-        }
-    }
-
-    private void Start()
-    {
-        if (Inventory.Instance != null)
-        {
-            Inventory.Instance.OnInventoryChanged += RefreshSlots;
-        }
-        else
-        {
-            Debug.LogError("InventoryUI: no Inventory was found. Make sure the Managers prefab with the Inventory is in the scene.", this);
-        }
-
-        if (panel != null)
-        {
-            panel.SetActive(false); // Start closed.
         }
     }
 
@@ -122,9 +115,9 @@ public class InventoryUI : MonoBehaviour
         RefreshSlots();
         RefreshDetails();
 
-        if (PauseManager.Instance != null)
+        if (GameManager.Instance != null && GameManager.Instance.PauseManager != null)
         {
-            PauseManager.Instance.Pause(this);
+            GameManager.Instance.PauseManager.Pause(this);
         }
     }
 
@@ -137,23 +130,30 @@ public class InventoryUI : MonoBehaviour
             panel.SetActive(false);
         }
 
-        if (PauseManager.Instance != null)
+        if (GameManager.Instance != null && GameManager.Instance.PauseManager != null)
         {
-            PauseManager.Instance.Resume(this);
+            GameManager.Instance.PauseManager.Resume(this);
         }
     }
 
-    // Rebuilds the grid of slots from the current inventory.
+    // Remembers the new slots and redraws them.
+    private void HandleInventoryChanged(IReadOnlyList<InventorySlot> slots)
+    {
+        currentSlots = slots;
+        RefreshSlots();
+    }
+
+    // Rebuilds the grid of slots from the latest inventory slots.
     private void RefreshSlots()
     {
-        if (Inventory.Instance == null || slotContainer == null || slotPrefab == null)
+        ClearSlots();
+
+        if (currentSlots == null || slotContainer == null || slotPrefab == null)
         {
             return;
         }
 
-        ClearSlots();
-
-        foreach (InventorySlot slot in Inventory.Instance.Slots)
+        foreach (InventorySlot slot in currentSlots)
         {
             InventorySlotUI slotView = Instantiate(slotPrefab, slotContainer);
             slotView.Show(slot, OnSlotClicked);
@@ -176,15 +176,16 @@ public class InventoryUI : MonoBehaviour
             return;
         }
 
-        if (selectedItem == null || LocalizationManager.Instance == null)
+        LocalizationManager localization = GameManager.Instance != null ? GameManager.Instance.Localization : null;
+        if (selectedItem == null || localization == null)
         {
             nameText.text = string.Empty;
             descriptionText.text = string.Empty;
             return;
         }
 
-        nameText.text = LocalizationManager.Instance.Get(selectedItem.DisplayName);
-        descriptionText.text = LocalizationManager.Instance.Get(selectedItem.Description);
+        nameText.text = localization.Get(selectedItem.DisplayName);
+        descriptionText.text = localization.Get(selectedItem.Description);
     }
 
     // Destroys all the current slot views.

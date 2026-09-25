@@ -3,16 +3,16 @@
 // actually running (holding Run AND moving). It does NOT recover while running,
 // but recovers while walking or standing still. When stamina hits 0 the player is
 // forced to walk and cannot run again until stamina climbs back to the "Can Run
-// Again" value (30 by default). When it empties, it flashes/shakes the bar and
-// plays a tired sound.
+// Again" value (30 by default). When it empties, a tired sound plays.
+// Every change raises GameEvents.OnStaminaChanged, so the stamina bar updates
+// itself (and flashes when it reaches 0).
 //
-// The movement scripts ask this component "CanRun" to decide walk vs run speed.
+// The movement script asks this component "CanRun" to decide walk vs run speed.
 //
 // Put this on: the Player GameObject.
 // Assign in Inspector:
 //   - Input Reader: the shared MainInputReader asset.
 //   - Max Stamina / Drain / Regen / Can Run Again: the numbers to tune.
-//   - Stamina Bar (optional): the UIStatBar that shows stamina.
 //   - Tired Sound (optional): a sound played when stamina runs out.
 
 using UnityEngine;
@@ -36,10 +36,6 @@ public class PlayerStamina : MonoBehaviour
     [Tooltip("After hitting 0, stamina must reach this value before the player can run again.")]
     [SerializeField] private float canRunAgainThreshold = 30f;
 
-    [Header("UI")]
-    [Tooltip("The bar that shows current stamina. Optional.")]
-    [SerializeField] private UIStatBar staminaBar;
-
     [Header("Feedback")]
     [Tooltip("Sound played once when stamina runs out.")]
     [SerializeField] private AudioClip tiredSound;
@@ -55,7 +51,7 @@ public class PlayerStamina : MonoBehaviour
     // Movement scripts read this to decide whether to run or walk.
     public bool CanRun => !isExhausted && currentStamina > 0f;
 
-    // Current stamina from 0 to 1, handy for other UI.
+    // Current stamina from 0 to 1, handy for other scripts.
     public float NormalizedStamina => currentStamina / maxStamina;
 
     private void Awake()
@@ -70,7 +66,7 @@ public class PlayerStamina : MonoBehaviour
 
     private void Start()
     {
-        UpdateBar();
+        GameEvents.RaiseStaminaChanged(currentStamina, maxStamina);
     }
 
     private void Update()
@@ -79,6 +75,8 @@ public class PlayerStamina : MonoBehaviour
         {
             return;
         }
+
+        float staminaBefore = currentStamina;
 
         if (IsRunningNow())
         {
@@ -89,7 +87,10 @@ public class PlayerStamina : MonoBehaviour
             Regenerate();
         }
 
-        UpdateBar();
+        if (currentStamina != staminaBefore)
+        {
+            GameEvents.RaiseStaminaChanged(currentStamina, maxStamina);
+        }
     }
 
     // The player is running only when they want to run, are moving, and are allowed.
@@ -127,7 +128,7 @@ public class PlayerStamina : MonoBehaviour
         }
     }
 
-    // Runs once when stamina empties: locks running and plays the feedback.
+    // Runs once when stamina empties: locks running and plays the tired sound.
     private void BecomeExhausted()
     {
         if (isExhausted)
@@ -137,22 +138,9 @@ public class PlayerStamina : MonoBehaviour
 
         isExhausted = true;
 
-        if (staminaBar != null)
-        {
-            staminaBar.PlayWarningEffect();
-        }
         if (tiredSound != null && AudioManager.Instance != null)
         {
             AudioManager.Instance.PlaySfx(tiredSound);
-        }
-    }
-
-    // Updates the stamina bar to match the current stamina.
-    private void UpdateBar()
-    {
-        if (staminaBar != null)
-        {
-            staminaBar.SetFill(NormalizedStamina);
         }
     }
 }

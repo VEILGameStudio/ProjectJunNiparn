@@ -9,8 +9,12 @@
 // Register(this) / Unregister(this). The SaveManager then asks each of them to
 // fill in the save when SaveGame() runs.
 //
+// It autosaves by listening to GameEvents: when a new scene is ready
+// (OnSceneReady) and when the player picks up an item (OnItemPickedUp).
+// For "level complete", call SaveGame() (for example through SaveActions).
+//
 // Put this on: the "Managers" GameObject (the prefab that lives in every scene).
-// Assign in Inspector: nothing required.
+// Assign in Inspector: Autosave On Scene Load (ticked by default).
 
 using System.Collections;
 using System.Collections.Generic;
@@ -20,6 +24,10 @@ using UnityEngine.SceneManagement;
 
 public class SaveManager : Singleton<SaveManager>
 {
+    [Header("Autosave")]
+    [Tooltip("If ticked, the game autosaves each time a new scene finishes loading.")]
+    [SerializeField] private bool autosaveOnSceneLoad = true;
+
     // File names inside Application.persistentDataPath.
     private const string GameSaveFileName = "gamesave.json";
     private const string SettingsFileName = "settings.json";
@@ -33,8 +41,8 @@ public class SaveManager : Singleton<SaveManager>
     // True if an autosave file already exists on disk.
     public bool HasSave => File.Exists(GameSavePath);
 
-    // True while a saved game is being loaded and restored. Other systems (like the
-    // SceneLoader) check this so they do not autosave over the file mid-load.
+    // True while a saved game is being loaded and restored. Other systems check
+    // this so they do not autosave over the file mid-load.
     public bool IsRestoring { get; private set; }
 
     // The save being restored right now, and whether a restore is in progress.
@@ -47,14 +55,25 @@ public class SaveManager : Singleton<SaveManager>
     protected override void Awake()
     {
         base.Awake();
-        LoadSettings(); // Settings should always be ready as soon as the game starts.
-        GameEvents.SceneLoadFinished += HandleSceneLoadFinished;
+        ReadSettingsFile(); // Settings are ready for other scripts from the very start.
     }
 
-    protected override void OnDestroy()
+    private void Start()
     {
-        base.OnDestroy();
-        GameEvents.SceneLoadFinished -= HandleSceneLoadFinished;
+        // Applied in Start, so the GameManager and its systems are ready first.
+        ApplySettings();
+    }
+
+    private void OnEnable()
+    {
+        GameEvents.OnSceneReady += HandleSceneReady;
+        GameEvents.OnItemPickedUp += HandleItemPickedUp;
+    }
+
+    private void OnDisable()
+    {
+        GameEvents.OnSceneReady -= HandleSceneReady;
+        GameEvents.OnItemPickedUp -= HandleItemPickedUp;
     }
 
     // A system asks to be included in the autosave. If a load is in progress, the
@@ -82,7 +101,7 @@ public class SaveManager : Singleton<SaveManager>
     }
 
     // Collects data from every registered system and writes the autosave file.
-    // Call this to autosave (scene load, item pickup, level complete).
+    // Call this to autosave (for example on level complete).
     public void SaveGame()
     {
         GameSaveData data = new GameSaveData();
@@ -123,27 +142,41 @@ public class SaveManager : Singleton<SaveManager>
             participant.RestoreState(loadingData);
         }
 
-        if (SceneLoader.Instance != null)
+        if (GameManager.Instance != null && GameManager.Instance.SceneLoader != null)
         {
-            SceneLoader.Instance.LoadScene(loadingData.sceneName, null);
+            GameManager.Instance.SceneLoader.LoadScene(loadingData.sceneName, null);
         }
         else
         {
+            Debug.LogError("SaveManager: no SceneLoader found, so the saved scene cannot load. Make sure the Managers object has a SceneLoader.", this);
             ClearRestore();
         }
         return true;
     }
 
-    // After the saved scene has loaded, give its new objects a couple of frames to
-    // register (and be restored), then finish the restore.
-    private void HandleSceneLoadFinished()
+    // A new scene is ready: finish a Continue that is in progress, or autosave.
+    private void HandleSceneReady()
     {
         if (restorePending)
         {
             StartCoroutine(FinishRestore());
+            return;
+        }
+
+        if (autosaveOnSceneLoad)
+        {
+            SaveGame();
         }
     }
 
+    // Autosaves right after the player picks something up.
+    private void HandleItemPickedUp(ItemData item, int amount)
+    {
+        SaveGame();
+    }
+
+    // Gives the loaded scene's new objects a couple of frames to register (and be
+    // restored), then finishes the restore.
     private IEnumerator FinishRestore()
     {
         yield return null; // Let new objects' Start run and register.
@@ -167,16 +200,23 @@ public class SaveManager : Singleton<SaveManager>
     // Reads the settings file (or uses defaults the first time) and applies them.
     public void LoadSettings()
     {
-        if (File.Exists(SettingsPath))
+        ReadSettingsFile();
+        ApplySettings();
+    }
+
+    // Reads the settings file into Settings. Keeps the defaults if there is no file yet.
+    private void ReadSettingsFile()
+    {
+        if (!File.Exists(SettingsPath))
         {
-            SettingsSaveData loaded = ReadJson<SettingsSaveData>(SettingsPath);
-            if (loaded != null)
-            {
-                Settings = loaded;
-            }
+            return;
         }
 
-        ApplySettings();
+        SettingsSaveData loaded = ReadJson<SettingsSaveData>(SettingsPath);
+        if (loaded != null)
+        {
+            Settings = loaded;
+        }
     }
 
     // Pushes the current settings into the systems that use them.
@@ -187,13 +227,18 @@ public class SaveManager : Singleton<SaveManager>
             AudioManager.Instance.SetMusicVolume(Settings.musicVolume);
             AudioManager.Instance.SetSoundVolume(Settings.soundVolume);
         }
-        if (LocalizationManager.Instance != null)
+
+        if (GameManager.Instance == null)
         {
-            LocalizationManager.Instance.SetLanguage(Settings.language);
+            return;
         }
-        if (BrightnessController.Instance != null)
+        if (GameManager.Instance.Localization != null)
         {
-            BrightnessController.Instance.ApplyBrightness(Settings.brightness);
+            GameManager.Instance.Localization.SetLanguage(Settings.language);
+        }
+        if (GameManager.Instance.Brightness != null)
+        {
+            GameManager.Instance.Brightness.ApplyBrightness(Settings.brightness);
         }
     }
 

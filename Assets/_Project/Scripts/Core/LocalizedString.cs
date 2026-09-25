@@ -3,7 +3,7 @@
 // ScriptableObject or script (for example an item name or a dialogue line) and
 // fill in each language in the Inspector.
 // To turn it into the player's chosen language at runtime, call:
-//   LocalizationManager.Instance.Get(myLocalizedString)
+//   GameManager.Instance.Localization.Get(myLocalizedString)
 //
 // Put this on: nothing directly. It is a field used inside other data objects.
 // Assign in Inspector: the English and Thai text boxes.

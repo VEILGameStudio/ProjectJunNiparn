@@ -1,18 +1,20 @@
 // DialogueManager
 // The single entry point for showing dialogue. Other scripts call PlayFull,
-// PlayChoice, or ShowMini here; this manager shows the right panel and, for full
-// and choice dialogues, locks the player (Cutscene state) until it finishes.
+// PlayChoice, or ShowMini here; this manager shows the right panel. For full and
+// choice dialogues it raises GameEvents.OnDialogueStarted / OnDialogueEnded, and
+// the GameManager locks player input in between.
+// Other scripts reach it with: UIManager.Instance.Dialogue
 //
 // Put this on: a "DialogueManager" GameObject on your main (persistent) Canvas.
 // Assign in Inspector:
 //   - Full Dialogue UI: the FullDialogueUI panel.
 //   - Choice Dialogue UI: the ChoiceDialogueUI panel.
-//   (Mini dialogue uses the separate MiniDialogueUI automatically.)
+//   (Mini dialogue uses the MiniDialogueUI from the UIManager automatically.)
 
 using System;
 using UnityEngine;
 
-public class DialogueManager : Singleton<DialogueManager>
+public class DialogueManager : MonoBehaviour
 {
     [Header("Panels")]
     [Tooltip("The panel that shows full conversations (speaker + lines).")]
@@ -37,7 +39,7 @@ public class DialogueManager : Singleton<DialogueManager>
         }
 
         fullEndCallback = onEnd;
-        EnterDialogue();
+        GameEvents.RaiseDialogueStarted();
         fullDialogueUI.Show(data.Lines, HandleFullEnded);
     }
 
@@ -52,7 +54,7 @@ public class DialogueManager : Singleton<DialogueManager>
 
         choiceYesCallback = onYes;
         choiceNoCallback = onNo;
-        EnterDialogue();
+        GameEvents.RaiseDialogueStarted();
         choiceDialogueUI.Show(data, HandleChoiceYes, HandleChoiceNo);
     }
 
@@ -63,19 +65,19 @@ public class DialogueManager : Singleton<DialogueManager>
         {
             return;
         }
-        if (MiniDialogueUI.Instance == null)
+        if (UIManager.Instance == null || UIManager.Instance.MiniDialogue == null)
         {
-            Debug.LogWarning("DialogueManager: no MiniDialogueUI found. Add one to your Canvas.", this);
+            Debug.LogWarning("DialogueManager: no MiniDialogueUI found. Make sure the UIManager has one.", this);
             return;
         }
 
-        MiniDialogueUI.Instance.ShowLocalized(data.Text);
+        UIManager.Instance.MiniDialogue.ShowLocalized(data.Text);
     }
 
     // Runs when the full dialogue finishes: unlock the player, then run the callback.
     private void HandleFullEnded()
     {
-        ExitDialogue();
+        GameEvents.RaiseDialogueEnded();
         Action callback = fullEndCallback;
         fullEndCallback = null;
         callback?.Invoke();
@@ -84,7 +86,7 @@ public class DialogueManager : Singleton<DialogueManager>
     // Runs when the player picks Yes.
     private void HandleChoiceYes()
     {
-        ExitDialogue();
+        GameEvents.RaiseDialogueEnded();
         Action callback = choiceYesCallback;
         ClearChoiceCallbacks();
         callback?.Invoke();
@@ -93,7 +95,7 @@ public class DialogueManager : Singleton<DialogueManager>
     // Runs when the player picks No.
     private void HandleChoiceNo()
     {
-        ExitDialogue();
+        GameEvents.RaiseDialogueEnded();
         Action callback = choiceNoCallback;
         ClearChoiceCallbacks();
         callback?.Invoke();
@@ -103,23 +105,5 @@ public class DialogueManager : Singleton<DialogueManager>
     {
         choiceYesCallback = null;
         choiceNoCallback = null;
-    }
-
-    // Locks the player while a dialogue is on screen.
-    private void EnterDialogue()
-    {
-        if (GameManager.Instance != null)
-        {
-            GameManager.Instance.SetState(GameState.Cutscene);
-        }
-    }
-
-    // Returns to normal play after a dialogue closes.
-    private void ExitDialogue()
-    {
-        if (GameManager.Instance != null && GameManager.Instance.CurrentState == GameState.Cutscene)
-        {
-            GameManager.Instance.SetState(GameState.Playing);
-        }
     }
 }

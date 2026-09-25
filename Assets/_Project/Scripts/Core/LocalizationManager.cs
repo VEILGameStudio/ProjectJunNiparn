@@ -1,13 +1,14 @@
 // LocalizationManager
 // Remembers which language the player chose and turns a LocalizedString into the
-// correct text. Any UI or dialogue script asks this manager for its words.
+// correct text. Any UI or dialogue script asks this manager for its words:
+//   GameManager.Instance.Localization.Get(myLocalizedString)
 //
-// Put this on: the "Managers" GameObject (the prefab that lives in every scene).
+// Put this on: the "Managers" GameObject (next to the GameManager).
 // Assign in Inspector: "Default Language" (used the very first time the game runs).
 
 using UnityEngine;
 
-public class LocalizationManager : Singleton<LocalizationManager>
+public class LocalizationManager : MonoBehaviour
 {
     [Header("Language")]
     [Tooltip("The language used the first time the game runs, before the player picks one in Settings.")]
@@ -16,9 +17,8 @@ public class LocalizationManager : Singleton<LocalizationManager>
     // The language currently shown in the game.
     public Language CurrentLanguage { get; private set; }
 
-    protected override void Awake()
+    private void Awake()
     {
-        base.Awake();
         CurrentLanguage = defaultLanguage;
     }
 

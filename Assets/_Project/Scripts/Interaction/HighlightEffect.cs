@@ -58,6 +58,13 @@ public class HighlightEffect : MonoBehaviour
         SetOutline(false); // Start hidden.
     }
 
+    // Hides the outline when switched off (for example after a one-shot interactable is used).
+    private void OnDisable()
+    {
+        isShown = false;
+        SetOutline(false);
+    }
+
     private void Update()
     {
         bool shouldShow = ShouldShow();
@@ -75,11 +82,19 @@ public class HighlightEffect : MonoBehaviour
         {
             return true;
         }
-        if (useIdleHint && HintManager.Instance != null && HintManager.Instance.ShouldShowHint)
+        if (useIdleHint && IsHintTime())
         {
             return true;
         }
         return false;
+    }
+
+    // True when the HintManager says the player has been idle long enough.
+    private bool IsHintTime()
+    {
+        return GameManager.Instance != null
+            && GameManager.Instance.HintManager != null
+            && GameManager.Instance.HintManager.ShouldShowHint;
     }
 
     // True when the player is within Show Distance.
@@ -94,7 +109,7 @@ public class HighlightEffect : MonoBehaviour
             }
         }
 
-        return player != null && Vector3.Distance(player.position, transform.position) <= showDistance;
+        return player != null && Vector2.Distance(player.position, transform.position) <= showDistance;
     }
 
     // Turns the outline on or off using a property block (no material copies made).

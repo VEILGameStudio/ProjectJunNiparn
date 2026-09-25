@@ -1,18 +1,19 @@
 // Inventory
 // Holds everything the player is carrying. It can add items, remove items, and
 // count them, and items stack up to each item's Max Stack. Whenever anything
-// changes it fires OnInventoryChanged so the UI can refresh itself. The UI reads
-// the inventory but never changes it directly - it calls Add/Remove here.
+// changes it raises GameEvents.OnInventoryChanged so the UI can refresh itself.
+// The UI never changes the inventory directly - only Add/Remove here do.
 // The inventory survives scene changes and is saved with the game.
+// Other scripts reach it with: GameManager.Instance.Inventory
+// (inside an interactable, use player.Inventory instead).
 //
-// Put this on: the "Managers" GameObject (so it lives for the whole game).
+// Put this on: the "Managers" GameObject (next to the GameManager).
 // Assign in Inspector: Item Database (used to rebuild items when loading a save).
 
-using System;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class Inventory : Singleton<Inventory>, ISaveParticipant
+public class Inventory : MonoBehaviour, ISaveParticipant
 {
     [Header("Data")]
     [Tooltip("The database of all items, used to rebuild the inventory when loading a save.")]
@@ -21,11 +22,8 @@ public class Inventory : Singleton<Inventory>, ISaveParticipant
     // The slots the player currently owns.
     private readonly List<InventorySlot> slots = new List<InventorySlot>();
 
-    // The UI reads this to draw the slots. It cannot change the list.
+    // The current slots, read only.
     public IReadOnlyList<InventorySlot> Slots => slots;
-
-    // Fired whenever items are added or removed. The UI listens to this.
-    public event Action OnInventoryChanged;
 
     private void Start()
     {
@@ -39,9 +37,8 @@ public class Inventory : Singleton<Inventory>, ISaveParticipant
         }
     }
 
-    protected override void OnDestroy()
+    private void OnDestroy()
     {
-        base.OnDestroy();
         if (SaveManager.Instance != null)
         {
             SaveManager.Instance.Unregister(this);
@@ -58,7 +55,7 @@ public class Inventory : Singleton<Inventory>, ISaveParticipant
         }
 
         AddInternal(item, amount);
-        OnInventoryChanged?.Invoke();
+        GameEvents.RaiseInventoryChanged(slots);
         return true;
     }
 
@@ -89,7 +86,7 @@ public class Inventory : Singleton<Inventory>, ISaveParticipant
             }
         }
 
-        OnInventoryChanged?.Invoke();
+        GameEvents.RaiseInventoryChanged(slots);
         return true;
     }
 
@@ -113,7 +110,7 @@ public class Inventory : Singleton<Inventory>, ISaveParticipant
         return Count(item) >= amount;
     }
 
-    // Shared add logic without firing the change event (used by Add and by loading).
+    // Shared add logic without raising the change event (used by Add and by loading).
     private void AddInternal(ItemData item, int amount)
     {
         int remaining = amount;
@@ -174,6 +171,6 @@ public class Inventory : Singleton<Inventory>, ISaveParticipant
             }
         }
 
-        OnInventoryChanged?.Invoke();
+        GameEvents.RaiseInventoryChanged(slots);
     }
 }

@@ -1,20 +1,21 @@
 // IInteractable
-// The shared contract for anything the player can click on: pickups, doors,
-// signs, NPCs, and so on. The player's interaction script calls Interact() on
-// whatever it clicked, without needing to know what kind of thing it is.
+// The shared contract for anything the player can click on or walk into: pickups,
+// doors, signs, NPCs, and so on. The PlayerInteractor talks to every interactable
+// through this, without needing to know what kind of thing it is.
 //
-// Put this on: nothing directly. Scripts implement this interface, e.g.:
-//   public class Door : MonoBehaviour, IInteractable { ... }
-
-using UnityEngine;
+// Do not implement this directly. Subclass InteractableBase instead - it already
+// does all the shared checks.
+//
+// Put this on: nothing directly. InteractableBase implements it.
 
 public interface IInteractable
 {
-    // A short line shown to the player, like "Open" or "Pick up". It is a
-    // LocalizedString so it can be translated.
-    LocalizedString Prompt { get; }
+    // How this is started: Click, Touch, or Both.
+    ActivationMode Activation { get; }
 
-    // Runs when the player interacts with this object. "interactor" is usually
-    // the player GameObject.
-    void Interact(GameObject interactor);
+    // True when the player may use this right now (close enough, still switched on).
+    bool CanInteract(PlayerContext player);
+
+    // Uses this object. The PlayerInteractor only calls it after CanInteract is true.
+    void Interact(PlayerContext player);
 }

@@ -12,10 +12,8 @@ using System.Collections.Generic;
 public class GameSaveData
 {
     public string sceneName;            // Which scene the player was in.
-    public float playerPositionX;       // Player position, split into x/y/z so
-    public float playerPositionY;       // JsonUtility can store it (it cannot
-    public float playerPositionZ;       // save a Vector3 by itself here).
-    public float playTimeSeconds;       // Total time played so far.
+    public float playerPositionX;       // Player position, split into x/y so
+    public float playerPositionY;       // JsonUtility can store it simply.
     public List<InventoryEntry> inventoryEntries = new List<InventoryEntry>();
 
     public bool hasTimer;               // True if a puzzle timer was saved.

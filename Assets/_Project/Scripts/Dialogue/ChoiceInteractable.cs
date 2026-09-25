@@ -1,24 +1,20 @@
 // ChoiceInteractable
-// Put this on something the player can click to be asked a yes/no question, like
+// Put this on something that asks the player a yes/no question, like
 // "Take the gem? Yes / No". You wire what happens for each answer here in the
 // Inspector: for example On Yes -> add item + destroy object, On No -> do nothing.
 //
-// Put this on: the object that asks the question. It also needs a Collider
-//   (Collider2D in 2D scenes, 3D Collider in 2.5D scenes) so the click ray can hit it.
+// Put this on: the object that asks the question. Add a Collider2D first (for
+//   example a BoxCollider2D).
 // Assign in Inspector:
-//   - Prompt: text shown to the player, e.g. "Take".
 //   - Choice: the ChoiceDialogueData (the question text).
 //   - On Yes / On No: the actions for each answer.
+//   - Activation / Max Click Distance / One Shot / Required Item: see InteractableBase.
 
 using UnityEngine;
 using UnityEngine.Events;
 
-public class ChoiceInteractable : MonoBehaviour, IInteractable
+public class ChoiceInteractable : InteractableBase
 {
-    [Header("Prompt")]
-    [Tooltip("Short text shown when the player points at this, e.g. 'Take'.")]
-    [SerializeField] private LocalizedString prompt;
-
     [Header("Choice")]
     [Tooltip("The yes/no question to ask.")]
     [SerializeField] private ChoiceDialogueData choice;
@@ -30,24 +26,21 @@ public class ChoiceInteractable : MonoBehaviour, IInteractable
     [Tooltip("Runs when the player picks No.")]
     [SerializeField] private UnityEvent onNo;
 
-    // The text shown to the player (from IInteractable).
-    public LocalizedString Prompt => prompt;
-
-    // Asks the question when the player interacts.
-    public void Interact(GameObject interactor)
+    // Asks the question.
+    protected override void OnInteract(PlayerContext player)
     {
         if (choice == null)
         {
             Debug.LogError($"ChoiceInteractable on '{name}': Choice is not assigned. Drag a ChoiceDialogueData asset here.", this);
             return;
         }
-        if (DialogueManager.Instance == null)
+        if (UIManager.Instance == null || UIManager.Instance.Dialogue == null)
         {
-            Debug.LogError($"ChoiceInteractable on '{name}': no DialogueManager found. Add one to your Canvas.", this);
+            Debug.LogError($"ChoiceInteractable on '{name}': no DialogueManager found. Make sure the PersistentCanvas (with a UIManager) is in the scene.", this);
             return;
         }
 
-        DialogueManager.Instance.PlayChoice(choice, InvokeYes, InvokeNo);
+        UIManager.Instance.Dialogue.PlayChoice(choice, InvokeYes, InvokeNo);
     }
 
     // Runs the On Yes actions.

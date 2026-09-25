@@ -44,9 +44,12 @@ public class SaveActions : MonoBehaviour
             Debug.LogError($"SaveActions on '{name}': New Game Scene Name is empty. Type the first scene's name.", this);
             return;
         }
-        if (SceneLoader.Instance != null)
+        if (GameManager.Instance == null || GameManager.Instance.SceneLoader == null)
         {
-            SceneLoader.Instance.LoadScene(newGameSceneName, null);
+            Debug.LogError($"SaveActions on '{name}': no SceneLoader found. Make sure the Managers object (with a SceneLoader) is in the scene.", this);
+            return;
         }
+
+        GameManager.Instance.SceneLoader.LoadScene(newGameSceneName, null);
     }
 }

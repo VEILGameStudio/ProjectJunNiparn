@@ -1,11 +1,12 @@
 // CutsceneManager
 // Plays a cutscene - either a Timeline (through a PlayableDirector) or a video
-// clip (through a VideoPlayer) - and shows a Skip button. While a cutscene plays it
-// turns off player input and sets the game to the Cutscene state, then restores
-// normal play when the cutscene ends or is skipped.
-// Trigger components call PlayTimeline / PlayVideo here.
+// clip (through a VideoPlayer) - and shows a Skip button. While a cutscene plays,
+// player input is locked in two ways: the game state is set to Cutscene, and the
+// Gameplay controls are switched off. Both are restored when the cutscene ends or
+// is skipped. The Skip button still works because it is UI.
+// Other scripts reach it with: UIManager.Instance.Cutscene
 //
-// Put this on: the "Managers" GameObject (the prefab that lives in every scene).
+// Put this on: the PersistentCanvas (next to the UIManager).
 // Assign in Inspector:
 //   - Input Reader: the shared MainInputReader asset (so input can be turned off).
 //   - Skip Button: a UI Button shown during cutscenes (its click skips).
@@ -17,7 +18,7 @@ using UnityEngine.Playables;
 using UnityEngine.UI;
 using UnityEngine.Video;
 
-public class CutsceneManager : Singleton<CutsceneManager>
+public class CutsceneManager : MonoBehaviour
 {
     [Header("Input")]
     [Tooltip("Drag the shared Input Reader asset here so input can be turned off during cutscenes.")]
@@ -48,6 +49,12 @@ public class CutsceneManager : Singleton<CutsceneManager>
         {
             videoScreen.SetActive(false);
         }
+    }
+
+    // Stops listening to the director or video if this is switched off mid-cutscene.
+    private void OnDisable()
+    {
+        StopListening();
     }
 
     // Plays a Timeline cutscene. onFinished runs when it ends or is skipped.
@@ -147,16 +154,9 @@ public class CutsceneManager : Singleton<CutsceneManager>
         }
         IsPlaying = false;
 
-        if (activeDirector != null)
-        {
-            activeDirector.stopped -= HandleDirectorStopped;
-            activeDirector = null;
-        }
-        if (activeVideo != null)
-        {
-            activeVideo.loopPointReached -= HandleVideoFinished;
-            activeVideo = null;
-        }
+        StopListening();
+        activeDirector = null;
+        activeVideo = null;
 
         if (skipButton != null)
         {
@@ -178,6 +178,19 @@ public class CutsceneManager : Singleton<CutsceneManager>
         Action callback = onFinished;
         onFinished = null;
         callback?.Invoke();
+    }
+
+    // Unsubscribes from the director and video events.
+    private void StopListening()
+    {
+        if (activeDirector != null)
+        {
+            activeDirector.stopped -= HandleDirectorStopped;
+        }
+        if (activeVideo != null)
+        {
+            activeVideo.loopPointReached -= HandleVideoFinished;
+        }
     }
 
     private void HandleDirectorStopped(PlayableDirector director) => End();

@@ -1,8 +1,8 @@
 // PuzzleTimer
 // A countdown used by certain puzzles or missions. It shows the time left on a UI
 // text. If time runs out, it plays a Fail animation (an Animator trigger you name
-// in the Inspector) and then runs the On Timer End event. Later the GameOverManager
-// will listen to that event; for now wire whatever you like there.
+// in the Inspector), runs the On Timer End event, and then raises
+// GameEvents.OnGameOver, which starts the shared game over sequence.
 // The timer automatically stops while the game is paused (menu/inventory open),
 // because it only counts down during normal play.
 //
@@ -12,7 +12,7 @@
 //   - Start Automatically: tick to start when the scene loads.
 //   - Timer Text (optional): a TextMeshPro text showing the time left.
 //   - Fail Animator + Fail Trigger Name (optional): the Fail animation to play.
-//   - On Timer End: what happens when time runs out.
+//   - On Timer End (optional): extra things to do when time runs out.
 
 using TMPro;
 using UnityEngine;
@@ -42,7 +42,7 @@ public class PuzzleTimer : MonoBehaviour, ISaveParticipant
     [SerializeField] private string failTriggerName = "Fail";
 
     [Header("Events")]
-    [Tooltip("Runs once when the time runs out. The GameOverManager will use this later.")]
+    [Tooltip("Runs once when the time runs out, just before the game over sequence starts.")]
     [SerializeField] private UnityEvent onTimerEnd;
 
     private float timeRemaining;
@@ -129,7 +129,7 @@ public class PuzzleTimer : MonoBehaviour, ISaveParticipant
         UpdateDisplay();
     }
 
-    // Runs when the timer reaches zero: play the fail animation, then the event.
+    // Runs when the timer reaches zero: fail animation, the event, then game over.
     private void TimeUp()
     {
         isRunning = false;
@@ -140,12 +140,7 @@ public class PuzzleTimer : MonoBehaviour, ISaveParticipant
         }
 
         onTimerEnd?.Invoke();
-
-        // Hand off to the shared game-over sequence (fade, wait, reload last save).
-        if (GameOverManager.Instance != null)
-        {
-            GameOverManager.Instance.TriggerGameOver();
-        }
+        GameEvents.RaiseGameOver();
     }
 
     // True only during normal gameplay.
