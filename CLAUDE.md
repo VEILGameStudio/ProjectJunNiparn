@@ -47,7 +47,7 @@ Nothing else. Never make a player, item, door, puzzle or trap a singleton.
 ### Observer — for everything crossing system boundaries
 
 A static `GameEvents` class holds all game-wide C# events in one file:
-`OnInventoryChanged`, `OnHealthChanged`, `OnStaminaChanged`, `OnItemPickedUp`, `OnDialogueStarted`, `OnDialogueEnded`, `OnPuzzleCompleted`, `OnGameOver`, `OnSceneReady`.
+`OnInventoryChanged`, `OnHealthChanged`, `OnStaminaChanged`, `OnItemPickedUp`, `OnDialogueStarted`, `OnDialogueEnded`, `OnPuzzleCompleted`, `OnGameOver`, `OnSceneReady`, plus `OnLanguageChanged` (kept because the UI still uses it to refresh text).
 
 Systems raise events. UI and other systems subscribe. UI never reads manager internals directly.
 
@@ -69,7 +69,7 @@ This is the single most damaging bug in this project: an event that is never uns
 9. New Input System only, keyboard + gamepad. No legacy `Input.GetKey`.
 10. TextMeshPro for all text, with multi-language support including a Thai font fallback.
 11. Comments in simple English.
-12. **Do not create asmdef files.** Everything stays in the default `Assembly-CSharp`.
+12. **Do not create asmdef files.** Everything stays in the default `Assembly-CSharp`. This rule covers only our own code under `Assets/_Project`; asmdef files that ship with third-party packages (such as DOTween) are fine.
 
 Expected comment style:
 
@@ -208,7 +208,8 @@ Required for every system.
 - Do **not** test Unity itself. Never assert that `transform.position` changed after setting it.
 - Do not write a test you could not make fail by breaking the production code.
 - Every fixed bug gets a regression test that would have caught it.
-- Tests live in `Assets/_Project/Tests/` (PlayMode) and `Assets/_Project/Tests/Editor/` (EditMode). Test Runner has "Enable playmode tests for all assemblies" turned on, because game code has no asmdef. Do not add an asmdef for game code to make tests compile — ask first.
+- Tests live in `Assets/_Project/Tests/` (PlayMode) and `Assets/_Project/Tests/Editor/` (EditMode). Test Runner's "Enable playmode tests for all assemblies" must be turned on, because game code has no asmdef. Do not add an asmdef for game code to make tests compile — ask first.
+- **That setting is currently OFF** (`playModeTestRunnerEnabled: 0` in `ProjectSettings/ProjectSettings.asset`). While it is off, do not write test files into the project. Put the test code in the report instead, and remind Oak to turn the setting on first. Delete this bullet once the setting is enabled.
 - Test names state the behaviour: `Stamina_CannotRun_UntilRegeneratedTo30`. Arrange / Act / Assert with blank lines between.
 
 **After finishing a system, run the tests and report real results.** If you cannot run them, say so and give the exact command. Never report a result you did not observe.
@@ -221,3 +222,52 @@ Required for every system.
 2. Inspector setup steps, written for someone who does not code.
 3. Test results: passed / failed counts, and what each failure means in plain language.
 4. A short manual checklist for anything tests cannot cover.
+
+---
+
+## 11. Third-party packages
+
+The project uses exactly these two. Do not add other packages without asking.
+
+### Cinemachine (version: 3.1.7)
+
+Unity 6.x ships Cinemachine 3.x, whose API differs from the 2.x examples most code samples use. Before writing any Cinemachine code, check the installed version and use the matching API. If you are unsure which API applies, say so instead of guessing.
+
+Cinemachine 3.x naming, for reference:
+
+- namespace is `Unity.Cinemachine`, not `Cinemachine`
+- `CinemachineCamera` (was `CinemachineVirtualCamera`)
+- `CinemachinePositionComposer` (was `CinemachineFramingTransposer`)
+- `CinemachineConfiner2D` still exists and still needs a bounding shape
+
+Rules:
+
+- One `CinemachineBrain` on the Main Camera. One `CinemachineCamera` follows the player.
+- The camera is Orthographic, follows X and Y, Z locked, with slightly higher Y damping than X so walking into depth does not feel jumpy.
+- `CinemachineConfiner2D` per level for camera bounds. Its bounding shape is a different collider from the player's walkable area — the camera bounds are usually smaller. Never reuse one collider for both.
+- If the bounding shape changes at runtime, call `InvalidateBoundingShapeCache()`.
+- Never set the Main Camera's transform from a script. Cinemachine owns it. Anything that needs to move or shake the camera does it through Cinemachine (an Impulse Source, or by switching cameras), never by writing to `Camera.main.transform`.
+- Camera settings live in the Inspector so the level designer can tune them without code.
+
+### DOTween Pro
+
+Used for tweening UI, fades, and small gameplay motion. Rules, in priority order:
+
+1. **Pause safety.** This project sets `Time.timeScale = 0` when the menu or inventory is open.
+   - A tween that must keep running while paused (menu UI, pause fades, settings panels) must use `.SetUpdate(true)` for unscaled time.
+   - A gameplay tween (a door opening, an item bobbing, a trap moving) must not use it, so it freezes with the game.
+   - State which one you chose whenever you write a tween.
+2. **Lifetime safety.** A tween outliving its GameObject throws on scene change.
+   - Every tween is linked to its object with `.SetLink(gameObject)`.
+   - Any tween stored in a field is killed in `OnDisable`.
+   - Never start a tween in `Update`.
+3. Keep Safe Mode ON in the DOTween Utility Panel. This team is two beginners; the small performance cost is worth the protection.
+4. Prefer the `DOTweenAnimation` component over code for anything the non-coding intern should be able to author or tweak — button feedback, panel slide-ins, highlight pulses. Only write tween code when it has to react to game state.
+5. Keep tween durations and eases as `[SerializeField]` fields with `[Tooltip]`, never hard-coded, so timing can be tuned in the Inspector.
+6. DOTween ships its own asmdef files. That is fine and expected — the "no asmdef" rule applies to our code under `Assets/_Project`, not to third-party packages.
+7. After importing or updating DOTween Pro, run **Tools > Demigiant > DOTween Utility Panel > Setup**, otherwise the modules for UI, TextMeshPro and 2D physics are not enabled.
+8. DOTween modules enabled: Audio, Physics2D, Sprites, UI, TextMesh Pro.
+   - 3D Physics, UI Toolkit and all External Asset modules are intentionally OFF.
+   - If a tween API is missing, the module is off by design — ask before enabling one.
+
+**Do not use `DOText()` for dialogue.** Thai combining characters break when revealed one index at a time. Use `TMP_Text.maxVisibleCharacters` advanced by grapheme cluster instead.
