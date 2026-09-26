@@ -8,16 +8,28 @@ This file is the single source of truth for this project. Read it before writing
 
 Unity **6.5.10f1**, **URP (2D Renderer)**. Genre: puzzle, point-and-click.
 
-**One view mode only.** Side-view 2D with depth walking, like the game "Habromania".
+**One code path, two art styles.** Every level is 2D with free WASD movement on X and Y.
+What changes between levels is the camera angle the art is drawn at, never the code.
 
-- The player walks left/right on X, and walks into or out of the scene on Y (up/down) to reach deeper spots.
-- The walkable floor is a bounded area. The player cannot leave it.
-- Sprites sort by their Y position: the player goes behind objects further back and in front of objects nearer.
-- Mouse click = interact / pick up. Parallax background layers.
-- **2D Physics only** (Rigidbody2D, Collider2D). No 3D models, no 3D colliders, no perspective camera.
+- **Side view** — the camera looks nearly straight on. The player walks left/right freely and
+  a little into depth. Parallax background layers are used.
+- **Three-quarter** — the camera looks down at roughly 45-60 degrees, like a diorama
+  (reference: Pumpkin Panic). The player walks freely in all directions across a floor area.
+  Parallax is off or near zero, because a top-down camera barely slides its background.
+
+Shared by both:
+- Movement is free, never grid or tile based. Walls and obstacles are ordinary `Collider2D`
+  that the player physically cannot pass through. No custom clamping code.
+- Sprites sort by their Y position: things further back draw behind things nearer.
+- Mouse click = interact / pick up.
+- **2D Physics only** (`Rigidbody2D`, `Collider2D`). No 3D models in scenes, no 3D colliders,
+  no perspective camera, no 3D lights.
 - About 24 levels. Doors link levels. Inventory and game state persist across scenes.
 
-There is **no 2.5D mode**. Any 3/4-view or 3D code in this project is left over from an old spec and must be removed.
+3D models exist in the project as an **art source only**. Props are pre-rendered from those models
+into sprites before they enter a scene. Nothing 3D ever ships in a scene. A prop used in both art
+styles must be rendered separately for each one, from that style's camera angle — never reuse a
+single sprite across both styles, because the angle reads as wrong immediately.
 
 ---
 
@@ -92,7 +104,8 @@ public class PlayerStamina : MonoBehaviour
 ```
 Assets/_Project/
   Scripts/
-    Core/            Singleton<T>, GameEvents, GameManager, SceneLoader     [Oak]
+    Core/            Singleton<T>, GameEvents, GameManager, SceneLoader,    [Oak]
+                     LevelSettings
     Player/          Movement, Health, Stamina                              [Oak]
     Interaction/     IInteractable, InteractableBase, click & touch system  [Oak]
     Items/           ItemData, Inventory                                    [Oak]
@@ -151,13 +164,31 @@ Exposes `protected abstract void OnInteract(PlayerContext player);`
 
 ## 7. Systems
 
-**Movement.** A/D on X, W/S on Y. Y speed is a separate Inspector multiplier, default 0.55, so depth reads correctly. `Rigidbody2D` with no gravity. The player is confined inside a `PolygonCollider2D` walkable area.
+**Movement.** A/D on X, W/S on Y, free movement, gamepad supported. `Rigidbody2D` (Dynamic,
+Gravity Scale 0) moved with `MovePosition`. Y speed is a separate Inspector multiplier so depth
+reads correctly: about **0.55 for side view**, about **0.7 for three-quarter**. The player is kept
+inside the level by ordinary wall colliders, not by clamping to a polygon — physics then handles
+sliding along walls for free. Every prop that should block the player carries a small `Collider2D`
+**at its base only**, never covering the whole sprite.
 
-**Depth sorting.** `YSortObject` sets `sortingOrder = Mathf.RoundToInt(-transform.position.y * 100)`. An Inspector checkbox "Static" calculates once in `Start` for props that never move. Use `SortingGroup` on multi-sprite prefabs. **Sprite pivots must be at the feet.**
+**Depth sorting.** `YSortObject` sets `sortingOrder = Mathf.RoundToInt(-transform.position.y * 100)`.
+An Inspector checkbox "Static" calculates once in `Start` for props that never move. Use
+`SortingGroup` on multi-sprite prefabs. **Sprite pivots must be at the feet.** This matters more in
+three-quarter levels, where sprites overlap far more than in side view.
 
-**Camera.** One Cinemachine orthographic camera following X and Y with Z locked, slightly higher Y damping, and a Cinemachine Confiner 2D per level.
+**Camera.** One Cinemachine orthographic camera following X and Y with Z locked, slightly higher Y
+damping than X, and a `CinemachineConfiner2D` per level. The three-quarter look comes entirely from
+how the art is drawn; the camera itself is the same in both styles.
 
-**Parallax.** Separate X and Y factors per layer. Far layers 0.4–0.6 on X; foreground layers −0.2 to −0.3. The Y factor should default to about half the X factor.
+**Parallax.** Side-view levels use separate X and Y factors per layer: far layers 0.4-0.6 on X,
+foreground layers -0.2 to -0.3, Y factor about half the X factor. Three-quarter levels normally use
+no parallax at all.
+
+**Level settings.** Each scene has one `LevelSettings` component holding a `ViewStyle` dropdown
+(SideView / ThreeQuarter). On scene start it applies that style's defaults — Y speed multiplier,
+parallax on or off, camera damping — to the player and camera, so the level designer sets one
+dropdown instead of remembering four numbers. Every value stays overridable in the Inspector for
+levels that need something different.
 
 **Items and inventory.** `ItemData` (ScriptableObject): id, localized name, localized description, icon, maxStack. Inventory supports add/remove/count and stacking, and raises `OnInventoryChanged`. The inventory UI subscribes and refreshes itself; it never touches inventory data directly.
 
@@ -191,6 +222,7 @@ These exist so interns can add content without touching core code.
 - `PuzzleBase` — `puzzleId`, `oneTimeOnly`, `StartPuzzle()`, `CompletePuzzle()`, `FailPuzzle()`, plus UnityEvents `OnPuzzleStarted` / `OnPuzzleCompleted` / `OnPuzzleFailed` so Intern B can wire doors, sounds and animations in the Inspector with no code. Completion is recorded by the save system through `OnPuzzleCompleted(puzzleId)`.
 - `MiniGameBase` — shows its UI, locks player input while it runs, returns success or failure, closes itself.
 - `QuickTimeEvent : MiniGameBase` — Inspector-configurable: ordered input actions, time limit per input, allowed mistakes, prompt prefab. A new QTE should need no new code.
+- `LevelSettings` — one per scene. The level designer picks the ViewStyle and the level configures itself. Adding a new view style means adding one enum value and its defaults, nothing else.
 
 Gameplay code **subscribes** to `GameEvents` but never raises core events.
 
@@ -244,7 +276,7 @@ Rules:
 
 - One `CinemachineBrain` on the Main Camera. One `CinemachineCamera` follows the player.
 - The camera is Orthographic, follows X and Y, Z locked, with slightly higher Y damping than X so walking into depth does not feel jumpy.
-- `CinemachineConfiner2D` per level for camera bounds. Its bounding shape is a different collider from the player's walkable area — the camera bounds are usually smaller. Never reuse one collider for both.
+- `CinemachineConfiner2D` per level for camera bounds. Its bounding shape is its own `PolygonCollider2D`, separate from the player's walkable area — the walkable area is whatever the level's wall colliders enclose, and the camera bounds are usually smaller. Never reuse one collider for both.
 - If the bounding shape changes at runtime, call `InvalidateBoundingShapeCache()`.
 - Never set the Main Camera's transform from a script. Cinemachine owns it. Anything that needs to move or shake the camera does it through Cinemachine (an Impulse Source, or by switching cameras), never by writing to `Camera.main.transform`.
 - Camera settings live in the Inspector so the level designer can tune them without code.
