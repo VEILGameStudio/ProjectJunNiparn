@@ -15,7 +15,6 @@
 //   - Gravity: downward pull that keeps the player grounded (a negative number).
 //   - Sprite Renderer (optional): used to flip the player to face left or right.
 
-using System.Collections;
 using UnityEngine;
 
 [RequireComponent(typeof(CharacterController))]
@@ -43,10 +42,6 @@ public class PlayerMovement25D : MonoBehaviour
     [Tooltip("Optional. The SpriteRenderer that is flipped to face the walking direction.")]
     [SerializeField] private SpriteRenderer spriteRenderer;
 
-    [Header("Debug")]
-    [Tooltip("Turn on to print movement logs to the Console. Turn off after debugging.")]
-    [SerializeField] private bool logMovement = true;
-
     private CharacterController controller;
 
     // How fast the player is currently falling (built up by gravity each frame).
@@ -64,20 +59,12 @@ public class PlayerMovement25D : MonoBehaviour
         {
             Debug.LogError($"PlayerMovement25D on '{name}': Input Reader is not assigned. Drag the MainInputReader asset here.", this);
         }
-        else if (logMovement)
-        {
-            Debug.Log($"PlayerMovement25D on '{name}': inputReader assigned OK");
-        }
     }
 
     private void OnEnable()
     {
         if (inputReader != null)
         {
-            if (logMovement)
-            {
-                Debug.Log($"PlayerMovement25D on '{name}': OnEnable -> EnableGameplay");
-            }
             inputReader.EnableGameplay();
         }
     }
@@ -87,17 +74,6 @@ public class PlayerMovement25D : MonoBehaviour
         if (inputReader != null)
         {
             inputReader.DisableGameplay();
-        }
-    }
-
-    // Enabling input one frame after load avoids an Input System timing issue where
-    // enabling during OnEnable (scene load) does not stick.
-    private IEnumerator Start()
-    {
-        yield return null;
-        if (inputReader != null)
-        {
-            inputReader.EnableGameplay();
         }
     }
 
@@ -111,11 +87,11 @@ public class PlayerMovement25D : MonoBehaviour
 
         // Left/right becomes world X, up/down becomes world Z (forward on the ground).
         Vector2 input = CanMove() ? inputReader.MoveInput : Vector2.zero;
-
-        if (logMovement && inputReader.MoveInput.sqrMagnitude > 0.01f)
+        if (input.sqrMagnitude > 0.01f)
         {
-            Debug.Log($"PlayerMovement25D: rawMove={inputReader.MoveInput}, CanMove={CanMove()}, grounded={controller.isGrounded}");
+            InputDebug.Log($"PlayerMovement25D '{name}': move={input}, grounded={controller.isGrounded}", this);
         }
+
         Vector3 horizontalMove = new Vector3(input.x, 0f, input.y);
         if (horizontalMove.sqrMagnitude > 1f)
         {

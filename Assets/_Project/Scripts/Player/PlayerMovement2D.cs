@@ -91,6 +91,11 @@ public class PlayerMovement2D : MonoBehaviour
         }
 
         Vector2 input = inputReader.MoveInput;
+        if (input.sqrMagnitude > 0.01f)
+        {
+            InputDebug.Log($"PlayerMovement2D '{name}': move={input}", this);
+        }
+
         float speed = IsRunning() ? runSpeed : walkSpeed;
 
         Vector2 targetPosition = body.position + input * (speed * Time.fixedDeltaTime);
