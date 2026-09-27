@@ -101,11 +101,12 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 7825882035963509392}
-  - component: {fileID: 8225500026414567448}
   - component: {fileID: 6367213625122410701}
   - component: {fileID: 1739086425707792836}
   - component: {fileID: 7061509634678572499}
   - component: {fileID: 7090148441003883408}
+  - component: {fileID: 5029741579554410319}
+  - component: {fileID: -1986303359432600623}
   m_Layer: 0
   m_Name: Player_25D
   m_TagString: Player
@@ -129,31 +130,6 @@ Transform:
   - {fileID: 4344023410549186980}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!143 &8225500026414567448
-CharacterController:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 8147747108655129601}
-  m_Material: {fileID: 0}
-  m_IncludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_ExcludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_LayerOverridePriority: 0
-  m_ProvidesContacts: 0
-  m_Enabled: 1
-  serializedVersion: 3
-  m_Height: 2
-  m_Radius: 0.4
-  m_SlopeLimit: 45
-  m_StepOffset: 0.3
-  m_SkinWidth: 0.08
-  m_MinMoveDistance: 0.001
-  m_Center: {x: 0, y: 1, z: 0}
 --- !u!114 &6367213625122410701
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -217,3 +193,49 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: dd6c3901e6d384d4c8accfd8d87b6b11, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PlayerSaveAgent
+--- !u!50 &5029741579554410319
+Rigidbody2D:
+  serializedVersion: 5
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8147747108655129601}
+  m_BodyType: 0
+  m_Simulated: 1
+  m_UseFullKinematicContacts: 0
+  m_UseAutoMass: 0
+  m_Mass: 1
+  m_LinearDamping: 0
+  m_AngularDamping: 0.05
+  m_GravityScale: 1
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_Interpolate: 0
+  m_SleepingMode: 1
+  m_CollisionDetection: 0
+  m_Constraints: 4
+--- !u!114 &-1986303359432600623
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8147747108655129601}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 686bdbfc96579364f9ae37b6df2a1c60, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::PlayerMovement2D
+  inputReader: {fileID: 11400000, guid: f19d2595478f8ad4ca1a48721d4df4e6, type: 2}
+  walkSpeed: 3
+  runSpeed: 6
+  depthSpeedMultiplier: 0.55
+  stamina: {fileID: 6367213625122410701}
+  walkableArea: {fileID: 0}
+  spriteRenderer: {fileID: 6126664693822667081}
