@@ -10,7 +10,6 @@ GameObject:
   m_Component:
   - component: {fileID: 4344023410549186980}
   - component: {fileID: 6126664693822667081}
-  - component: {fileID: 7608202146474738141}
   m_Layer: 0
   m_Name: Sprite
   m_TagString: Untagged
@@ -93,20 +92,6 @@ SpriteRenderer:
   m_WasSpriteAssigned: 1
   m_SpriteSortPoint: 0
   m_BlendShapeWeights: []
---- !u!114 &7608202146474738141
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 260617923843294819}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 6b741a00f993f0744b8c0cb372a7f4e2, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::Billboard
-  targetCamera: {fileID: 0}
-  stayUpright: 1
 --- !u!1 &8147747108655129601
 GameObject:
   m_ObjectHideFlags: 0
@@ -117,7 +102,6 @@ GameObject:
   m_Component:
   - component: {fileID: 7825882035963509392}
   - component: {fileID: 8225500026414567448}
-  - component: {fileID: 3618233336431592288}
   - component: {fileID: 6367213625122410701}
   - component: {fileID: 1739086425707792836}
   - component: {fileID: 7061509634678572499}
@@ -170,24 +154,6 @@ CharacterController:
   m_SkinWidth: 0.08
   m_MinMoveDistance: 0.001
   m_Center: {x: 0, y: 1, z: 0}
---- !u!114 &3618233336431592288
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 8147747108655129601}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: b56f7441d7880f742ac365e2c58e77ac, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::PlayerMovement25D
-  inputReader: {fileID: 11400000, guid: f19d2595478f8ad4ca1a48721d4df4e6, type: 2}
-  walkSpeed: 3.5
-  runSpeed: 7
-  stamina: {fileID: 0}
-  gravity: -20
-  spriteRenderer: {fileID: 6126664693822667081}
 --- !u!114 &6367213625122410701
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -205,7 +171,6 @@ MonoBehaviour:
   drainPerSecond: 25
   regenPerSecond: 15
   canRunAgainThreshold: 30
-  staminaBar: {fileID: 0}
   tiredSound: {fileID: 0}
 --- !u!114 &1739086425707792836
 MonoBehaviour:
@@ -220,7 +185,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PlayerHealth
   maxHealth: 100
-  healthBar: {fileID: 0}
   onDeath:
     m_PersistentCalls:
       m_Calls: []
@@ -238,11 +202,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::PlayerInteractor
   inputReader: {fileID: 11400000, guid: f19d2595478f8ad4ca1a48721d4df4e6, type: 2}
   interactionCamera: {fileID: 0}
-  raycastMode: 1
   interactableLayers:
     serializedVersion: 2
     m_Bits: 4294967295
-  maxDistance: 100
 --- !u!114 &7090148441003883408
 MonoBehaviour:
   m_ObjectHideFlags: 0
