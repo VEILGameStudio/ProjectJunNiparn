@@ -3,13 +3,13 @@
 // moment it touches the trap. Traps are not interactables: they react to the
 // player's body touching them, not to clicks.
 //
-// Put this on: the trap GameObject. Add a Collider2D first (for example a
-//   BoxCollider2D) and tick "Is Trigger" on it.
+// Put this on: the trap GameObject. Add a Collider first (for example a
+//   BoxCollider) and tick "Is Trigger" on it.
 // Assign in Inspector: Damage Amount.
 
 using UnityEngine;
 
-[RequireComponent(typeof(Collider2D))]
+[RequireComponent(typeof(Collider))]
 public class DamageTrap : MonoBehaviour
 {
     [Header("Damage")]
@@ -17,7 +17,7 @@ public class DamageTrap : MonoBehaviour
     [SerializeField] private int damageAmount = 20;
 
     // Called when something walks into the trap.
-    private void OnTriggerEnter2D(Collider2D other)
+    private void OnTriggerEnter(Collider other)
     {
         TryDamage(other.gameObject);
     }

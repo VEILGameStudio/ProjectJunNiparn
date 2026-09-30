@@ -3,11 +3,14 @@
 //   1. The player walks near it.
 //   2. The player has not interacted with anything for a while (a hint), handled
 //      by the HintManager.
-// It turns the outline on by setting the Outline Thickness on the sprite's
-// material (the sprite must use the "Game/Sprite Outline" shader/material).
+// It turns the outline on by setting _OutlineThickness and _OutlineColor through a
+// MaterialPropertyBlock on this one renderer only. The shared material file is never
+// changed, so other sprites do not light up and nothing is left changed after Play mode.
 //
-// Put this on: the interactable sprite GameObject (it needs a SpriteRenderer whose
-//   material uses the Sprite Outline shader).
+// Put this on: the interactable sprite GameObject (it needs a SpriteRenderer using the
+//   SpriteLit material, shader "Game/SpriteLitOutline"). The sprite needs a transparent
+//   border at least as wide as the outline, and its import setting Mesh Type = Full Rect,
+//   or the outline has nowhere to be drawn.
 // Assign in Inspector:
 //   - Outline Color / Outline Thickness: how the highlight looks.
 //   - Show Distance: how close the player must be to light it up.
@@ -109,7 +112,7 @@ public class HighlightEffect : MonoBehaviour
             }
         }
 
-        return player != null && Vector2.Distance(player.position, transform.position) <= showDistance;
+        return player != null && Vector3.Distance(player.position, transform.position) <= showDistance;
     }
 
     // Turns the outline on or off using a property block (no material copies made).

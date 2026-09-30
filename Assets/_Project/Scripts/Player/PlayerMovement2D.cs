@@ -1,17 +1,20 @@
 // PlayerMovement2D
 // Moves the player. A/D (or the stick left/right) walks along X. W/S (or the stick
-// up/down) walks deeper into or out of the scene on Y. Up/down is slower (the
-// Depth Speed Multiplier) so depth looks right. Holding Run makes the player move
-// faster. The player can never leave the Walkable Area. Movement only works during
+// up/down) walks deeper into or out of the scene on Y. Up/down uses the Depth Speed
+// Multiplier so depth looks right. Holding Run makes the player move faster.
+// Walls are ordinary Collider2D objects: the player bumps into them and slides along
+// them by physics, so there is no clamping code here. Movement only works during
 // normal gameplay (it stops while paused, in a dialogue, or in a cutscene).
 //
-// Put this on: the Player GameObject (it needs a Rigidbody2D, and usually a
-//   Collider2D and a SpriteRenderer).
+// Put this on: the Player root (it needs a Rigidbody2D: Dynamic, Gravity Scale 0,
+//   Freeze Rotation Z, Collision Detection Continuous - this script fixes any of these
+//   that are wrong - plus a small solid Collider2D at the feet, and a Visual child
+//   with the SpriteRenderer).
 // Assign in Inspector:
 //   - Input Reader: the shared MainInputReader asset.
 //   - Walk Speed / Run Speed: how fast the player moves.
-//   - Depth Speed Multiplier: up/down speed compared to left/right (default 0.55).
-//   - Walkable Area: this level's floor outline (a PolygonCollider2D with Is Trigger ticked).
+//   - Depth Speed Multiplier: up/down speed compared to left/right. The scene's
+//     LevelSettings sets this when the scene starts (0.55 side view, 0.85 three-quarter).
 //   - Sprite Renderer (optional): used to flip the player to face left or right.
 
 using UnityEngine;
@@ -30,15 +33,11 @@ public class PlayerMovement2D : MonoBehaviour
     [Tooltip("Speed while the Run button is held, in units per second.")]
     [SerializeField] private float runSpeed = 6f;
 
-    [Tooltip("Up/down speed compared to left/right speed. 0.55 makes walking into the scene look right.")]
+    [Tooltip("Up/down speed compared to left/right speed. The scene's LevelSettings replaces this when the scene starts.")]
     [SerializeField] private float depthSpeedMultiplier = 0.55f;
 
     [Tooltip("Optional. If assigned, the player can only run while stamina allows it.")]
     [SerializeField] private PlayerStamina stamina;
-
-    [Header("Walkable Area")]
-    [Tooltip("The PolygonCollider2D that outlines the floor of this level. Tick 'Is Trigger' on it. The player cannot walk outside it.")]
-    [SerializeField] private PolygonCollider2D walkableArea;
 
     [Header("Facing")]
     [Tooltip("Optional. The SpriteRenderer that is flipped to face the walking direction.")]
@@ -58,23 +57,41 @@ public class PlayerMovement2D : MonoBehaviour
         {
             Debug.LogError($"PlayerMovement2D on '{name}': Input Reader is not assigned. Drag the MainInputReader asset here.", this);
         }
-        if (walkableArea == null)
-        {
-            Debug.LogWarning($"PlayerMovement2D on '{name}': Walkable Area is not assigned, so the player can walk anywhere. Drag this level's floor PolygonCollider2D here.", this);
-        }
-        if (body.gravityScale != 0f)
-        {
-            // In this side-view style there is no falling, so gravity would pull the player down.
-            Debug.LogWarning($"PlayerMovement2D on '{name}': Rigidbody2D Gravity Scale should be 0. Setting it to 0 now.", this);
-            body.gravityScale = 0f;
-        }
+
+        ApplyRequiredPhysicsSettings();
     }
 
     private void Start()
     {
-        if (walkableArea != null && !walkableArea.OverlapPoint(body.position))
+        if (FindAnyObjectByType<LevelSettings>() == null)
         {
-            Debug.LogWarning($"PlayerMovement2D on '{name}': the player starts outside the Walkable Area and will not be able to move. Move the player (or the spawn point) inside the floor outline.", this);
+            Debug.LogWarning($"PlayerMovement2D on '{name}': this scene has no LevelSettings, so default values are used. Add an empty GameObject named 'LevelSettings', add the LevelSettings component, and pick a View Style.", this);
+        }
+    }
+
+    // Makes sure the Rigidbody2D is set up the way walking needs, fixing it with a warning if not.
+    private void ApplyRequiredPhysicsSettings()
+    {
+        if (body.bodyType != RigidbodyType2D.Dynamic)
+        {
+            Debug.LogWarning($"PlayerMovement2D on '{name}': Rigidbody2D Body Type should be Dynamic, or the player walks through walls. Setting it now.", this);
+            body.bodyType = RigidbodyType2D.Dynamic;
+        }
+        if (body.gravityScale != 0f)
+        {
+            // There is no falling in this game, so gravity would pull the player down.
+            Debug.LogWarning($"PlayerMovement2D on '{name}': Rigidbody2D Gravity Scale should be 0. Setting it now.", this);
+            body.gravityScale = 0f;
+        }
+        if (!body.freezeRotation)
+        {
+            Debug.LogWarning($"PlayerMovement2D on '{name}': Rigidbody2D should tick Freeze Rotation Z, or the player tips over when bumping walls at an angle. Setting it now.", this);
+            body.freezeRotation = true;
+        }
+        if (body.collisionDetectionMode != CollisionDetectionMode2D.Continuous)
+        {
+            Debug.LogWarning($"PlayerMovement2D on '{name}': Rigidbody2D Collision Detection should be Continuous, or a fast player can slip through thin walls. Setting it now.", this);
+            body.collisionDetectionMode = CollisionDetectionMode2D.Continuous;
         }
     }
 
@@ -92,6 +109,12 @@ public class PlayerMovement2D : MonoBehaviour
         {
             inputReader.DisableGameplay();
         }
+    }
+
+    // Sets how fast the player walks up/down compared to left/right. LevelSettings calls this.
+    public void SetDepthSpeedMultiplier(float value)
+    {
+        depthSpeedMultiplier = value;
     }
 
     // Moves the player. Uses FixedUpdate because we move a Rigidbody2D.
@@ -112,34 +135,10 @@ public class PlayerMovement2D : MonoBehaviour
         float speed = IsRunning() ? runSpeed : walkSpeed;
         Vector2 step = new Vector2(input.x, input.y * depthSpeedMultiplier) * (speed * Time.fixedDeltaTime);
 
-        body.MovePosition(KeepInsideWalkableArea(body.position, step));
+        // Physics stops the player at walls and slides them along.
+        body.MovePosition(body.position + step);
 
         UpdateFacing(input.x);
-    }
-
-    // Returns where the player may move without leaving the Walkable Area. If the
-    // full step would leave it, the player slides along X only, then Y only.
-    private Vector2 KeepInsideWalkableArea(Vector2 from, Vector2 step)
-    {
-        Vector2 fullStep = from + step;
-        if (walkableArea == null || walkableArea.OverlapPoint(fullStep))
-        {
-            return fullStep;
-        }
-
-        Vector2 sideStep = from + new Vector2(step.x, 0f);
-        if (walkableArea.OverlapPoint(sideStep))
-        {
-            return sideStep;
-        }
-
-        Vector2 depthStep = from + new Vector2(0f, step.y);
-        if (walkableArea.OverlapPoint(depthStep))
-        {
-            return depthStep;
-        }
-
-        return from;
     }
 
     // True when the player is holding Run and stamina allows it (if stamina is used).

@@ -2,7 +2,8 @@
 // An object that shows a short "mini dialogue" line when the player uses it, like
 // reading a sign or looking at scenery. It does not change anything in the game.
 //
-// Put this on: the object to inspect. Add a Collider2D first (for example a BoxCollider2D).
+// Put this on: the object to inspect. Add a BoxCollider click box first
+//   (Is Trigger ticked, layer Interactable) - see InteractableBase for the full setup.
 // Assign in Inspector:
 //   - Message: the short line to show.
 //   - Activation / Max Click Distance / One Shot: see InteractableBase.

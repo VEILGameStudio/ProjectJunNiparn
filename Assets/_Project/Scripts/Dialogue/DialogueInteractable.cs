@@ -3,7 +3,8 @@
 // a note, a grandpa). When the conversation ends, it can run extra actions through
 // the On Dialogue End event (for example start a cutscene or give a quest).
 //
-// Put this on: the object to talk to. Add a Collider2D first (for example a BoxCollider2D).
+// Put this on: the object to talk to. Add a BoxCollider click box first
+//   (Is Trigger ticked, layer Interactable) - see InteractableBase for the full setup.
 // Assign in Inspector:
 //   - Dialogue: the FullDialogueData to play.
 //   - On Dialogue End (optional): actions to run after the conversation.

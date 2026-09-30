@@ -1,35 +1,69 @@
-# Project Spec — 2D Puzzle / Point-and-Click Game
+# Project Spec — 3D Puzzle / Point-and-Click Game (HD-2D)
 
 This file is the single source of truth for this project. Read it before writing any code.
 
 ---
 
+## 0. Critical rules
+
+Everything in this file matters, but these seven are the ones that are expensive to reverse and easy
+to break without noticing. Each is marked **CRITICAL** again where it is explained in full.
+
+1. **Every subscriber subscribes in `OnEnable` and unsubscribes in `OnDisable`.** (§3)
+   A missed unsubscribe breaks on the next scene load, and a beginner cannot trace it.
+2. **Player input is camera-relative, never world-axis.** (§7)
+   Get it wrong and pressing one key walks the character diagonally. This is the signature bug of
+   this genre and it looks like a dozen other problems.
+3. **Sprite materials use alpha clipping, never alpha blending.** (§7)
+   Alpha-blended sprites flicker and swap order wherever they overlap. Discovering this late means
+   reworking every sprite material and possibly the art itself.
+4. **Sprites never cast shadows.** (§7) A flat card casts a flat card-shaped shadow. Use a blob shadow.
+5. **One camera angle for the whole game.** (§7)
+   Every sprite is drawn for that one pitch. Changing it after art production starts is a
+   project-wide redraw.
+6. **Never write code that sorts sprites by position.** (§1, §8)
+   The depth buffer does this. The old Y-sorting system was deleted on purpose; do not rebuild it.
+7. **Never report a test result you did not observe.** (§9)
+   If the tests cannot run, say so and give the command.
+
+---
+
 ## 1. The game
 
-Unity **6.5.10f1**, **URP (2D Renderer)**. Genre: puzzle, point-and-click.
+Unity **6.5.10f1**, **URP (3D Forward renderer)**. Genre: puzzle, point-and-click.
 
-**One code path, two art styles.** Every level is 2D with free WASD movement on X and Y.
-What changes between levels is the camera angle the art is drawn at, never the code.
+**A real 3D world seen through a fixed orthographic camera, filled mostly with 2D art.**
+References: Pumpkin Panic, Cult of the Lamb, Octopath Traveler. This is the style usually called HD-2D.
 
-- **Side view** — the camera looks nearly straight on. The player walks left/right freely and
-  a little into depth. Parallax background layers are used.
-- **Three-quarter** — the camera looks down at roughly 45-60 degrees, like a diorama
-  (reference: Pumpkin Panic). The player walks freely in all directions across a floor area.
-  Parallax is off or near zero, because a top-down camera barely slides its background.
+What is 3D geometry:
+- The floor, walls, stairs, and anything the player walks on or bumps into.
+- Colliders, physics and lighting are all ordinary 3D.
 
-Shared by both:
-- Movement is free, never grid or tile based. Walls and obstacles are ordinary `Collider2D`
-  that the player physically cannot pass through. No custom clamping code.
-- Sprites sort by their Y position: things further back draw behind things nearer.
-- Mouse click = interact / pick up.
-- **2D Physics only** (`Rigidbody2D`, `Collider2D`). No 3D models in scenes, no 3D colliders,
-  no perspective camera, no 3D lights.
+What is a 2D sprite:
+- Every character — player, NPCs, monsters — drawn by hand, standing upright in the world and
+  turned to face the camera.
+- Decorative props — grass, flowers, small rocks, bushes, hanging lanterns, signs.
+
+A large prop the player must walk around (a big tree, a pillar, a building) may be either: a sprite
+with a 3D collider at its base, or real geometry. Decide per prop, and say which when adding one.
+
+The camera never rotates. Because of that, sprites never need to spin to follow it: their rotation is
+set once, from the camera's fixed angle.
+
+Shared rules:
+- Free WASD movement on the ground plane, never grid or tile based.
+- Input is **camera-relative**: W always walks up the screen, which is a diagonal in world space.
+- Mouse click = interact / pick up, by raycasting from the camera through the mouse position.
+- Walls and obstacles are ordinary 3D colliders the player physically cannot pass through.
 - About 24 levels. Doors link levels. Inventory and game state persist across scenes.
 
-3D models exist in the project as an **art source only**. Props are pre-rendered from those models
-into sprites before they enter a scene. Nothing 3D ever ships in a scene. A prop used in both art
-styles must be rendered separately for each one, from that style's camera angle — never reuse a
-single sprite across both styles, because the angle reads as wrong immediately.
+**CRITICAL —** depth sorting, depth scaling and parallax are **not systems in this project**. The depth
+buffer and the orthographic camera handle all of that. Never write code that sorts sprites by
+position. An earlier version of this project had a Y-sorting system; it was deleted deliberately when
+the game moved to 3D. Do not rebuild it, and do not "restore" it if you find traces of it.
+
+Elevation (steps, raised platforms, bridges) is allowed — 3D handles it — but use it deliberately,
+because it affects camera framing and how readable the floor is.
 
 ---
 
@@ -63,7 +97,7 @@ A static `GameEvents` class holds all game-wide C# events in one file:
 
 Systems raise events. UI and other systems subscribe. UI never reads manager internals directly.
 
-**Every subscriber subscribes in `OnEnable` and unsubscribes in `OnDisable`. Every time. No exceptions.**
+**CRITICAL — every subscriber subscribes in `OnEnable` and unsubscribes in `OnDisable`. Every time. No exceptions.**
 This is the single most damaging bug in this project: an event that is never unsubscribed breaks on scene reload and is very hard for a beginner to diagnose.
 
 ---
@@ -105,14 +139,14 @@ public class PlayerStamina : MonoBehaviour
 Assets/_Project/
   Scripts/
     Core/            Singleton<T>, GameEvents, GameManager, SceneLoader,    [Oak]
-                     LevelSettings
+                     LevelSettings, GameLayers
     Player/          Movement, Health, Stamina                              [Oak]
     Interaction/     IInteractable, InteractableBase, click & touch system  [Oak]
     Items/           ItemData, Inventory                                    [Oak]
     Dialogue/                                                               [Oak]
     Save/                                                                   [Oak]
     Settings/                                                               [Oak]
-    Camera/          Cinemachine setup, Parallax, YSortObject               [Oak]
+    Camera/          Cinemachine setup, SpriteBillboard                     [Oak]
     UI/                                                                     [Oak]
     Cutscene/                                                               [Oak]
     Gameplay/
@@ -151,44 +185,84 @@ public interface IInteractable
 
 **Layer 2 — `InteractableBase : MonoBehaviour, IInteractable` (core).**
 Everything shared lives here so subclasses stay tiny:
-activation mode, max click distance, `oneShot`, `requiredItem`, `blockedMessage`, optional interact sound; distance and requirement checks; showing the blocked message; disabling itself after a one-shot; registering with the highlight system.
+activation mode, max interact distance, `oneShot`, `requiredItem`, `blockedMessage`, optional interact sound; distance and requirement checks; showing the blocked message; disabling itself after a one-shot; registering with the highlight system.
 Exposes `protected abstract void OnInteract(PlayerContext player);`
 
 **Layer 3 — concrete classes.** `PickupInteractable`, `DoorInteractable`, `MessageInteractable`, `PuzzleInteractable`, `QTEInteractable`. Interns add new ones here.
 
-**Detection:** Click uses `Physics2D.OverlapPoint` on the mouse position plus a distance check. Touch uses `OnTriggerEnter2D` on the player. Both paths call the same `Interact`. Never duplicate that logic.
+**Detection.** Click casts a ray from the camera through the mouse position with
+`Physics.Raycast`, filtered by a LayerMask so it only sees the `Interactable` layer. The 3D depth test
+already picks the nearest hit, so no manual sorting is needed. Touch is detected on the player and
+never uses the click collider: `OnControllerColliderHit` when the player bumps an object's solid
+`Blocking` collider, or `OnTriggerEnter` when the player walks into a trigger on the `TouchZone`
+layer. A `CharacterController` does not raise `OnCollisionEnter` — `OnControllerColliderHit` is the
+callback it does raise, so do not reach for the Rigidbody one. The cooldown restarts while the player
+is still pushing against the same object, so holding into it counts as one touch and the player has
+to step away before it fires again. Both paths call the same `Interact`. Never duplicate that logic.
 
-**Traps are not interactables.** A trap that damages on touch is `HazardTrap : MonoBehaviour`, dealing damage through `IDamageable` on a 2D trigger. A trap that can be disarmed gets `HazardTrap` **plus** a `DisarmInteractable` on the same GameObject. Composition, not a second interface.
+**Colliders per interactable object.** A layer belongs to a whole GameObject, so each collider sits on
+its own GameObject: the clickable one on the root, the others on children.
+
+| Collider | Shape | Layer | Is Trigger | Job |
+|---|---|---|---|---|
+| Blocking | small, at the base | `Blocking` | no | stops the player walking through; the touch point for solid objects |
+| Clickable | a box around the visible sprite or mesh | `Interactable` | yes | receives the mouse ray, never a touch |
+| Touch zone (optional) | the area to walk into | `TouchZone` | yes | touch for walk-in spots that must not block: floor plates, cutscene spots, walk-through doorways, pickups on the floor |
+
+Explain it to the level designer as: *the small one is what the character bumps into, the big one is
+what the mouse clicks.* An object that is only decoration needs neither; an object that only blocks
+needs the small one; an object that is only clicked needs the big one.
+
+For a character or prop drawn as an upright sprite, the clickable box stands upright too and is about
+the size of the drawn figure. It does not need to match the sprite exactly.
+
+**Traps are not interactables.** A trap that damages on touch is `HazardTrap : MonoBehaviour`, dealing damage through `IDamageable` on a trigger. A trap that can be disarmed gets `HazardTrap` **plus** a `DisarmInteractable` on the same GameObject. Composition, not a second interface.
 
 ---
 
 ## 7. Systems
 
-**Movement.** A/D on X, W/S on Y, free movement, gamepad supported. `Rigidbody2D` (Dynamic,
-Gravity Scale 0) moved with `MovePosition`. Y speed is a separate Inspector multiplier so depth
-reads correctly: about **0.55 for side view**, about **0.7 for three-quarter**. The player is kept
-inside the level by ordinary wall colliders, not by clamping to a polygon — physics then handles
-sliding along walls for free. Every prop that should block the player carries a small `Collider2D`
-**at its base only**, never covering the whole sprite.
+**Movement.** WASD on the ground plane, gamepad supported, free movement. Uses a
+`CharacterController` — simple and predictable, no physics tuning, and it slides along walls for free.
+Do not use a Rigidbody for the player unless something later genuinely needs to push it.
 
-**Depth sorting.** `YSortObject` sets `sortingOrder = Mathf.RoundToInt(-transform.position.y * 100)`.
-An Inspector checkbox "Static" calculates once in `Start` for props that never move. Use
-`SortingGroup` on multi-sprite prefabs. **Sprite pivots must be at the feet.** This matters more in
-three-quarter levels, where sprites overlap far more than in side view.
+**CRITICAL — input is camera-relative.** The camera looks down at a fixed angle, so pressing W must move the
+player *up the screen*, not along world +Z. Take the camera's forward and right, flatten them onto
+the ground plane, normalize, and build the movement direction from those. Getting this wrong is the
+most common bug in this kind of game: the character appears to walk diagonally when you press one key.
 
-**Camera.** One Cinemachine orthographic camera following X and Y with Z locked, slightly higher Y
-damping than X, and a `CinemachineConfiner2D` per level. The three-quarter look comes entirely from
-how the art is drawn; the camera itself is the same in both styles.
+**Sprites in the world.** Characters and sprite props stand upright on the ground and face the camera.
+`SpriteBillboard` sets the rotation from the camera's fixed angle:
 
-**Parallax.** Side-view levels use separate X and Y factors per layer: far layers 0.4-0.6 on X,
-foreground layers -0.2 to -0.3, Y factor about half the X factor. Three-quarter levels normally use
-no parallax at all.
+- Rotation is set once in `Start`, not every frame, because the camera never rotates.
+- Default is **yaw only** — the sprite stays vertical in the world, so it meets the floor naturally
+  and reads correctly against 3D geometry.
+- An Inspector field `tiltTowardCamera` (0 to the camera's pitch, default 0) leans the sprite back
+  toward the camera. Higher values fight foreshortening but make the sprite look like it is lying
+  down. This is a tuning knob for the art team, not something to change per object.
+- If the camera angle is ever changed at runtime, call `Refresh()` on the billboards.
 
-**Level settings.** Each scene has one `LevelSettings` component holding a `ViewStyle` dropdown
-(SideView / ThreeQuarter). On scene start it applies that style's defaults — Y speed multiplier,
-parallax on or off, camera damping — to the player and camera, so the level designer sets one
-dropdown instead of remembering four numbers. Every value stays overridable in the Inspector for
-levels that need something different.
+**CRITICAL — sprite materials must use alpha clipping, never alpha blending.** Alpha-blended sprites do not write
+to the depth buffer, so they sort by object distance and flicker or pop when they overlap — which they
+will, constantly. Use a URP Lit or Unlit material with Surface Type Opaque and Alpha Clipping on.
+The cost is harder sprite edges; the art should be drawn with that in mind.
+
+**CRITICAL — shadows.** The floor, walls and 3D props cast and receive real shadows. Sprites **do not cast**
+shadows (Cast Shadows = Off on the renderer), because a flat card casts a flat card-shaped shadow.
+A character or prop that needs to feel planted gets a separate soft blob shadow quad at its base
+instead.
+
+**Camera.** One Cinemachine orthographic camera at a fixed downward angle, following the player on X
+and Z. It never rotates during play. The angle is set once for the whole game — see Level settings.
+
+**Level settings.** Each scene has one `LevelSettings` component. It holds the camera angle preset and
+per-level camera bounds, and applies them on scene start, so the level designer sets one dropdown
+instead of remembering numbers. Every value stays overridable in the Inspector.
+
+**CRITICAL — one camera angle for the whole game.** This is decided and fixed. Every sprite in the project is
+drawn for that single pitch, so a second angle would mean redrawing every sprite prop that appears in
+both. Levels get their variety from layout, lighting and framing, never from moving the camera.
+Changing the angle after art production starts is a project-wide redraw — treat it as a hard stop.
 
 **Items and inventory.** `ItemData` (ScriptableObject): id, localized name, localized description, icon, maxStack. Inventory supports add/remove/count and stacking, and raises `OnInventoryChanged`. The inventory UI subscribes and refreshes itself; it never touches inventory data directly.
 
@@ -196,7 +270,7 @@ levels that need something different.
 
 **Stamina.** 0–100. Drains only while running. No regeneration while running; regenerates while walking or idle. At 0 the player is forced to walk and cannot run until stamina reaches **30**. Feedback when depleted: bar flash or shake plus a sound. Raises `OnStaminaChanged`.
 
-**Health and damage.** `IDamageable` with `TakeDamage(int amount)`. Traps and monsters call it through 2D triggers. Raises `OnHealthChanged`; at 0 raises `OnGameOver`.
+**Health and damage.** `IDamageable` with `TakeDamage(int amount)`. Traps and monsters call it through triggers. Raises `OnHealthChanged`; at 0 raises `OnGameOver`.
 
 **Timer.** A countdown used by some puzzles only, not every level. On timeout it plays a Fail animation (Animator trigger name set in the Inspector) and raises `OnGameOver`. It stops while the game is paused.
 
@@ -206,7 +280,7 @@ levels that need something different.
 
 **Settings.** Music and Sound sliders through an AudioMixer. Brightness through a URP Global Volume, Color Adjustments → Post Exposure: slider minimum **10** is the normal default (Post Exposure 0), and the slider maximum is an Inspector field clamped between **50 and 70**. Language dropdown. All stored in the global save.
 
-**Highlight.** A soft white outline on interactable sprites via URP Shader Graph. Shown when the player is near, and also when the player has not interacted with anything for a configurable idle time (hint system).
+**Highlight.** A soft white outline on interactable objects via URP Shader Graph, following the object's silhouette. Shown when the player is near, and also when the player has not interacted with anything for a configurable idle time (hint system).
 
 **Cutscenes.** Either a Timeline (`PlayableDirector`) or a video clip (`VideoPlayer`), with a Skip button. Used for: the storybook intro, the start of the game, and before collecting the puzzle gem. Player input is locked while one plays.
 
@@ -222,12 +296,13 @@ These exist so interns can add content without touching core code.
 - `PuzzleBase` — `puzzleId`, `oneTimeOnly`, `StartPuzzle()`, `CompletePuzzle()`, `FailPuzzle()`, plus UnityEvents `OnPuzzleStarted` / `OnPuzzleCompleted` / `OnPuzzleFailed` so Intern B can wire doors, sounds and animations in the Inspector with no code. Completion is recorded by the save system through `OnPuzzleCompleted(puzzleId)`.
 - `MiniGameBase` — shows its UI, locks player input while it runs, returns success or failure, closes itself.
 - `QuickTimeEvent : MiniGameBase` — Inspector-configurable: ordered input actions, time limit per input, allowed mistakes, prompt prefab. A new QTE should need no new code.
-- `LevelSettings` — one per scene. The level designer picks the ViewStyle and the level configures itself. Adding a new view style means adding one enum value and its defaults, nothing else.
+- `LevelSettings` — one per scene. Holds the camera preset and bounds and configures the level on start.
+- `SpriteBillboard` — drop it on any sprite that should face the camera. No configuration needed in the normal case.
 
 Gameplay code **subscribes** to `GameEvents` but never raises core events.
 
 **Hard stops for gameplay work.** If a task requires any of these, stop and report it instead of writing code:
-writing `Time.timeScale`; calling `SaveManager` or needing state to survive a scene reload; raising a core event; locking or unlocking player input; adding a field or changing a signature in a core class; adding a new event to `GameEvents`; pathfinding or monster AI; creating an asmdef.
+writing `Time.timeScale`; calling `SaveManager` or needing state to survive a scene reload; raising a core event; locking or unlocking player input; adding a field or changing a signature in a core class; adding a new event to `GameEvents`; pathfinding or monster AI; creating an asmdef; changing the camera angle; writing any code that sorts sprites by position.
 
 ---
 
@@ -235,8 +310,8 @@ writing `Time.timeScale`; calling `SaveManager` or needing state to survive a sc
 
 Required for every system.
 
-- **EditMode unit tests** for pure C# logic, where most tests belong: inventory add/remove/stack limits, stamina math and the 30 threshold, save data round-trip, localization lookup, timer countdown, puzzle state, and `GameEvents` subscribe/unsubscribe.
-- **PlayMode integration tests** only for behaviour that needs the engine: click vs touch interaction, inventory surviving a scene load, Y-sort ordering, game over reloading the save, input locked during dialogue.
+- **EditMode unit tests** for pure C# logic, where most tests belong: inventory add/remove/stack limits, stamina math and the 30 threshold, save data round-trip, localization lookup, timer countdown, puzzle state, camera-relative direction maths, and `GameEvents` subscribe/unsubscribe.
+- **PlayMode integration tests** only for behaviour that needs the engine: click vs touch interaction, inventory surviving a scene load, game over reloading the save, input locked during dialogue.
 - Do **not** test Unity itself. Never assert that `transform.position` changed after setting it.
 - Do not write a test you could not make fail by breaking the production code.
 - Every fixed bug gets a regression test that would have caught it.
@@ -244,7 +319,7 @@ Required for every system.
 - **That setting is currently OFF** (`playModeTestRunnerEnabled: 0` in `ProjectSettings/ProjectSettings.asset`). While it is off, do not write test files into the project. Put the test code in the report instead, and remind Oak to turn the setting on first. Delete this bullet once the setting is enabled.
 - Test names state the behaviour: `Stamina_CannotRun_UntilRegeneratedTo30`. Arrange / Act / Assert with blank lines between.
 
-**After finishing a system, run the tests and report real results.** If you cannot run them, say so and give the exact command. Never report a result you did not observe.
+**CRITICAL — after finishing a system, run the tests and report real results.** If you cannot run them, say so and give the exact command. Never report a result you did not observe. A guessed "all green" is worse than no test run at all.
 
 ---
 
@@ -270,14 +345,15 @@ Cinemachine 3.x naming, for reference:
 - namespace is `Unity.Cinemachine`, not `Cinemachine`
 - `CinemachineCamera` (was `CinemachineVirtualCamera`)
 - `CinemachinePositionComposer` (was `CinemachineFramingTransposer`)
-- `CinemachineConfiner2D` still exists and still needs a bounding shape
 
 Rules:
 
 - One `CinemachineBrain` on the Main Camera. One `CinemachineCamera` follows the player.
-- The camera is Orthographic, follows X and Y, Z locked, with slightly higher Y damping than X so walking into depth does not feel jumpy.
-- `CinemachineConfiner2D` per level for camera bounds. Its bounding shape is its own `PolygonCollider2D`, separate from the player's walkable area — the walkable area is whatever the level's wall colliders enclose, and the camera bounds are usually smaller. Never reuse one collider for both.
-- If the bounding shape changes at runtime, call `InvalidateBoundingShapeCache()`.
+- The camera is **Orthographic**, at a fixed downward angle, and never rotates during play.
+- Camera bounds per level use `CinemachineConfiner3D` with a `BoxCollider` marked Is Trigger on the
+  `Ignore Raycast` layer. The box limits where the **camera** may sit, not where the player may walk,
+  so it is offset from the floor by the camera's own height and distance and is smaller than the floor
+  by roughly half the visible width and depth on each side.
 - Never set the Main Camera's transform from a script. Cinemachine owns it. Anything that needs to move or shake the camera does it through Cinemachine (an Impulse Source, or by switching cameras), never by writing to `Camera.main.transform`.
 - Camera settings live in the Inspector so the level designer can tune them without code.
 
@@ -297,9 +373,10 @@ Used for tweening UI, fades, and small gameplay motion. Rules, in priority order
 4. Prefer the `DOTweenAnimation` component over code for anything the non-coding intern should be able to author or tweak — button feedback, panel slide-ins, highlight pulses. Only write tween code when it has to react to game state.
 5. Keep tween durations and eases as `[SerializeField]` fields with `[Tooltip]`, never hard-coded, so timing can be tuned in the Inspector.
 6. DOTween ships its own asmdef files. That is fine and expected — the "no asmdef" rule applies to our code under `Assets/_Project`, not to third-party packages.
-7. After importing or updating DOTween Pro, run **Tools > Demigiant > DOTween Utility Panel > Setup**, otherwise the modules for UI, TextMeshPro and 2D physics are not enabled.
-8. DOTween modules enabled: Audio, Physics2D, Sprites, UI, TextMesh Pro.
-   - 3D Physics, UI Toolkit and all External Asset modules are intentionally OFF.
+7. After importing or updating DOTween Pro, run **Tools > Demigiant > DOTween Utility Panel > Setup**, otherwise the modules are not enabled.
+8. DOTween modules needed: Audio, **Physics (3D)**, Sprites, UI, TextMesh Pro.
+   - **Physics2D is now off and Physics (3D) is on** — this project moved from 2D to 3D.
+   - UI Toolkit and all External Asset modules stay OFF.
    - If a tween API is missing, the module is off by design — ask before enabling one.
 
 **Do not use `DOText()` for dialogue.** Thai combining characters break when revealed one index at a time. Use `TMP_Text.maxVisibleCharacters` advanced by grapheme cluster instead.

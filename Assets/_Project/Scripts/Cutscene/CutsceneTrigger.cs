@@ -8,8 +8,10 @@
 // It can play a Timeline or a video, and runs the On Cutscene End event afterwards.
 // Player input is locked while the cutscene plays (the CutsceneManager does that).
 //
-// Put this on: the object that should start the cutscene. Add a Collider2D first
-//   (for example a BoxCollider2D); tick "Is Trigger" on it for Activation = Touch.
+// Put this on: the object that should start the cutscene. Add a BoxCollider click box first
+//   (Is Trigger ticked, layer Interactable) - see InteractableBase for the full setup.
+//   For a spot the player walks into, set Activation = Touch and add a trigger on the
+//   TouchZone layer instead.
 // Assign in Inspector:
 //   - Play On: when the cutscene starts.
 //   - Cutscene Type + Timeline/Video: what to play.

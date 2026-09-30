@@ -4,7 +4,8 @@
 // optionally shows a short message, then removes itself from the scene.
 // Use Interact Sound (from InteractableBase) for the pickup sound.
 //
-// Put this on: the pickup GameObject. Add a Collider2D first (for example a BoxCollider2D).
+// Put this on: the pickup GameObject. Add a BoxCollider click box first
+//   (Is Trigger ticked, layer Interactable) - see InteractableBase for the full setup.
 // Assign in Inspector:
 //   - Item: the ItemData to give the player.
 //   - Amount: how many to give.
