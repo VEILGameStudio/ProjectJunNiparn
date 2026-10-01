@@ -167,7 +167,8 @@ public abstract class InteractableBase : MonoBehaviour, IInteractable
     // Turns this interactable and its highlight off after a one-shot use.
     private void SwitchOff()
     {
-        HighlightEffect highlight = GetComponent<HighlightEffect>();
+        // The highlight usually sits on the Visual child, next to the SpriteRenderer.
+        HighlightEffect highlight = GetComponentInChildren<HighlightEffect>();
         if (highlight != null)
         {
             highlight.enabled = false;

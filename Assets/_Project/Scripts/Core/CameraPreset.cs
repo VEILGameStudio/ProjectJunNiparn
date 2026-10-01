@@ -1,6 +1,9 @@
 // CameraPreset
 // The camera presets a level can pick in LevelSettings, and the numbers behind each one.
 // The whole game uses ONE camera angle, because every sprite is drawn for that angle.
+// The angle is isometric-style: the camera is turned 45 degrees (Yaw), so rooms look like
+// diamonds on screen, and it looks 30 degrees down (Pitch), so a square floor tile is
+// drawn twice as wide as it is tall.
 // That is why there is only "Default" for now. Never add a preset with a different
 // Pitch or Yaw: that would mean redrawing every sprite (ask Oak first).
 //
@@ -31,8 +34,8 @@ public struct CameraPresetValues
             default:
                 return new CameraPresetValues
                 {
-                    Pitch = 45f,
-                    Yaw = 0f,
+                    Pitch = 30f,
+                    Yaw = 45f,
                     OrthographicSize = 5f,
                     CameraDistance = 20f,
                     Damping = new Vector2(1f, 1.3f)
