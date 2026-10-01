@@ -2,13 +2,13 @@
 // An enemy that keeps hurting anything that can be damaged while it stays in
 // contact, once every Damage Interval.
 //
-// Put this on: the monster GameObject. Add a Collider2D first (for example a
-//   CircleCollider2D) and tick "Is Trigger" on it.
+// Put this on: the monster GameObject. Add a Collider first (for example a
+//   CapsuleCollider) and tick "Is Trigger" on it.
 // Assign in Inspector: Damage Amount, Damage Interval.
 
 using UnityEngine;
 
-[RequireComponent(typeof(Collider2D))]
+[RequireComponent(typeof(Collider))]
 public class DamageMonster : MonoBehaviour
 {
     [Header("Damage")]
@@ -21,12 +21,12 @@ public class DamageMonster : MonoBehaviour
     // Counts down to the next hit while a target is inside.
     private float timeUntilNextHit;
 
-    private void OnTriggerEnter2D(Collider2D other)
+    private void OnTriggerEnter(Collider other)
     {
         timeUntilNextHit = 0f; // Hit right away on first contact.
     }
 
-    private void OnTriggerStay2D(Collider2D other)
+    private void OnTriggerStay(Collider other)
     {
         Tick(other.gameObject);
     }

@@ -3,8 +3,8 @@
 // "Take the gem? Yes / No". You wire what happens for each answer here in the
 // Inspector: for example On Yes -> add item + destroy object, On No -> do nothing.
 //
-// Put this on: the object that asks the question. Add a Collider2D first (for
-//   example a BoxCollider2D).
+// Put this on: the object that asks the question. Add a BoxCollider click box first
+//   (Is Trigger ticked, layer Interactable) - see InteractableBase for the full setup.
 // Assign in Inspector:
 //   - Choice: the ChoiceDialogueData (the question text).
 //   - On Yes / On No: the actions for each answer.

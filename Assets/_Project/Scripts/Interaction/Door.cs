@@ -3,7 +3,8 @@
 // SceneLoader to load the target scene and place the player at the chosen spawn
 // point. To lock it, set Required Item and Blocked Message (from InteractableBase).
 //
-// Put this on: the door GameObject. Add a Collider2D first (for example a BoxCollider2D).
+// Put this on: the door GameObject. Add a BoxCollider click box first
+//   (Is Trigger ticked, layer Interactable) - see InteractableBase for the full setup.
 // Assign in Inspector:
 //   - Target Scene Name: the exact scene file name to load (must be in Build Settings).
 //   - Target Spawn Point Id: the SpawnPoint id in that scene to arrive at.

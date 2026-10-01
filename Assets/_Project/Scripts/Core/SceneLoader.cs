@@ -97,7 +97,16 @@ public class SceneLoader : MonoBehaviour
             return;
         }
 
-        player.transform.position = target.transform.position;
+        // PlayerMovement teleports safely; setting the position directly would be undone by the CharacterController.
+        PlayerMovement movement = player.GetComponent<PlayerMovement>();
+        if (movement != null)
+        {
+            movement.TeleportTo(target.transform.position);
+        }
+        else
+        {
+            player.transform.position = target.transform.position;
+        }
     }
 
     // Looks through the loaded scene for a spawn point with the matching id.
