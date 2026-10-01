@@ -17,10 +17,12 @@ to break without noticing. Each is marked **CRITICAL** again where it is explain
 3. **Sprite materials use alpha clipping, never alpha blending.** (§7)
    Alpha-blended sprites flicker and swap order wherever they overlap. Discovering this late means
    reworking every sprite material and possibly the art itself.
-4. **Sprites never cast shadows.** (§7) A flat card casts a flat card-shaped shadow. Use a blob shadow.
-5. **One camera angle for the whole game.** (§7)
-   Every sprite is drawn for that one pitch. Changing it after art production starts is a
-   project-wide redraw.
+4. **Sprites never cast shadows.** (§7) A flat card casts a flat card-shaped shadow. Use a blob shadow
+   in `ThreeQuarter` levels; a blob is invisible in `SideView` and needs a different solution.
+5. **Exactly two camera presets, `ThreeQuarter` and `SideView`. Never a third.** (§7)
+   Each level picks one. Every sprite is drawn for one preset and lives in that preset's art folder;
+   a sprite used in the wrong preset looks wrong and nothing warns you. Adding a third preset means
+   a third set of art for everything shared — treat it as a hard stop.
 6. **Never write code that sorts sprites by position.** (§1, §8)
    The depth buffer does this. The old Y-sorting system was deleted on purpose; do not rebuild it.
 7. **Never report a test result you did not observe.** (§9)
@@ -30,10 +32,28 @@ to break without noticing. Each is marked **CRITICAL** again where it is explain
 
 ## 1. The game
 
-Unity **6.5.10f1**, **URP (3D Forward renderer)**. Genre: puzzle, point-and-click.
+Unity **6.5.10f1**, **URP (3D Forward renderer)**. Genre: **story-driven** puzzle, point-and-click.
 
-**A real 3D world seen through a fixed orthographic camera, filled mostly with 2D art.**
+The story is the spine of the game and puzzles gate progress through it: a level is passed by solving
+its puzzle. That makes Dialogue and Cutscenes primary systems, not decoration — they carry the game.
+
+**A real 3D world seen through a fixed camera, filled mostly with 2D art.**
 References: Pumpkin Panic, Cult of the Lamb, Octopath Traveler. This is the style usually called HD-2D.
+
+**Two kinds of level, roughly half the game each.** They differ only in the camera preset the level
+picks; the code is the same for both. Today one scene uses one preset throughout; later a single scene
+will hold several areas with a preset each — see §12, and do not write code that forbids it.
+
+| | `ThreeQuarter` | `SideView` |
+|---|---|---|
+| Looks like | a diorama seen from above at an angle | a 2.5D side-scroller |
+| Camera | Orthographic | Perspective |
+| Pitch / Yaw | 30° / 45° | 10° / 0° |
+| Job in the game | puzzle rooms — the main gameplay | connecting corridors, a little puzzling, keeping the player on a path |
+| Walkable depth | the whole floor | shallow, about **3 units** |
+
+`SideView` levels are deliberately shallow. The player can step behind a pillar but cannot wander; the
+narrow depth is the point, not a limitation. A level that needs real exploration is a `ThreeQuarter` level.
 
 What is 3D geometry:
 - The floor, walls, stairs, and anything the player walks on or bumps into.
@@ -47,8 +67,8 @@ What is a 2D sprite:
 A large prop the player must walk around (a big tree, a pillar, a building) may be either: a sprite
 with a 3D collider at its base, or real geometry. Decide per prop, and say which when adding one.
 
-The camera never rotates. Because of that, sprites never need to spin to follow it: their rotation is
-set once, from the camera's fixed angle.
+The camera never rotates during play. Because of that, sprites never need to spin to follow it: their
+rotation is set once, from the level's camera angle.
 
 Shared rules:
 - Free WASD movement on the ground plane, never grid or tile based.
@@ -58,8 +78,8 @@ Shared rules:
 - About 24 levels. Doors link levels. Inventory and game state persist across scenes.
 
 **CRITICAL —** depth sorting, depth scaling and parallax are **not systems in this project**. The depth
-buffer and the orthographic camera handle all of that. Never write code that sorts sprites by
-position. An earlier version of this project had a Y-sorting system; it was deleted deliberately when
+buffer handles all of that, and in `SideView` the perspective camera shrinks distant sprites by itself.
+Never write code that sorts sprites by position or scales them by distance. An earlier version of this project had a Y-sorting system; it was deleted deliberately when
 the game moved to 3D. Do not rebuild it, and do not "restore" it if you find traces of it.
 
 Elevation (steps, raised platforms, bridges) is allowed — 3D handles it — but use it deliberately,
@@ -157,8 +177,18 @@ Assets/_Project/
   Data/{Items,Dialogue,Settings}                                            [Intern B]
   Tests/           PlayMode tests
   Tests/Editor/    EditMode tests
-  Prefabs, Scenes, Art, Audio                                               [Intern B]
+  Prefabs, Scenes, Audio                                                    [Intern B]
+  Art/
+    Sprites/
+      ThreeQuarter/  drawn for pitch 30 — only for ThreeQuarter levels      [Intern B]
+      SideView/      drawn for pitch 10 — only for SideView levels          [Intern B]
+      Shared/        angle-independent only: UI, icons, particles, VFX      [Intern B]
+    Materials, Models, ...                                                  [Intern B]
 ```
+
+**Never put a sprite from one preset folder into a level of the other preset.** It will look subtly
+wrong — lit from the wrong height, floor contact at the wrong angle — and nothing in the editor warns
+you. `Shared/` is only for art with no viewing angle at all. When in doubt it is not shared.
 
 Gameplay code may **read** core systems but never edit them. If a gameplay task needs a change in a core folder, stop and say what is needed instead of editing it.
 
@@ -234,7 +264,11 @@ most common bug in this kind of game: the character appears to walk diagonally w
 **Sprites in the world.** Characters and sprite props stand upright on the ground and face the camera.
 `SpriteBillboard` sets the rotation from the camera's fixed angle:
 
-- Rotation is set once in `Start`, not every frame, because the camera never rotates.
+- Rotation is set once in `Start`, not every frame, because the camera never rotates during play.
+  This stays true under the `SideView` perspective camera: a sprite away from screen centre is then
+  seen slightly off-axis and looks a little narrower, which is normal for this style and much better
+  than having sprites swivel as the player walks past them. Never make billboards track the camera's
+  *position*.
 - Default is **yaw only** — the sprite stays vertical in the world, so it meets the floor naturally
   and reads correctly against 3D geometry.
 - An Inspector field `tiltTowardCamera` (0 to the camera's pitch, default 0) leans the sprite back
@@ -252,17 +286,43 @@ shadows (Cast Shadows = Off on the renderer), because a flat card casts a flat c
 A character or prop that needs to feel planted gets a separate soft blob shadow quad at its base
 instead.
 
-**Camera.** One Cinemachine orthographic camera at a fixed downward angle, following the player on X
-and Z. It never rotates during play. The angle is set once for the whole game — see Level settings.
+A blob shadow only works in `ThreeQuarter`. At the `SideView` pitch of 10° a flat quad on the floor is
+seen nearly edge-on and compresses to about 17% of its depth — a thin sliver nobody will see. `SideView`
+art grounds its figures another way: a contact shadow drawn into the sprite itself, or a shadow quad
+standing at an angle rather than lying flat. Decide this with the art team before the first sprite is
+drawn, not afterwards.
 
-**Level settings.** Each scene has one `LevelSettings` component. It holds the camera angle preset and
+**Camera.** One Cinemachine camera per scene, following the player on X and Z, never rotating during
+play. Its projection, angle and framing come from the level's preset:
+
+| | `ThreeQuarter` | `SideView` |
+|---|---|---|
+| Projection | Orthographic | Perspective |
+| Pitch / Yaw | 30 / 45 | 10 / 0 |
+| Size / FOV | Orthographic Size 5 | Field of View 25 *(provisional)* |
+| Camera distance | 20 | 20 *(provisional)* |
+| Damping X / Z | 1 / 1.3 | 1 / 1.3 |
+
+The `SideView` FOV and distance are **not final**. A wider FOV makes the character grow and shrink more
+as it walks into depth and squashes sprites harder at the screen edges; a narrower one flattens the
+scene toward the reference look. Both numbers must be locked before the art team draws its first
+`SideView` sprite, and this table updated when they are.
+
+**Level settings.** Each scene has one `LevelSettings` component. It holds the camera preset and the
 per-level camera bounds, and applies them on scene start, so the level designer sets one dropdown
-instead of remembering numbers. Every value stays overridable in the Inspector.
+instead of remembering numbers. Every value stays overridable in the Inspector, including a Field of
+View override used only by `SideView` levels.
 
-**CRITICAL — one camera angle for the whole game.** This is decided and fixed. Every sprite in the project is
-drawn for that single pitch, so a second angle would mean redrawing every sprite prop that appears in
-both. Levels get their variety from layout, lighting and framing, never from moving the camera.
-Changing the angle after art production starts is a project-wide redraw — treat it as a hard stop.
+**The code that applies a preset to a camera is a `public static` method, not a private method of
+`LevelSettings`.** It takes a `CinemachineCamera` and a preset and sets the lens mode, size or FOV,
+rotation and distance. `LevelSettings` only calls it. This is what lets §12's per-area camera zones be
+added later without touching a core file.
+
+**CRITICAL — two presets, never a third.** `ThreeQuarter` and `SideView` are decided and fixed, and each
+level picks one. Every sprite is drawn for one of them. A third preset would mean a third version of
+every sprite that appears in more than one kind of level, so adding one is a hard stop — ask first.
+Within a preset, levels get their variety from layout, lighting and framing, never from nudging the
+camera angle. Changing either preset's pitch after art production starts is a project-wide redraw.
 
 **Items and inventory.** `ItemData` (ScriptableObject): id, localized name, localized description, icon, maxStack. Inventory supports add/remove/count and stacking, and raises `OnInventoryChanged`. The inventory UI subscribes and refreshes itself; it never touches inventory data directly.
 
@@ -302,7 +362,7 @@ These exist so interns can add content without touching core code.
 Gameplay code **subscribes** to `GameEvents` but never raises core events.
 
 **Hard stops for gameplay work.** If a task requires any of these, stop and report it instead of writing code:
-writing `Time.timeScale`; calling `SaveManager` or needing state to survive a scene reload; raising a core event; locking or unlocking player input; adding a field or changing a signature in a core class; adding a new event to `GameEvents`; pathfinding or monster AI; creating an asmdef; changing the camera angle; writing any code that sorts sprites by position.
+writing `Time.timeScale`; calling `SaveManager` or needing state to survive a scene reload; raising a core event; locking or unlocking player input; adding a field or changing a signature in a core class; adding a new event to `GameEvents`; pathfinding or monster AI; creating an asmdef; changing a camera preset's values or adding a third preset; building anything described in §12; writing any code that sorts sprites by position or scales them by distance.
 
 ---
 
@@ -313,6 +373,9 @@ Required for every system.
 - **EditMode unit tests** for pure C# logic, where most tests belong: inventory add/remove/stack limits, stamina math and the 30 threshold, save data round-trip, localization lookup, timer countdown, puzzle state, camera-relative direction maths, and `GameEvents` subscribe/unsubscribe.
 - **PlayMode integration tests** only for behaviour that needs the engine: click vs touch interaction, inventory surviving a scene load, game over reloading the save, input locked during dialogue.
 - Do **not** test Unity itself. Never assert that `transform.position` changed after setting it.
+- **Camera-relative movement must be tested at yaw 45, not only at yaw 0.** At the `SideView` yaw of 0
+  the camera axes and the world axes coincide, so that case passes even if the code ignores the camera
+  completely. Only the `ThreeQuarter` yaw of 45 can fail. Keep both cases; the yaw-45 one is the test.
 - Do not write a test you could not make fail by breaking the production code.
 - Every fixed bug gets a regression test that would have caught it.
 - Tests live in `Assets/_Project/Tests/` (PlayMode) and `Assets/_Project/Tests/Editor/` (EditMode). Test Runner's "Enable playmode tests for all assemblies" must be turned on, because game code has no asmdef. Do not add an asmdef for game code to make tests compile — ask first.
@@ -349,11 +412,38 @@ Cinemachine 3.x naming, for reference:
 Rules:
 
 - One `CinemachineBrain` on the Main Camera. One `CinemachineCamera` follows the player.
-- The camera is **Orthographic**, at a fixed downward angle, and never rotates during play.
+- The projection depends on the level's preset: **Orthographic** for `ThreeQuarter`, **Perspective** for
+  `SideView`. The camera is at a fixed angle and never rotates during play.
+- **Switch projection through `CinemachineCamera.Lens.ModeOverride`, never by writing
+  `Camera.main.orthographic`.** The Brain writes its lens onto the Main Camera every frame, so a value
+  set directly on the camera is overwritten or not depending on script execution order — a bug a
+  beginner cannot trace. `LensSettings.ModeOverride` is the supported switch and it is deterministic.
+  Set `OrthographicSize` for `ThreeQuarter` and `FieldOfView` for `SideView`; they are separate fields.
+- **`ModeOverride` does nothing unless `Lens Mode Override` is ticked on the `CinemachineBrain`.** The
+  Brain only pushes the mode to the Unity camera when `CinemachineBrain.LensModeOverride.Enabled` is
+  true, and it is **off by default**. Tick it in the Inspector on the Main Camera of every scene whose
+  preset is not already the camera's projection; code reads this flag but never writes it. A scene that
+  needs it and does not have it logs an error naming the exact Inspector step — the symptom otherwise
+  is correct code with a camera that silently refuses to change projection.
+- **A level can override framing, never the angle.** Zoom, field of view, distance, damping and bounds
+  are per-level Inspector values. Pitch and yaw are not, and there is no Inspector field for them: they
+  belong to the preset, and a per-level angle would be the third preset that §0 rule 5 forbids —
+  created by an intern with one checkbox, in a level where every sprite was drawn for a different one.
+- **`LevelSettings` resolves preset plus overrides in exactly one place, and everything reads it from
+  there.** `Apply`, `CameraPitch` and `CameraYaw` all take their values from that one method; nothing
+  calls the raw preset lookup directly. `SpriteBillboard` aims from `CameraPitch` and `CameraYaw`, so
+  the moment those can disagree with what `Apply` gave the camera, every sprite in the level aims at an
+  angle the camera is not at — and it looks like bad art, not like a bug, so nobody reports it.
+  The test is end-to-end: after `Apply`, the camera's actual rotation must equal `CameraPitch` and
+  `CameraYaw`.
 - Camera bounds per level use `CinemachineConfiner3D` with a `BoxCollider` marked Is Trigger on the
   `Ignore Raycast` layer. The box limits where the **camera** may sit, not where the player may walk,
   so it is offset from the floor by the camera's own height and distance and is smaller than the floor
   by roughly half the visible width and depth on each side.
+- **Under a perspective camera the visible width grows with distance, so size the back wall for the
+  far plane, not the player plane.** Work out the half-width at the back wall's depth, add the camera's
+  maximum sideways travel, and make the wall at least that wide. A back wall sized for the player plane
+  leaves a visible gap at the ends of the level once the camera pans to either extreme.
 - Never set the Main Camera's transform from a script. Cinemachine owns it. Anything that needs to move or shake the camera does it through Cinemachine (an Impulse Source, or by switching cameras), never by writing to `Camera.main.transform`.
 - Camera settings live in the Inspector so the level designer can tune them without code.
 
@@ -380,3 +470,47 @@ Used for tweening UI, fades, and small gameplay motion. Rules, in priority order
    - If a tween API is missing, the module is off by design — ask before enabling one.
 
 **Do not use `DOText()` for dialogue.** Thai combining characters break when revealed one index at a time. Use `TMP_Text.maxVisibleCharacters` advanced by grapheme cluster instead.
+
+---
+
+## 12. Planned, not built yet
+
+This section describes where the project is going. **Do not build any of it now.** Its purpose is to
+stop today's code from closing a door that is going to be needed. If a task seems to require something
+here, stop and ask.
+
+### Camera zones inside one scene
+
+A single scene will eventually hold several areas, each with its own camera preset: the player walks
+through a door into a `ThreeQuarter` puzzle room, solves it, and leaves through another door into a
+`SideView` corridor — all without a scene load. A `CameraZone` component will own a trigger volume, a
+`CinemachineCamera` and a preset, and raise its camera's priority when the player enters.
+
+Three constraints follow from this, and the first two are level-design rules, not code:
+
+1. **Two zones of different presets must never be visible from each other.** A sprite drawn for a 30°
+   pitch looks wrong the moment it appears in a 10° camera's frame. Zones connect through doors, turns
+   or anything that blocks the sightline — never across an open space. This is the expensive one: it
+   constrains level layout, and it cannot be fixed after the art is drawn.
+2. **The transition is a cut behind a fade, never a blend.** Cinemachine cannot blend between an
+   orthographic and a perspective camera — `OrthographicSize` and `FieldOfView` are different units, so
+   an interpolated value is meaningless and the picture jumps mid-blend. Set a Cut in the Brain's
+   Custom Blends asset for these pairs and hide it behind the same fade the door transitions use.
+3. **Billboards must re-aim on a zone change.** `SpriteBillboard` sets its rotation once in `Start`,
+   which is correct for one preset per scene. With zones, each billboard registers itself in a static
+   list in `OnEnable` and removes itself in `OnDisable` — the same rule as every other subscriber in
+   §3 — and a single `RefreshAll()` re-aims the active ones on a zone change.
+
+### Level structure
+
+A level is one scene containing several sub-areas (1.1, 1.2, 1.3 …). Clearing all of them loads the
+next level's scene. Doors inside a scene move the player between sub-areas; doors between levels go
+through `SceneLoader` as they do today.
+
+**Each sub-area is one parent GameObject, deactivated until the player enters it.** A scene holding
+five sub-areas otherwise loads all five at once, which is more in memory than five separate scenes, not
+less. Deactivating also keeps other zones out of frame on its own, and keeps `RefreshAll()` cheap.
+
+This works because of §3: deactivating an area disables its scripts, which unsubscribe in `OnDisable`,
+and re-enabling resubscribes. The one rule it adds — **state belonging to a sub-area lives in a manager,
+never on a GameObject that gets deactivated**, because `OnEnable` runs again and local state is lost.

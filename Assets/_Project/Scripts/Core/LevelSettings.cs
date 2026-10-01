@@ -1,22 +1,28 @@
 // LevelSettings
 // Sets up the level's camera when the scene starts, so the level designer picks one
 // dropdown instead of remembering numbers:
-//   - the camera angle and zoom from the Camera Preset,
+//   - the camera's projection, angle and zoom from the Camera Preset,
 //   - how far back the camera sits and how smoothly it follows the player,
 //   - the Camera Bounds box, given to the camera's CinemachineConfiner3D.
-// The camera angle is the same in every level, because every sprite is drawn for it.
-// Tick "Override Preset Values" to change the zoom, distance or smoothing for one level.
-// The angle itself can never be overridden.
+// The game has two kinds of level, and each level uses one preset:
+//   Three Quarter = puzzle room (orthographic, turned 45 degrees),
+//   Side View     = corridor (perspective, seen from the side).
+// Tick "Override Preset Values" to change the zoom, field of view, distance or smoothing
+// for one level. The angle itself can never be overridden and has no field here: every
+// sprite is drawn for its preset's angle, so a level with its own angle would have every
+// sprite looking wrong.
 //
 // Put this on: an empty GameObject named "LevelSettings". Every level scene needs
 //   exactly one (the player warns in the Console if it is missing).
 // Assign in Inspector:
-//   - Camera Preset: leave on Default.
+//   - Camera Preset: Three Quarter or Side View. Use the one Oak told you to use.
 //   - Level Camera: this level's CinemachineCamera. It needs a CinemachinePositionComposer
 //     and a CinemachineConfiner3D, and Rotation Control set to None.
 //   - Camera Bounds: a BoxCollider (tick Is Trigger, layer Ignore Raycast) around where
 //     the CAMERA may move. The camera sits above and behind the player, so this box
 //     sits above and behind the floor, not on it.
+// Also needed in a Side View level: select the Main Camera and tick Lens Mode Override
+//   on its Cinemachine Brain, or the camera stays orthographic (the Console tells you).
 
 using Unity.Cinemachine;
 using UnityEngine;
@@ -24,8 +30,8 @@ using UnityEngine;
 public class LevelSettings : MonoBehaviour
 {
     [Header("Camera Preset")]
-    [Tooltip("The camera angle, zoom and smoothing for this level. The whole game uses Default.")]
-    [SerializeField] private CameraPreset cameraPreset = CameraPreset.Default;
+    [Tooltip("The kind of level. Three Quarter = puzzle room (orthographic, turned 45 degrees). Side View = corridor (perspective, seen from the side). Use the one Oak told you to use.")]
+    [SerializeField] private CameraPreset cameraPreset = CameraPreset.ThreeQuarter;
 
     [Header("Camera")]
     [Tooltip("This level's CinemachineCamera (the one that follows the player). It needs a CinemachinePositionComposer and a CinemachineConfiner3D.")]
@@ -36,11 +42,14 @@ public class LevelSettings : MonoBehaviour
     [SerializeField] private Collider cameraBounds;
 
     [Header("Custom Values")]
-    [Tooltip("Tick to use the zoom, distance and smoothing below instead of the preset's. The camera angle always comes from the preset.")]
+    [Tooltip("Tick to use the zoom, field of view, distance and smoothing below instead of the preset's. The camera angle always comes from the preset.")]
     [SerializeField] private bool overridePresetValues;
 
-    [Tooltip("Zoom: half the screen height in world units. Bigger = sees more. Only used when Override Preset Values is ticked.")]
+    [Tooltip("Three Quarter levels only. Zoom: half the screen height in world units. Bigger = sees more. Only used when Override Preset Values is ticked.")]
     [SerializeField] private float orthographicSize = 5f;
+
+    [Tooltip("Side View levels only. How wide the camera sees, in degrees. Bigger = sees more, but things shrink faster with distance. Only used when Override Preset Values is ticked.")]
+    [SerializeField] private float fieldOfView = 25f;
 
     [Tooltip("How far back from the player the camera sits. Only used when Override Preset Values is ticked.")]
     [SerializeField] private float cameraDistance = 20f;
@@ -49,78 +58,45 @@ public class LevelSettings : MonoBehaviour
     [SerializeField] private Vector2 cameraDamping = new Vector2(1f, 1.3f);
 
     // How many degrees the camera looks down. SpriteBillboard reads this.
-    public float CameraPitch => CameraPresetValues.For(cameraPreset).Pitch;
+    public float CameraPitch => GetAppliedValues().Pitch;
 
     // Which way the camera faces around the vertical axis. SpriteBillboard reads this.
-    public float CameraYaw => CameraPresetValues.For(cameraPreset).Yaw;
+    public float CameraYaw => GetAppliedValues().Yaw;
 
     private void Start()
     {
         WarnIfMoreThanOne();
-        WarnIfMainCameraNotOrthographic();
-
-        if (levelCamera == null)
-        {
-            Debug.LogError($"LevelSettings on '{name}': Level Camera is not assigned, so the camera angle, zoom and bounds were not set. Drag this level's CinemachineCamera here.", this);
-            return;
-        }
-
-        CameraPresetValues values = GetValues();
-        ApplyAngle(values);
-        ApplyZoom(values);
-        ApplyFollow(values);
-        ApplyBounds();
+        ApplyToLevelCamera();
     }
 
-    // Returns the preset's numbers, with zoom, distance and smoothing replaced when overriding.
-    private CameraPresetValues GetValues()
+    // The numbers this level really uses: the preset's, with the custom values put in when overriding.
+    // This is the only place that looks up the preset, so the camera and the sprites always agree.
+    public CameraPresetValues GetAppliedValues()
     {
         CameraPresetValues values = CameraPresetValues.For(cameraPreset);
         if (overridePresetValues)
         {
             values.OrthographicSize = orthographicSize;
+            values.FieldOfView = fieldOfView;
             values.CameraDistance = cameraDistance;
             values.Damping = cameraDamping;
         }
         return values;
     }
 
-    // Turns the CinemachineCamera to the game's camera angle. Cinemachine then moves the Main Camera.
-    private void ApplyAngle(CameraPresetValues values)
+    // Sets up the Level Camera: preset, bounds, and a check that the projection will really change.
+    public void ApplyToLevelCamera()
     {
-        if (levelCamera.GetCinemachineComponent(CinemachineCore.Stage.Aim) != null)
+        if (levelCamera == null)
         {
-            Debug.LogError($"LevelSettings on '{name}': the Level Camera has a Rotation Control, which turns the camera away from the game's camera angle. Select the CinemachineCamera and set Rotation Control to None.", this);
-        }
-
-        Quaternion angle = Quaternion.Euler(values.Pitch, values.Yaw, 0f);
-        if (Quaternion.Angle(levelCamera.transform.rotation, angle) > 0.1f)
-        {
-            Debug.LogWarning($"LevelSettings on '{name}': the Level Camera was turned to the game's camera angle ({values.Pitch}, {values.Yaw}, 0). Type that into its Rotation in the Inspector, so the Scene view looks like the game.", this);
-        }
-        levelCamera.transform.rotation = angle;
-    }
-
-    // Sets how much of the level the camera shows.
-    private void ApplyZoom(CameraPresetValues values)
-    {
-        LensSettings lens = levelCamera.Lens;
-        lens.OrthographicSize = values.OrthographicSize;
-        levelCamera.Lens = lens;
-    }
-
-    // Sets how far back the camera sits and how smoothly it follows the player.
-    private void ApplyFollow(CameraPresetValues values)
-    {
-        CinemachinePositionComposer composer = levelCamera.GetComponent<CinemachinePositionComposer>();
-        if (composer == null)
-        {
-            Debug.LogError($"LevelSettings on '{name}': the Level Camera has no CinemachinePositionComposer, so it cannot follow the player. Select the CinemachineCamera and set Position Control to Position Composer.", this);
+            Debug.LogError($"LevelSettings on '{name}': Level Camera is not assigned, so the camera angle, zoom and bounds were not set. Drag this level's CinemachineCamera here.", this);
             return;
         }
 
-        composer.CameraDistance = values.CameraDistance;
-        composer.Damping = new Vector3(values.Damping.x, values.Damping.y, composer.Damping.z);
+        CameraPresetValues values = GetAppliedValues();
+        CameraPresetValues.Apply(levelCamera, values);
+        ApplyBounds();
+        CheckProjection(values);
     }
 
     // Gives the Camera Bounds box to the camera's confiner.
@@ -145,13 +121,15 @@ public class LevelSettings : MonoBehaviour
         confiner.BoundingVolume = cameraBounds;
     }
 
-    // The game needs an orthographic camera: no perspective, things look the same size near and far.
-    private void WarnIfMainCameraNotOrthographic()
+    // Says so in the Console when the Main Camera would not get the preset's projection.
+    // The Cinemachine Brain is only read here; ticking Lens Mode Override is done in the Inspector.
+    private void CheckProjection(CameraPresetValues values)
     {
-        Camera mainCamera = Camera.main;
-        if (mainCamera != null && !mainCamera.orthographic)
+        CinemachineBrain brain = FindAnyObjectByType<CinemachineBrain>();
+        string problem = CameraPresetValues.FindProjectionProblem(levelCamera, brain, values);
+        if (problem != null)
         {
-            Debug.LogError($"LevelSettings on '{name}': the Main Camera is not Orthographic. Select the Main Camera and set Projection to Orthographic.", this);
+            Debug.LogError($"LevelSettings on '{name}': {problem}", this);
         }
     }
 
