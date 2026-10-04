@@ -23,11 +23,16 @@ public class PuzzleManager : MonoBehaviour
     public Button[] buttons;
     public Button closeBtn;
 
+
     private int[] currentIcon = { 0, 0, 0, 0 };
     private bool isResolved = false;
+    private bool isCodeCorrect = false;   // รหัสถูกแล้ว พร้อมกดไปต่อ
+
 
     // รูปคำใบ้ของช่องที่ slot (0-3)
     public Sprite GetClueSprite(int slot) { return symbolSprites[code[slot]]; }
+
+    public Button confirmBtn;
 
     void Start()
     {
@@ -36,6 +41,9 @@ public class PuzzleManager : MonoBehaviour
         {
             int index = i;
             buttons[index].onClick.AddListener(() => UpdateSlotIcon(index));
+
+            confirmBtn.interactable = false;
+            confirmBtn.onClick.AddListener(ConfirmPuzzle);
         }
         SetActiveChestPuzzle(false);
     }
@@ -59,20 +67,45 @@ public class PuzzleManager : MonoBehaviour
         chestPuzzle.SetActive(active);
     }
 
+
+    
     private void UpdateSlotIcon(int index)
     {
+        if (isResolved) return;
+
         int current = currentIcon[index];
         current++;
         if (current > symbolSprites.Length - 1) current = 0;
         icons[index].sprite = symbolSprites[current];
         currentIcon[index] = current;
 
-        if (CheckCode(currentIcon))
+        // เช็ครหัสทุกครั้งที่เปลี่ยนรูป แต่ยังไม่ปลดล็อค
+        isCodeCorrect = CheckCode(currentIcon);
+        confirmBtn.interactable = isCodeCorrect;
+        if (isCodeCorrect)Debug.Log("รหัสถูกต้อง! กดยืนยันเพื่อไปต่อ");
+    }
+
+    // ผูกกับปุ่ม "ยืนยัน"
+    public void ConfirmPuzzle()
+    {
+        if (isResolved) return;
+
+        if (isCodeCorrect)
         {
-            SetActiveChestPuzzle(false);
+            Debug.Log("ยืนยันคำตอบถูกต้อง!");
             isResolved = true;
-            // PUZZLE แก้ได้แล้ว จะทำอะไรต่อก็ทำเลย
+            chestPuzzle.SetActive(false);
+            // PUZZLE แก้ได้แล้ว จะทำอะไรต่อก็ทำตรงนี้
+        }
+        else
+        {
+            Debug.Log("คำตอบไม่ถูกต้อง!");
         }
     }
+  
 }
+    
+
+
+
 
