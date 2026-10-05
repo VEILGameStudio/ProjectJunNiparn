@@ -36,5 +36,7 @@ public class Door : InteractableBase
         }
 
         GameManager.Instance.SceneLoader.LoadScene(targetSceneName, targetSpawnPointId);
+
+        GameManager.Instance.Brightness.ApplyBrightness(0.8f);
     }
 }
