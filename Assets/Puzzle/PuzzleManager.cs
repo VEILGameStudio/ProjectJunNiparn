@@ -6,6 +6,7 @@ using UnityEngine.UI;
 public class PuzzleManager : MonoBehaviour
 {
     public static PuzzleManager Instance;
+    [SerializeField] private GameObject boxImage;
 
     [Header("ใส่รูปสัญลักษณ์ทั้ง 4 แบบ")]
     public Sprite[] symbolSprites = new Sprite[4];
@@ -96,12 +97,17 @@ public class PuzzleManager : MonoBehaviour
             isResolved = true;
             chestPuzzle.SetActive(false);
             // PUZZLE แก้ได้แล้ว จะทำอะไรต่อก็ทำตรงนี้
+            isResolved = true;
+            chestPuzzle.SetActive(false);
+            boxImage.SetActive(true);   // โชว์ภาพกล่อง
         }
         else
         {
             Debug.Log("คำตอบไม่ถูกต้อง!");
         }
     }
+
+    
   
 }
     

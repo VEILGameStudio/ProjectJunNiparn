@@ -25,7 +25,7 @@ public class ItemDatabase : ScriptableObject
     // Finds the item with this id, or returns null if it is not in the list.
     public ItemData GetById(string id)
     {
-        BuildLookupIfNeeded();
+        //BuildLookupIfNeeded();
 
         if (lookup.TryGetValue(id, out ItemData item))
         {
@@ -37,21 +37,21 @@ public class ItemDatabase : ScriptableObject
     }
 
     // Builds the lookup dictionary from the Items list.
-    private void BuildLookupIfNeeded()
-    {
-        if (lookup != null)
-        {
-            return;
-        }
+    //private void BuildLookupIfNeeded()
+    //{
+    //    if (lookup != null)
+    //    {
+    //        return;
+    //    }
 
-        lookup = new Dictionary<string, ItemData>();
-        foreach (ItemData item in items)
-        {
-            if (item == null || string.IsNullOrEmpty(item.Id))
-            {
-                continue;
-            }
-            lookup[item.Id] = item;
-        }
-    }
+    //    lookup = new Dictionary<string, ItemData>();
+    //    foreach (ItemData item in items)
+    //    {
+    //        if (item == null || string.IsNullOrEmpty(item.Id))
+    //        {
+    //            continue;
+    //        }
+    //        lookup[item.Id] = item;
+    //    }
+    //}
 }

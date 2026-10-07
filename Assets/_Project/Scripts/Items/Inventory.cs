@@ -116,30 +116,30 @@ public class Inventory : MonoBehaviour, ISaveParticipant
         int remaining = amount;
 
         // Fill stacks that already exist and still have room.
-        foreach (InventorySlot slot in slots)
-        {
-            if (remaining <= 0)
-            {
-                break;
-            }
-            if (slot.Item != item || slot.Count >= item.MaxStack)
-            {
-                continue;
-            }
+        //foreach (InventorySlot slot in slots)
+        //{
+        //    if (remaining <= 0)
+        //    {
+        //        break;
+        //    }
+        //    if (slot.Item != item || slot.Count >= item.MaxStack)
+        //    {
+        //        continue;
+        //    }
 
-            int space = item.MaxStack - slot.Count;
-            int added = Mathf.Min(space, remaining);
-            slot.ChangeCount(added);
-            remaining -= added;
-        }
+        //    int space = item.MaxStack - slot.Count;
+        //    int added = Mathf.Min(space, remaining);
+        //    slot.ChangeCount(added);
+        //    remaining -= added;
+        //}
 
         // Make new stacks for whatever is left over.
-        while (remaining > 0)
-        {
-            int added = Mathf.Min(item.MaxStack, remaining);
-            slots.Add(new InventorySlot(item, added));
-            remaining -= added;
-        }
+        //while (remaining > 0)
+        //{
+        //    int added = Mathf.Min(item.MaxStack, remaining);
+        //    slots.Add(new InventorySlot(item, added));
+        //    remaining -= added;
+        //}
     }
 
     // --- Saving (ISaveParticipant) ---
@@ -150,7 +150,7 @@ public class Inventory : MonoBehaviour, ISaveParticipant
         data.inventoryEntries.Clear();
         foreach (InventorySlot slot in slots)
         {
-            data.inventoryEntries.Add(new InventoryEntry { itemId = slot.Item.Id, count = slot.Count });
+            //data.inventoryEntries.Add(new InventoryEntry { itemId = slot.Item.Id, count = slot.Count });
         }
     }
 
