@@ -184,8 +184,8 @@ public class InventoryUI : MonoBehaviour
             return;
         }
 
-        nameText.text = localization.Get(selectedItem.DisplayName);
-        descriptionText.text = localization.Get(selectedItem.Description);
+      //  nameText.text = localization.Get(selectedItem.DisplayName);
+      //  descriptionText.text = localization.Get(selectedItem.Description);
     }
 
     // Destroys all the current slot views.

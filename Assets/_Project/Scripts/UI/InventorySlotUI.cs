@@ -48,8 +48,8 @@ public class InventorySlotUI : MonoBehaviour
 
         if (iconImage != null)
         {
-            iconImage.sprite = item.Icon;
-            iconImage.enabled = item.Icon != null;
+            //iconImage.sprite = item.Icon;
+            //iconImage.enabled = item.Icon != null;
         }
 
         if (countText != null)
