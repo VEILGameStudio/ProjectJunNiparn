@@ -45,6 +45,9 @@ public static class GameEvents
     // A new scene finished loading and the player is standing at the spawn point.
     public static event Action OnSceneReady;
 
+    // The player walked into another camera zone of the same scene. Sends that zone's camera preset.
+    public static event Action<CameraPreset> OnCameraZoneChanged;
+
     // The player switched language in Settings. Text on screen should refresh.
     public static event Action OnLanguageChanged;
 
@@ -59,5 +62,6 @@ public static class GameEvents
     public static void RaisePuzzleCompleted(string puzzleId) => OnPuzzleCompleted?.Invoke(puzzleId);
     public static void RaiseGameOver() => OnGameOver?.Invoke();
     public static void RaiseSceneReady() => OnSceneReady?.Invoke();
+    public static void RaiseCameraZoneChanged(CameraPreset preset) => OnCameraZoneChanged?.Invoke(preset);
     public static void RaiseLanguageChanged() => OnLanguageChanged?.Invoke();
 }

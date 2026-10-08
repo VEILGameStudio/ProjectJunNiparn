@@ -1,0 +1,15 @@
+PLACEHOLDER - not a deliverable. Replace with final art before shipping.
+
+Asset:      Dial Padlock Asset
+Author:     AlexanderZotov
+Source:     https://opengameart.org/content/dial-padlock-asset
+License:    CC0 1.0 (public domain). Attribution is not required
+            (the author writes "Attribution appreciated").
+Downloaded: 2026-10-08, file 3DPadlockPackage.zip
+
+Only padlock.fbx was copied from the package. The package's Unity scripts
+(LockControl.cs, Rotate.cs), its sample scene and its .blend file were NOT imported.
+
+Used for: baking the placeholder lock sprites
+  Assets/_Project/Art/Sprites/ThreeQuarter/Placeholder/Placeholder_Lock_ThreeQuarter.png
+  Assets/_Project/Art/Sprites/SideView/Placeholder/Placeholder_Lock_SideView.png
