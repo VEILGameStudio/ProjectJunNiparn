@@ -7,7 +7,6 @@
 //   SideView     - corridors between rooms. Perspective, like a side-scroller. The camera
 //                  looks straight along the level (Yaw 0) and only 10 degrees down, so A/D
 //                  walk left/right and W/S walk a short way into and out of the screen.
-//                  Its Field Of View and Camera Distance are NOT final yet (Oak is choosing).
 // There are exactly two presets and there will never be a third: every sprite is drawn for
 // one of them. Sprites for the two presets live in separate folders (Art/Sprites/ThreeQuarter
 // and Art/Sprites/SideView) and must not be mixed. Never add a preset or change these numbers
@@ -40,10 +39,12 @@ public struct CameraPresetValues
     public float FieldOfView;       // Perspective only. How wide the camera sees, in degrees (top to bottom of the screen).
     public float CameraDistance;    // How far back from the player the camera sits, along its view direction.
     public Vector3 TargetOffset;    // The point the camera looks at, measured from the player's feet.
-    public Vector3 Damping;         // Follow smoothing: X = left/right on screen, Y = up/down on screen, Z = toward/away from the camera.
+    public Vector3 Damping;         // Follow smoothing: X = left/right on screen, Y = up/down on screen, Z = toward/away from the camera. Keep all three the same, or the picture drifts up and down while the player runs.
 
     // The camera box is never thinner than this. A box that is 0 thick can confuse the physics engine.
-    public const float MinimumCameraBoxSize = 0.05f;
+    // Keep it this small: the camera slides from one side of the box to the other when the player
+    // crosses the middle of the area, so the size of the box is the jump the player sees.
+    public const float MinimumCameraBoxSize = 0.01f;
 
     // Returns the numbers for a preset.
     public static CameraPresetValues For(CameraPreset preset)
@@ -56,10 +57,10 @@ public struct CameraPresetValues
                     Pitch = 10f,
                     Yaw = 0f,
                     Orthographic = false,
-                    FieldOfView = 25f,      // Not final yet.
-                    CameraDistance = 20f,   // Not final yet.
+                    FieldOfView = 19f,
+                    CameraDistance = 20f,
                     TargetOffset = new Vector3(0f, 2f, 0f),
-                    Damping = new Vector3(1f, 1f, 1.3f)
+                    Damping = new Vector3(1f, 1f, 1f)
                 };
 
             case CameraPreset.ThreeQuarter:
@@ -72,7 +73,7 @@ public struct CameraPresetValues
                     OrthographicSize = 5f,
                     CameraDistance = 20f,
                     TargetOffset = new Vector3(0f, 1.25f, 0f),
-                    Damping = new Vector3(1f, 1f, 1.3f)
+                    Damping = new Vector3(1f, 1f, 1f)
                 };
         }
     }

@@ -13,6 +13,7 @@ MonoBehaviour:
   m_Name: ManaPotion
   m_EditorClassIdentifier: Assembly-CSharp::ItemData
   id: 003
+  category: 1
   displayName:
     english: 'ManaPotion
 
@@ -23,3 +24,12 @@ MonoBehaviour:
     thai: "\u0E0A\u0E48\u0E27\u0E22\u0E1F\u0E37\u0E49\u0E19\u0E1F\u0E39\u0E1E\u0E25\u0E31\u0E07\u0E40\u0E27\u0E17\u0E21\u0E19\u0E15\u0E4C"
   icon: {fileID: 0}
   maxStack: 1
+  healAmount: 0
+  staminaAmount: 40
+  secretTitle:
+    english: 
+    thai: 
+  secretBody:
+    english: 
+    thai: 
+  secretImage: {fileID: 0}

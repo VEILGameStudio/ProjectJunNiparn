@@ -89,11 +89,17 @@ it, and do not "restore" it if you find traces of it.
 Elevation (steps, raised platforms, bridges) is allowed — 3D handles it — but use it deliberately,
 because it affects camera framing and how readable the floor is.
 
-**Aspect ratio.** The game supports wide monitors. Vertical framing is fixed and never changes with the
-window: a wider screen shows more to the left and right, never more above or below. That falls out of a
-perspective camera's vertical FOV and an orthographic camera's size, so the camera itself needs no code
-for it — but camera bounds and the width of back walls must hold at the widest supported aspect, not
-just 16:9. See §7 Level settings.
+**Aspect ratio. The widest supported aspect is 21:9.** 16:9 is the baseline and 21:9 is the limit every
+number has to survive; anything wider is allowed to look wrong. Vertical framing is fixed and never
+changes with the window: a wider screen shows more to the left and right, never more above or below.
+That falls out of a perspective camera's vertical FOV and an orthographic camera's size, so the camera
+itself needs no code for it — but camera bounds and the width of back walls must hold at 21:9, not just
+16:9. Back walls are 36 wide, which actually holds to 32:9. See §7 Level settings.
+
+The same limit governs UI. The canvas scaler is Match 0.5, so canvas height shrinks as the window
+widens — 1080 units at 16:9, 935 at 21:9 — and a panel taller than 935 units is broken at the widest
+supported aspect even though it looks fine while you build it. Measure panels in canvas units against
+935, not against the window you happen to be using.
 
 ---
 
@@ -124,7 +130,10 @@ puzzles at once, so a puzzle that is a singleton breaks the second one silently.
 ### Observer — for everything crossing system boundaries
 
 A static `GameEvents` class holds all game-wide C# events in one file:
-`OnInventoryChanged`, `OnHealthChanged`, `OnStaminaChanged`, `OnItemPickedUp`, `OnDialogueStarted`, `OnDialogueEnded`, `OnPuzzleCompleted`, `OnGameOver`, `OnSceneReady`, `OnCameraZoneChanged`, plus `OnLanguageChanged` (kept because the UI still uses it to refresh text).
+`OnInventoryChanged`, `OnHeldItemChanged`, `OnHealthChanged`, `OnStaminaChanged`, `OnItemPickedUp`, `OnDialogueStarted`, `OnDialogueEnded`, `OnPuzzleCompleted`, `OnGameOver`, `OnSceneReady`, `OnCameraZoneChanged`, plus `OnLanguageChanged` (kept because the UI still uses it to refresh text).
+
+`OnHeldItemChanged` carries the held `ItemData`, or `null` for an empty hand. Holding the same
+item again does not raise it.
 
 Systems raise events. UI and other systems subscribe. UI never reads manager internals directly.
 
@@ -143,9 +152,11 @@ This is the single most damaging bug in this project: an event that is never uns
 6. Fail loudly and helpfully. A missing reference logs something like: `PlayerHealth on 'Player': Health Bar is not assigned. Drag the HealthBar UI here.`
 7. Use `[RequireComponent]` where a script depends on another component.
 8. Data lives in ScriptableObjects (items, dialogue, settings defaults). Never hard-code content in scripts.
-9. New Input System only, keyboard + gamepad. No legacy `Input.GetKey`. `activeInputHandler` in
-   `ProjectSettings.asset` must be **New Input System only**, not Both — with Both, a legacy call
-   compiles and runs fine, so the rule is unenforced and nobody finds out.
+9. New Input System only, keyboard + gamepad. **No legacy `Input.GetKey` in our own code.**
+   `activeInputHandler` is deliberately left on **Both**, so a legacy call still compiles and runs —
+   which means nothing stops it but a person reading the code. Treat it as a review item: any legacy
+   input call in a pull request or a handback is sent back, and anything that genuinely needs the old
+   API is named here as an exception rather than slipped in quietly.
 10. TextMeshPro for all text, with multi-language support including a Thai font fallback.
 11. Comments in simple English.
 12. **Do not create asmdef files.** Everything stays in the default `Assembly-CSharp`. This rule covers only our own code under `Assets/_Project`; asmdef files that ship with third-party packages (such as DOTween) are fine.
@@ -206,6 +217,27 @@ When in doubt it is not shared.
 
 Gameplay code may **read** core systems but never edit them. If a gameplay task needs a change in a core folder, stop and say what is needed instead of editing it.
 
+**Reading and editing are different things.** Every file in the project may be read, called, inherited
+from, attached to a GameObject, filled in from the Inspector, and subscribed to, whoever owns it. The
+only thing an owner tag forbids is **editing the contents of the file**. Anyone who reads a folder tag
+as "don't use this" and writes their own copy of something that already exists there has made the
+problem worse than editing it would have.
+
+**This map is not true on disk yet.** Four places differ, and all four are listed in §12 with where
+they are going. Until they move, these paths are what is real:
+
+| On disk | Owner | Rule |
+|---|---|---|
+| `Assets/Puzzle/` — `PuzzleManager.cs`, `123.unity`, `UI/`, `box/` | intern | Theirs to edit. Nobody moves, renames, or deletes-and-recreates these. |
+| `Assets/_Project/Prefabs/Puzzles/ChestPuzzle.prefab` | intern | Same. |
+| `Assets/Inventory/ItemData.cs` | Oak | Core, despite sitting outside `Scripts/`. Same rule as any Oak file. |
+
+`Scripts/Interaction/Chest.cs` was written by an intern but is a **core interactable owned by Oak**,
+under the same rule as everything else in that folder. `Scripts/Interaction/` has no exceptions in it.
+
+`123.unity` and `Test_3D.unity` are never opened for editing by anyone but their owner. A scene is the
+easiest file in Unity to break by accident and the hardest to review in a diff.
+
 ---
 
 ## 6. Interaction architecture
@@ -232,7 +264,7 @@ Everything shared lives here so subclasses stay tiny:
 activation mode, max interact distance, `oneShot`, `requiredItem`, `blockedMessage`, optional interact sound; distance and requirement checks; showing the blocked message; disabling itself after a one-shot; registering with the highlight system.
 Exposes `protected abstract void OnInteract(PlayerContext player);`
 
-**Layer 3 — concrete classes.** `PickupInteractable`, `DoorInteractable`, `ZoneDoor`, `MessageInteractable`, `PuzzleInteractable`, `QTEInteractable`. Interns add new ones here.
+**Layer 3 — concrete classes.** `PickupInteractable`, `ContainerInteractable`, `DoorInteractable`, `ZoneDoor`, `MessageInteractable`, `PuzzleInteractable`, `QTEInteractable`. Interns add new ones here — but read §8 first, because most new ideas are a field on an existing class, not a new class.
 
 **Detection.** Click casts a ray from the camera through the mouse position with
 `Physics.Raycast`, filtered by a LayerMask so it only sees the `Interactable` layer. The 3D depth test
@@ -342,19 +374,24 @@ and framing come from the area's preset:
 |---|---|---|
 | Projection | Orthographic | Perspective |
 | Pitch / Yaw | 30 / 45 | 10 / 0 |
-| Size / FOV | Orthographic Size 5 | Field of View 25 *(provisional)* |
-| Camera distance | 20 | 20 *(provisional)* |
+| Size / FOV | Orthographic Size 5 | Field of View 19 |
+| Camera distance | 20 | 20 |
 | Target Offset | 0, 1.25, 0 | 0, 2, 0 |
-| Damping X / Y / Z | 1 / 1 / 1.3 | 1 / 1 / 1.3 |
+| Damping X / Y / Z | 1 / 1 / 1 | 1 / 1 / 1 |
 
 **Every value in this table is written by code from the preset. None of them is adjusted by hand on a
 camera in a scene.** A camera whose values disagree with its preset has been edited by mistake and is
 put back, not accommodated: the spec is the source, the scene is not.
 
-The `SideView` FOV and distance are **not final**. A wider FOV makes the character grow and shrink more
-as it walks into depth and leans vertical lines harder at the screen edges; a narrower one flattens the
-scene and frames tighter. Both numbers must be locked before the art team draws its first `SideView`
-sprite, and this table updated when they are.
+These numbers are **locked**. The `SideView` field of view was chosen from measured captures: at 19 the
+character stands 249 px tall on a 1080-high screen, 23% of the frame, which is the framing the
+reference art was drawn against. Changing it later moves every `SideView` sprite's apparent size.
+
+**Damping is the same on all three axes.** The Position Composer damps along the camera's own axes, so
+walking into depth excites two of them at once; different values on those axes bow the camera's path
+and show up as the picture drifting vertically while the player runs. An earlier version of this file
+asked for 1.3 on one axis — that number came from the 2D era, when that axis meant something else, and
+it was carried forward without a reason. There is no reason now.
 
 ### Camera zones
 
@@ -406,7 +443,93 @@ player's plane, offset by the camera's own height and distance. The visible widt
 the game runs. A camera box placed by hand is correct for exactly one aspect ratio and asks the
 designer to do the camera's offset maths, which Intern B cannot be expected to do.
 
-**Items and inventory.** `ItemData` (ScriptableObject): id, localized name, localized description, icon, maxStack. Inventory supports add/remove/count and stacking, and raises `OnInventoryChanged`. The inventory UI subscribes and refreshes itself; it never touches inventory data directly.
+When the computed box comes out zero or negative on an axis the area fits on screen and the camera
+should not move on that axis at all — which is correct and common. The box is given a **minimum of
+0.01** per axis so the collider is never degenerate. Keep it that small: the camera slides from one
+side of that box to the other as the player crosses the middle of the area, and the jump the player
+sees is the size of the box.
+
+### Items and inventory
+
+`ItemData` (ScriptableObject): id, localized name, localized description, icon, maxStack, category.
+Inventory supports add/remove/count and stacking, and raises `OnInventoryChanged`. The inventory UI
+subscribes and refreshes itself; it never touches inventory data directly. **The inventory has no
+capacity limit.** A bag too full to hold the key that opens the next door is a dead end in a game where
+items gate progress, so the limit does not exist and there is no "inventory full" path to write.
+
+**One `ItemDatabase`, holding every item in the game, loaded at startup and alive for the whole
+session.** Items travel between levels — a key found in level 3 is still carried in level 7 — so
+`GetById` has to resolve any id at any time, from any scene. A per-level list of items cannot do that:
+load a save made in level 7 and the key from level 3 silently disappears, with nothing in the console
+to say why.
+
+**Categories are folders and a field, never separate databases.**
+
+```
+Data/Items/
+  Puzzle/       things that open something: keys, gears, fuses
+  Consumable/   things that are used up: food, tonics
+  Quest/        things carried to the end of the story
+  Secret/       collectibles, see below
+```
+
+The folders are what a person browses; the `category` field is what code and the UI read, because a
+script cannot look at a folder path while the game is running. Two tests keep them honest: every
+`.asset` under `Data/Items/` must appear in `ItemDatabase`, and an item in the `Puzzle/` folder must
+have `category = Puzzle`. The first of those catches the most common mistake there is — making an item
+and forgetting to register it.
+
+**Consumables carry plain numbers: `healAmount` and `staminaAmount`, where 0 means no effect.** Two
+numeric fields beat an effect system for the two effects that exist, and Intern B types a number
+instead of creating and dragging an asset. **The day a third kind of effect appears that is not a
+number added to a stat** — lighting a torch, revealing the map, slowing time — that is the day this
+becomes an `ItemEffect` ScriptableObject with an `Apply` method, one small class per effect. It is not
+the day to add a third `if`.
+
+**Secret items are gallery entries, not tools.** They carry a localized title, a localized body, and an
+optional image, and they are shown in an extras screen outside the levels; found ones are revealed and
+the rest stay silhouettes. Picking one up unlocks its gallery entry and does **not** put it in the bag,
+which is kept for things the player can act with.
+
+**CRITICAL — an item's `id` can never change once the game has shipped a save.** Saves store ids, so
+renaming `key` to `rusty_key` makes every existing save fail to find it, silently. Display names and
+descriptions can change freely at any time; the id cannot. If `GetById` is handed an id it does not
+know — an item deleted from a later build — it skips that entry and logs a warning naming the id. It
+never throws, and it never passes over it in silence.
+
+### Holding an item
+
+Some puzzles need the player to have a particular thing *in hand*, not merely somewhere in the bag.
+
+**One item is held at a time, and what is held is a kind of item, not a particular one.** Holding does
+not take the item out of the bag: `Count` is unchanged, so a door that only asks whether the player
+*has* a key still opens while that key is held. The held item is part of the gameplay save, so it is
+still in hand after a reload, and if the last of that item leaves the bag the hand empties itself.
+Changes raise `OnHeldItemChanged`.
+
+**On screen the hand is a slot of its own**, both inside the inventory screen and as a small slot
+beside the bag button, so the player can see what they are holding without opening anything.
+
+**The bag shows one fewer of whatever is held.** Hold the only key and it leaves the bag and appears in
+the hand; hold one of three potions and the bag shows two. Hiding the whole stack while one is held
+would tell a player with three potions that they have none.
+
+### The inventory screen
+
+Hand slot on the left, bag on the right: a grid five columns wide, **at least 25 cells, always drawn
+even when empty**, growing five at a time and scrolling if the player ever carries more. The 25 cells
+are a minimum to fill the artwork, never a capacity — nothing is ever refused (see above). Opened by
+the button at the bottom right of the screen or by **I**, and the game pauses while it is open.
+
+Clicking an item in the bag takes it into the hand; if something was already held it goes back to the
+bag. Clicking the hand slot puts it away. **The UI never edits inventory data**: it calls `Hold` and
+`StopHolding` and redraws from `OnInventoryChanged` and `OnHeldItemChanged`, like every other screen
+in §3.
+
+**Canvas Scaler is Scale With Screen Size, 1920×1080, Match 0.5** — not Constant Pixel Size. The game
+supports wide and high-resolution monitors, and a UI that does not scale is unreadably small on them.
+Fix this before building a screen, never after: every panel laid out against the wrong scaler has to be
+laid out again.
 
 ### Dialogue
 
@@ -420,6 +543,29 @@ Three types.
 - **Mini** — a small bubble on a World Space canvas above the object or the player's head, fades out by
   itself, does not block movement.
 
+**Which one to use is not a style choice.** Getting this wrong is how a chest that turns out to be
+empty ends up stopping the game with a full-screen box.
+
+| | Use it for | Examples |
+|---|---|---|
+| **Mini** | an object's reaction to being touched: no speaker, no choice, no consequence | "Empty." · "It's locked." · "Too heavy to move." · "Got the key." |
+| **Full** | a conversation with a character, or story text the player is meant to read | an NPC talking, a letter, the thought that opens a level |
+| **Choice** | only when the answer changes what happens next | "Open it anyway?" with real consequences either way |
+
+`blockedMessage` on `InteractableBase` always goes to **Mini**. Telling the player they need a key is
+not a conversation and must not stop them walking.
+
+**Every message field anywhere in the project holds a dialogue asset dragged into it, never typed
+text.** A field with Thai typed straight into it works perfectly until the day the game is translated,
+and by then there are hundreds of them scattered across prefabs where no translator can find them. An
+asset reference also cannot be misspelled, and Unity reports it if the asset goes missing. This costs
+nothing to get right at five objects and is very expensive at two hundred.
+
+Three fields do not follow this yet — `blockedMessage`, `PickupItem.pickupMessage` and
+`MessageInteractable.message` — because changing a field's type drops the text already typed into
+scenes. They are converted in one deliberate pass that reads those strings out first, not quietly
+alongside other work. New fields follow the rule from the start.
+
 Content is authored as JSON by a writer and imported into ScriptableObjects. `OnDialogueStarted` /
 `OnDialogueEnded` lock and release player input.
 
@@ -431,7 +577,36 @@ Content is authored as JSON by a writer and imported into ScriptableObjects. `On
 
 **Freeze time.** Opening the menu or inventory sets `Time.timeScale = 0`. UI still works while paused, using unscaled time.
 
-**Save and load.** Two JSON files in `Application.persistentDataPath`. *Gameplay save*: inventory, current scene, player position, timer value, completed puzzle ids. *Global save*: settings. Autosave on scene load, item pickup and level complete. Continue loads on game start.
+**Save and load.** Two JSON files in `Application.persistentDataPath`. *Gameplay save*: inventory (item ids and counts), current scene, player position, timer value, completed puzzle ids, used one-shot ids. *Global save*: settings, **and the ids of secret items the player has found**. Autosave on scene load, item pickup and level complete. Continue loads on game start.
+
+**Found secrets belong to the player, not to the save slot.** They live in the global save so that
+starting a new game does not wipe a collection the player spent the whole game building. Getting this
+backwards cannot be fixed later, because by then the loss has already happened on their machine.
+
+**A one-shot's saved id is `<scene name>/<its Unique Id>`.** Scoping the id to its scene means an id
+only has to be unique within one scene, which is something the game can actually check while it is
+running; with globally unique ids, two objects in different scenes sharing a name would quietly mark
+each other as used and nothing could detect it. The cost is that **a scene's name becomes part of the
+save format**: renaming a level scene after the game has shipped invalidates every one-shot in it.
+Rename scenes freely now; treat them as frozen once players have saves.
+
+**The check for duplicate ids runs once at scene start, from one place, and includes objects that are
+switched off** (`FindObjectsByType<InteractableBase>(FindObjectsInactive.Include, …)`). A check that
+each object runs in its own `Start` never sees the zones that are still closed, so a duplicate inside
+one only reports itself when a player happens to walk in — which is usually after the build has gone out.
+
+**Restoring must be safe to do twice.** An object may be restored both when the scene becomes ready and
+when its zone opens for the first time, so restoring sets state rather than toggling it, and never
+consumes anything. A restored object does not play its own sound or show its own message — but a
+`UnityEvent` wired to it fires whatever it is wired to, so a sound belongs in the component's own sound
+field, not dragged into the event, or it replays on every load.
+
+**Anything that happens once must be saved as having happened.** A chest that gave up its key, a
+message that only plays the first time, a door that unlocked — each has an id, and the id goes into the
+save the moment it is used. On scene ready, `InteractableBase` checks its own id against that list and
+switches itself off if it is there, exactly as `PuzzleBase` restores itself (§8). Without this the
+player reloads a save and finds the key back in the chest, and can farm it; the symptom appears in
+every level that has anything to pick up, so it is not a detail to leave for later.
 
 **Settings.** Music and Sound sliders through an AudioMixer. Brightness through a URP Global Volume, Color Adjustments → Post Exposure: slider minimum **10** is the normal default (Post Exposure 0), and the slider maximum is an Inspector field clamped between **50 and 70**. Language dropdown. All stored in the global save. Nothing outside the settings system calls the brightness code — a door or a puzzle that sets brightness is a bug, not a feature.
 
@@ -449,6 +624,43 @@ These exist so interns can add content without touching core code.
 
 - `InteractableBase` — subclass it, override `OnInteract`. That is the whole job.
 - `MiniGameBase` — shows its UI, locks player input while it runs, returns success or failure, closes itself.
+
+### `ContainerInteractable` — and the rule that keeps this folder small
+
+A chest, a crate, a drawer, a bookshelf. One class, and the differences between any two of them live in
+the Inspector, never in code:
+
+- **Contents** — an `ItemData`, **and it is allowed to be empty**
+- **Amount**
+- **Empty message / Taken message** — each a dialogue asset dragged in, shown as Mini dialogue
+
+```
+Contents is empty            -> Mini (Empty message), and that is all
+otherwise                    -> give the item, Mini (Taken message), mark this id used
+```
+
+Two paths, not three. There is no "bag is full" case because the inventory has no capacity (§7).
+
+That is the whole class. An empty chest is not a different kind of chest; it is this chest with one
+field left blank. A chest holding a key and a chest holding a torch are the same prefab with a
+different asset dragged in. Two hundred chests in the finished game are two hundred instances of one
+prefab, configured by Intern B, with no code written for any of them.
+
+**The rule, in order. Do not skip a step.**
+
+| What is needed | How | Who |
+|---|---|---|
+| different contents, different words | change the fields | Intern B |
+| something extra happens too — a sound, a door opening, an animation | wire the `OnOpened` UnityEvent | Intern B |
+| genuinely new logic that no combination of fields and events can express | a new subclass | Intern A |
+
+The UnityEvent is the relief valve, and it is the reason this folder will not fill up with
+`Box_001`-style classes. Before writing the sixth subclass of anything, say out loud why fields and an
+event cannot do it. Usually they can.
+
+**A unique id per object is required; a unique class per object is a debt.** Every chest needs its own
+id so the save system knows which ones are already open (§7). Ids can number in the thousands at no
+cost. Classes cannot.
 - `QuickTimeEvent : MiniGameBase` — Inspector-configurable: ordered input actions, time limit per input, allowed mistakes, prompt prefab. A new QTE should need no new code.
 - `LevelSettings` — one per area. Holds the camera preset and play area and configures the area on start.
 - `SpriteBillboard` — drop it on any sprite that should face the camera. No configuration needed in the normal case.
@@ -472,6 +684,28 @@ together unlock the large one. Two rules make that work:
   door it opened is a freshly loaded object sitting closed, and the player is locked in a room with
   nothing left to solve. Intern B wires the event the same way either way; nobody has to think about
   saving at all.
+
+### Asking whether the player is holding the right thing
+
+A puzzle that needs an item in hand has three ways to check, and the first one that fits is the one to
+use. Only the third needs code.
+
+| | How | Who |
+|---|---|---|
+| On any interactable | Set `Required Item` and tick **Must Be Held**. Without it in hand the interactable shows its message and does nothing. | Intern B |
+| Inside a puzzle screen | Add a `HeldItemCheck`: set `Required Item`, wire `On Correct` and `On Wrong`, and call `Check()` from a button. | Intern B |
+| In code | `player.Inventory.IsHolding(item)`, read `HeldItem`, listen to `GameEvents.OnHeldItemChanged`. | Intern A |
+
+**"You need a key" and "you need to be holding the key" are different sentences.** An interactable that
+checks for a held item carries a second message for the case where the player has the item but is not
+holding it; with one message, a player holding the key in their bag is told they do not have it, and
+has no way to work out what the game wants. The second message falls back to the first when left empty.
+
+**CRITICAL — an item that is used up must be the last thing a puzzle needs.** `HeldItemCheck` can
+consume the item it checked, and it does so only on success. But a puzzle that consumes something at
+step one and then fails at step two has eaten the only way through itself: the save records the item as
+gone, the puzzle is still unsolved, and the player is stuck with nothing on screen to explain it. Either
+consume at the final step, or make sure the puzzle can still be finished without that item.
 
 Gameplay code **subscribes** to `GameEvents` but never raises core events.
 
@@ -619,8 +853,27 @@ never on a GameObject that gets deactivated**, because `OnEnable` runs again and
 
 ### Puzzle ownership
 
-`PuzzleManager` in the gameplay folder currently uses a static `Instance`, which §3 forbids and which
-breaks as soon as a level holds two puzzles at once — and a level is specified to hold about five.
-It has to become one instance per puzzle. This is deliberately **not** done yet because it touches an
-intern's working files and must wait until that branch is merged. Do it before a second puzzle is
-written against the current shape, not after.
+`PuzzleManager` in the gameplay folder uses a static `Instance`, which §3 forbids and which breaks the
+moment a level holds two puzzles at once — and a level is specified to hold about five: one large and
+four small (§8).
+
+**This file belongs to the intern who wrote it, and the change is theirs to make.** Nobody else edits
+it. What matters is the deadline: it has to become one instance per puzzle **before a second puzzle is
+written against the current shape**. After that, two puzzles have to be unpicked instead of one, and
+the second was built on a foundation that was already known to be wrong.
+
+### Making §5 true on disk
+
+Three things sit in the wrong place. None of them move before the intern branch is merged, because two
+are the intern's files and a move during an open branch is a merge conflict in the worst possible form —
+a file that exists twice. At merge time they move, in this order, **with `AssetDatabase.MoveAsset` and
+nothing else**, recording every GUID before and after:
+
+| From | To | Why it matters |
+|---|---|---|
+| `Assets/Inventory/ItemData.cs` | `Scripts/Items/` | Core code outside the core tree. This is the file that already lost its GUID once (`dc8e31f`) and took three assets down with it. |
+| `Assets/Puzzle/PuzzleManager.cs` | `Scripts/Gameplay/Puzzles/` | Same move as the singleton fix above; do both at once rather than touching the file twice. |
+| `Assets/Puzzle/` scenes and art | `Scenes/` and `Art/` | Last, and only once the two above are verified, because scenes are what break. |
+
+`Scripts/Gameplay/` does not exist yet. It gets created on first use, from Unity's Project window, not
+by hand on disk.

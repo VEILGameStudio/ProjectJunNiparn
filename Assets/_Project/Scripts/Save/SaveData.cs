@@ -20,6 +20,10 @@ public class GameSaveData
     public bool hasTimer;               // True if a puzzle timer was saved.
     public float timerRemaining;        // Seconds left on the puzzle timer.
     public bool timerRunning;           // Whether that timer was counting down.
+
+    // Things that can be used only once and already were: a key that was picked up, a chest
+    // that was opened. Each entry is "<scene name>/<Unique Id>".
+    public List<string> usedOneShotIds = new List<string>();
 }
 
 // One line of the inventory: which item, and how many.
@@ -38,4 +42,8 @@ public class SettingsSaveData
     public float soundVolume = 1f;      // 0 = silent, 1 = full.
     public float brightness = 10f;      // Slider value; 10 = normal (default).
     public Language language = Language.English;
+
+    // The ids of the secret items the player has found. They are kept here, not in the
+    // autosave, so starting a new game does not wipe the player's collection.
+    public List<string> foundSecretIds = new List<string>();
 }

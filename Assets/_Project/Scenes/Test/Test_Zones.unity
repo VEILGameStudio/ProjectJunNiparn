@@ -220,7 +220,7 @@ MonoBehaviour:
       Offset: {x: 0, y: 0}
   CenterOnActivate: 1
   TargetOffset: {x: 0, y: 1.25, z: 0}
-  Damping: {x: 1, y: 1, z: 1.3}
+  Damping: {x: 1, y: 1, z: 1}
   Lookahead:
     Enabled: 0
     Time: 0
@@ -501,7 +501,7 @@ MonoBehaviour:
     LookAtTarget: {fileID: 0}
     CustomLookAtTarget: 0
   Lens:
-    FieldOfView: 25
+    FieldOfView: 19
     OrthographicSize: 5
     NearClipPlane: 0.1
     FarClipPlane: 5000
@@ -559,7 +559,7 @@ MonoBehaviour:
       Offset: {x: 0, y: 0}
   CenterOnActivate: 1
   TargetOffset: {x: 0, y: 2, z: 0}
-  Damping: {x: 1, y: 1, z: 1.3}
+  Damping: {x: 1, y: 1, z: 1}
   Lookahead:
     Enabled: 0
     Time: 0
@@ -1010,6 +1010,7 @@ MonoBehaviour:
   activation: 2
   maxInteractDistance: 2
   oneShot: 0
+  uniqueId: 
   clickArea: {fileID: 0}
   requiredItem: {fileID: 0}
   blockedMessage:
@@ -1086,6 +1087,7 @@ MonoBehaviour:
   activation: 0
   maxInteractDistance: 2
   oneShot: 0
+  uniqueId: corridor_key
   clickArea: {fileID: 0}
   requiredItem: {fileID: 0}
   blockedMessage:
@@ -1552,6 +1554,7 @@ MonoBehaviour:
   activation: 0
   maxInteractDistance: 2
   oneShot: 0
+  uniqueId: 
   clickArea: {fileID: 0}
   requiredItem: {fileID: 11400000, guid: 4c972315430309743ab776e1b482f8bc, type: 2}
   blockedMessage:
@@ -1666,9 +1669,9 @@ MonoBehaviour:
   cameraBounds: {fileID: 0}
   overridePresetValues: 1
   orthographicSize: 6
-  fieldOfView: 25
+  fieldOfView: 19
   cameraDistance: 20
-  followDamping: {x: 1, y: 1, z: 1.3}
+  followDamping: {x: 1, y: 1, z: 1}
 --- !u!1 &763526580
 GameObject:
   m_ObjectHideFlags: 0
@@ -1784,7 +1787,7 @@ GameObject:
   m_Component:
   - component: {fileID: 795296238}
   - component: {fileID: 795296240}
-  - component: {fileID: 795296239}
+  - component: {fileID: 795296241}
   m_Layer: 9
   m_Name: Box_Open
   m_TagString: Untagged
@@ -1809,30 +1812,6 @@ Transform:
   - {fileID: 436562090}
   m_Father: {fileID: 1720188689}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &795296239
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 795296237}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 2378e104f4c1cf047a8496cd5b0f4ca3, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::MessageInteractable
-  activation: 0
-  maxInteractDistance: 2
-  oneShot: 0
-  clickArea: {fileID: 0}
-  requiredItem: {fileID: 0}
-  blockedMessage:
-    english: 
-    thai: 
-  interactSound: {fileID: 0}
-  message:
-    english: The box is empty.
-    thai: "\u0E01\u0E25\u0E48\u0E2D\u0E07\u0E40\u0E1B\u0E25\u0E48\u0E32"
 --- !u!65 &795296240
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -1854,6 +1833,35 @@ BoxCollider:
   serializedVersion: 3
   m_Size: {x: 1.1, y: 0.95, z: 1.1}
   m_Center: {x: 0, y: 0.45, z: 0}
+--- !u!114 &795296241
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 795296237}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e7d36fb57b3d99449b15545fbf37b569, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::ContainerInteractable
+  activation: 0
+  maxInteractDistance: 2
+  oneShot: 0
+  uniqueId: room_box
+  clickArea: {fileID: 0}
+  requiredItem: {fileID: 0}
+  blockedMessage:
+    english: 
+    thai: 
+  interactSound: {fileID: 0}
+  contents: {fileID: 11400000, guid: aedc7e2f2aa44e1408548f7d237be952, type: 2}
+  amount: 1
+  emptyMessage: {fileID: 11400000, guid: 15bacef8a98d579498f92d5adcde23c0, type: 2}
+  takenMessage: {fileID: 11400000, guid: 65bc48adafca0be499a982c21ee0f227, type: 2}
+  onOpened:
+    m_PersistentCalls:
+      m_Calls: []
 --- !u!1001 &809836031
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -2379,6 +2387,7 @@ MonoBehaviour:
   activation: 1
   maxInteractDistance: 2
   oneShot: 0
+  uniqueId: 
   clickArea: {fileID: 0}
   requiredItem: {fileID: 0}
   blockedMessage:
@@ -2962,9 +2971,9 @@ MonoBehaviour:
   cameraBounds: {fileID: 0}
   overridePresetValues: 0
   orthographicSize: 5
-  fieldOfView: 25
+  fieldOfView: 19
   cameraDistance: 20
-  followDamping: {x: 1, y: 1, z: 1.3}
+  followDamping: {x: 1, y: 1, z: 1}
 --- !u!1 &1485101451
 GameObject:
   m_ObjectHideFlags: 0
@@ -3574,7 +3583,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1686312589}
   - component: {fileID: 1686312591}
-  - component: {fileID: 1686312590}
+  - component: {fileID: 1686312592}
   m_Layer: 9
   m_Name: Box_Open
   m_TagString: Untagged
@@ -3599,30 +3608,6 @@ Transform:
   - {fileID: 1721700730}
   m_Father: {fileID: 1619559062}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &1686312590
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1686312588}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 2378e104f4c1cf047a8496cd5b0f4ca3, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::MessageInteractable
-  activation: 0
-  maxInteractDistance: 2
-  oneShot: 0
-  clickArea: {fileID: 0}
-  requiredItem: {fileID: 0}
-  blockedMessage:
-    english: 
-    thai: 
-  interactSound: {fileID: 0}
-  message:
-    english: The box is empty.
-    thai: "\u0E01\u0E25\u0E48\u0E2D\u0E07\u0E40\u0E1B\u0E25\u0E48\u0E32"
 --- !u!65 &1686312591
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -3644,6 +3629,35 @@ BoxCollider:
   serializedVersion: 3
   m_Size: {x: 1.1, y: 0.95, z: 0.8}
   m_Center: {x: 0, y: 0.45, z: 0}
+--- !u!114 &1686312592
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1686312588}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e7d36fb57b3d99449b15545fbf37b569, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::ContainerInteractable
+  activation: 0
+  maxInteractDistance: 2
+  oneShot: 0
+  uniqueId: 
+  clickArea: {fileID: 0}
+  requiredItem: {fileID: 0}
+  blockedMessage:
+    english: 
+    thai: 
+  interactSound: {fileID: 0}
+  contents: {fileID: 0}
+  amount: 1
+  emptyMessage: {fileID: 11400000, guid: 15bacef8a98d579498f92d5adcde23c0, type: 2}
+  takenMessage: {fileID: 0}
+  onOpened:
+    m_PersistentCalls:
+      m_Calls: []
 --- !u!1 &1714757949
 GameObject:
   m_ObjectHideFlags: 0

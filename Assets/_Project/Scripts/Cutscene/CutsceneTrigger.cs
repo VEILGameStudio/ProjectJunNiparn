@@ -49,7 +49,8 @@ public class CutsceneTrigger : InteractableBase
 
     private bool hasPlayed;
 
-    private void Start()
+    // Runs once when the object starts (InteractableBase calls this instead of Start).
+    protected override void OnStarted()
     {
         if (playOn == PlayMode.SceneStart)
         {

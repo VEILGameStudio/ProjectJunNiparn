@@ -1,9 +1,16 @@
 // SaveManager
 // Saves and loads the game. There are two files:
-//   - gamesave.json  : the autosave (inventory, level, player position, time).
-//   - settings.json  : the global settings (music, sound, brightness, language).
+//   - gamesave.json  : the autosave (inventory, level, player position, time, and
+//                      which one-time things were already used).
+//   - settings.json  : the global settings (music, sound, brightness, language) and
+//                      the secret items the player has found.
 // Both files are stored in Application.persistentDataPath (a safe folder Unity
 // gives every game on the player's computer).
+//
+// One-time things (a key that was picked up, a chest that was opened) are remembered
+// here by their Unique Id, so they do not come back after loading. InteractableBase
+// does that by itself; other scripts do not need to call it. When a scene starts, this
+// also checks that every one-time object in it has its own Unique Id.
 //
 // Systems that want their data saved implement ISaveParticipant and call
 // Register(this) / Unregister(this). The SaveManager then asks each of them to
@@ -49,6 +56,12 @@ public class SaveManager : Singleton<SaveManager>
     private GameSaveData loadingData;
     private bool restorePending;
 
+    // The one-time things that were already used, each as "<scene name>/<Unique Id>".
+    private readonly HashSet<string> usedOneShotIds = new HashSet<string>();
+
+    // The scene whose Unique Ids were already checked, so each scene is checked once.
+    private Scene checkedScene;
+
     private string GameSavePath => Path.Combine(Application.persistentDataPath, GameSaveFileName);
     private string SettingsPath => Path.Combine(Application.persistentDataPath, SettingsFileName);
 
@@ -62,18 +75,23 @@ public class SaveManager : Singleton<SaveManager>
     {
         // Applied in Start, so the GameManager and its systems are ready first.
         ApplySettings();
+
+        // Also checked here, in case this manager was created after its scene had loaded.
+        CheckUniqueIds(SceneManager.GetActiveScene());
     }
 
     private void OnEnable()
     {
         GameEvents.OnSceneReady += HandleSceneReady;
         GameEvents.OnItemPickedUp += HandleItemPickedUp;
+        SceneManager.sceneLoaded += HandleSceneLoaded;
     }
 
     private void OnDisable()
     {
         GameEvents.OnSceneReady -= HandleSceneReady;
         GameEvents.OnItemPickedUp -= HandleItemPickedUp;
+        SceneManager.sceneLoaded -= HandleSceneLoaded;
     }
 
     // A system asks to be included in the autosave. If a load is in progress, the
@@ -111,8 +129,48 @@ public class SaveManager : Singleton<SaveManager>
         {
             participant.CaptureState(data);
         }
+        data.usedOneShotIds.AddRange(usedOneShotIds);
 
         WriteJson(GameSavePath, data);
+    }
+
+    // True if the one-time thing with this saved id ("<scene name>/<Unique Id>") was already used.
+    public bool IsOneShotUsed(string savedId)
+    {
+        return !string.IsNullOrEmpty(savedId) && usedOneShotIds.Contains(savedId);
+    }
+
+    // Remembers that a one-time thing was used, and autosaves at once so it stays used after loading.
+    public void MarkOneShotUsed(string savedId)
+    {
+        if (string.IsNullOrEmpty(savedId) || !usedOneShotIds.Add(savedId))
+        {
+            return; // No id, or already remembered.
+        }
+
+        if (!IsRestoring)
+        {
+            SaveGame();
+        }
+    }
+
+    // True if the player has found the secret item with this id.
+    public bool IsSecretFound(string itemId)
+    {
+        return !string.IsNullOrEmpty(itemId) && Settings.foundSecretIds.Contains(itemId);
+    }
+
+    // Remembers that the player found a secret item. It goes into the settings file, not the
+    // autosave, so it is kept when a new game starts.
+    public void MarkSecretFound(string itemId)
+    {
+        if (string.IsNullOrEmpty(itemId) || Settings.foundSecretIds.Contains(itemId))
+        {
+            return; // No id, or already found.
+        }
+
+        Settings.foundSecretIds.Add(itemId);
+        SaveSettings();
     }
 
     // Loads the saved game: reads the file, loads the saved scene, and restores all
@@ -134,6 +192,16 @@ public class SaveManager : Singleton<SaveManager>
 
         restorePending = true;
         IsRestoring = true;
+
+        // Known before the scene loads, so its one-time objects can switch themselves off as they start.
+        usedOneShotIds.Clear();
+        if (loadingData.usedOneShotIds != null)
+        {
+            foreach (string savedId in loadingData.usedOneShotIds)
+            {
+                usedOneShotIds.Add(savedId);
+            }
+        }
 
         // Restore systems that already exist (like the inventory, which lives on the
         // Managers object). Per-scene systems are restored as they register after load.
@@ -173,6 +241,29 @@ public class SaveManager : Singleton<SaveManager>
     private void HandleItemPickedUp(ItemData item, int amount)
     {
         SaveGame();
+    }
+
+    // Unity finished loading a scene.
+    private void HandleSceneLoaded(Scene scene, LoadSceneMode mode)
+    {
+        CheckUniqueIds(scene);
+    }
+
+    // Says so in the Console when a one-time object in the scene has no Unique Id, or shares one
+    // with another object. Objects that are switched off are checked too. Runs once per scene.
+    private void CheckUniqueIds(Scene scene)
+    {
+        // A spare copy of this manager is about to be removed (see Singleton), so it stays quiet.
+        if (Instance != this || scene == checkedScene)
+        {
+            return;
+        }
+        checkedScene = scene;
+
+        foreach (string problem in InteractableBase.FindIdProblems(scene))
+        {
+            Debug.LogError(problem, this);
+        }
     }
 
     // Gives the loaded scene's new objects a couple of frames to register (and be
@@ -216,6 +307,10 @@ public class SaveManager : Singleton<SaveManager>
         if (loaded != null)
         {
             Settings = loaded;
+        }
+        if (Settings.foundSecretIds == null)
+        {
+            Settings.foundSecretIds = new List<string>();
         }
     }
 

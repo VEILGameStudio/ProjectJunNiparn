@@ -10,14 +10,24 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 3b77da5a71e66e742915af4f2bb86a21, type: 3}
-  m_Name: Potion
+  m_Name: Key
   m_EditorClassIdentifier: Assembly-CSharp::ItemData
-  id: 002
+  id: 001
+  category: 0
   displayName:
-    english: Potion
-    thai: "\u0E22\u0E32\u0E1F\u0E37\u0E49\u0E19\u0E1F\u0E39\u0E1E\u0E25\u0E31\u0E07"
+    english: Key
+    thai: "\u0E01\u0E38\u0E0D\u0E41\u0E08"
   description:
-    english: Vitality-restoring medicine
-    thai: "\u0E22\u0E32\u0E2A\u0E33\u0E2B\u0E23\u0E31\u0E1A\u0E1F\u0E37\u0E49\u0E19\u0E1F\u0E39\u0E1E\u0E25\u0E31\u0E07\u0E0A\u0E35\u0E27\u0E34\u0E15"
-  icon: {fileID: 0}
+    english: Used for unlocking.
+    thai: "\u0E40\u0E2D\u0E32\u0E44\u0E27\u0E49\u0E44\u0E02\u0E01\u0E38\u0E0D\u0E41\u0E08"
+  icon: {fileID: 10913, guid: 0000000000000000f000000000000000, type: 0}
   maxStack: 1
+  healAmount: 0
+  staminaAmount: 0
+  secretTitle:
+    english: 
+    thai: 
+  secretBody:
+    english: 
+    thai: 
+  secretImage: {fileID: 0}

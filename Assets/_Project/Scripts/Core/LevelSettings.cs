@@ -57,13 +57,13 @@ public class LevelSettings : MonoBehaviour
     [SerializeField] private float orthographicSize = 5f;
 
     [Tooltip("Side View areas only. How wide the camera sees, in degrees. Bigger = sees more, but things shrink faster with distance. Only used when Override Preset Values is ticked.")]
-    [SerializeField] private float fieldOfView = 25f;
+    [SerializeField] private float fieldOfView = 19f;
 
     [Tooltip("How far back from the player the camera sits. Only used when Override Preset Values is ticked.")]
     [SerializeField] private float cameraDistance = 20f;
 
-    [Tooltip("Camera follow smoothing: X = left/right on screen, Y = up/down on screen, Z = toward/away from the camera (higher = softer). Only used when Override Preset Values is ticked.")]
-    [SerializeField] private Vector3 followDamping = new Vector3(1f, 1f, 1.3f);
+    [Tooltip("Camera follow smoothing: X = left/right on screen, Y = up/down on screen, Z = toward/away from the camera (higher = softer). Keep all three numbers the same, or the picture drifts up and down while the player runs. Only used when Override Preset Values is ticked.")]
+    [SerializeField] private Vector3 followDamping = new Vector3(1f, 1f, 1f);
 
     // The box the camera may move in. It is made while the game runs, from the Play Area.
     private BoxCollider cameraBox;
