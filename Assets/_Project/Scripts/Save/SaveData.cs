@@ -16,6 +16,7 @@ public class GameSaveData
     public float playerPositionY;       // JsonUtility can store it simply.
     public float playerPositionZ;       // (Save files made before the 3D move load this as 0.)
     public List<InventoryEntry> inventoryEntries = new List<InventoryEntry>();
+    public string heldItemId;           // The item in the player's hand. Empty = nothing held.
 
     public bool hasTimer;               // True if a puzzle timer was saved.
     public float timerRemaining;        // Seconds left on the puzzle timer.

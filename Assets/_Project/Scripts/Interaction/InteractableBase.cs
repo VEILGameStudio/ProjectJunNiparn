@@ -10,6 +10,9 @@
 //     every container that holds something.
 //   - Required Item: the player must carry this item, otherwise the Blocked
 //     Message is shown instead.
+//   - Must Be Held: carrying the Required Item is not enough, the player must be
+//     holding it (hand slot of the inventory screen). A player who has it in the bag
+//     but is not holding it sees the Not Held Message, so they know what to do.
 //   - Interact Sound: an optional sound played on every use.
 //
 // How to make a new interactable:
@@ -63,6 +66,12 @@ public abstract class InteractableBase : MonoBehaviour, IInteractable
 
     [Tooltip("Shown when the player does not carry the Required Item, e.g. 'It is locked. I need a key.'")]
     [SerializeField] private LocalizedString blockedMessage;
+
+    [Tooltip("Tick if carrying the Required Item is not enough: the player must be HOLDING it (it must be in the hand slot of the inventory screen).")]
+    [SerializeField] private bool mustBeHeld;
+
+    [Tooltip("Only used when Must Be Held is ticked. Shown when the player has the Required Item in the bag but is not holding it, e.g. 'I need to hold the key.' Drag a Mini dialogue asset here. Leave empty to show the Blocked Message instead.")]
+    [SerializeField] private MiniDialogueData notHeldMessage;
 
     [Header("Feedback (optional)")]
     [Tooltip("A sound played every time this is used.")]
@@ -146,9 +155,16 @@ public abstract class InteractableBase : MonoBehaviour, IInteractable
     {
         ReportIfStartWasReplaced();
 
-        if (!HasRequiredItem(player))
+        Inventory inventory = player != null ? player.Inventory : null;
+        RequiredItemResult itemCheck = CheckRequiredItem(inventory, requiredItem, mustBeHeld);
+        if (itemCheck == RequiredItemResult.Missing)
         {
             ShowBlockedMessage();
+            return;
+        }
+        if (itemCheck == RequiredItemResult.NotHeld)
+        {
+            ShowNotHeldMessage();
             return;
         }
 
@@ -323,15 +339,38 @@ public abstract class InteractableBase : MonoBehaviour, IInteractable
         return null;
     }
 
-    // True if no item is required, or the player carries it.
-    private bool HasRequiredItem(PlayerContext player)
+    // Decides whether a player with this inventory may use something that needs an item.
+    // "Does not have it" and "has it but is not holding it" are different answers, because
+    // the player needs a different message for each. Public and static so tests can check it.
+    public static RequiredItemResult CheckRequiredItem(Inventory inventory, ItemData requiredItem, bool mustBeHeld)
     {
         if (requiredItem == null)
         {
-            return true;
+            return RequiredItemResult.Ready;
+        }
+        if (inventory == null || !inventory.Has(requiredItem))
+        {
+            return RequiredItemResult.Missing;
+        }
+        if (mustBeHeld && !inventory.IsHolding(requiredItem))
+        {
+            return RequiredItemResult.NotHeld;
         }
 
-        return player.Inventory != null && player.Inventory.Has(requiredItem);
+        return RequiredItemResult.Ready;
+    }
+
+    // Tells the player they have the item but must hold it. Falls back to the Blocked
+    // Message when no Not Held Message was set.
+    private void ShowNotHeldMessage()
+    {
+        if (notHeldMessage == null)
+        {
+            ShowBlockedMessage();
+            return;
+        }
+
+        ShowMiniMessage(notHeldMessage);
     }
 
     // Tells the player why this cannot be used yet. Always the small mini popup, never a full dialogue.

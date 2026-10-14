@@ -21,6 +21,10 @@ public static class GameEvents
     // The inventory changed. Sends the current slots (read only).
     public static event Action<IReadOnlyList<InventorySlot>> OnInventoryChanged;
 
+    // The item in the player's hand changed. Sends the held item, or null for an empty hand.
+    // Holding the same item again does not raise it.
+    public static event Action<ItemData> OnHeldItemChanged;
+
     // The player's health changed. Sends (current health, max health).
     public static event Action<int, int> OnHealthChanged;
 
@@ -54,6 +58,7 @@ public static class GameEvents
     // The methods below are called by core systems to raise each event.
 
     public static void RaiseInventoryChanged(IReadOnlyList<InventorySlot> slots) => OnInventoryChanged?.Invoke(slots);
+    public static void RaiseHeldItemChanged(ItemData heldItem) => OnHeldItemChanged?.Invoke(heldItem);
     public static void RaiseHealthChanged(int currentHealth, int maxHealth) => OnHealthChanged?.Invoke(currentHealth, maxHealth);
     public static void RaiseStaminaChanged(float currentStamina, float maxStamina) => OnStaminaChanged?.Invoke(currentStamina, maxStamina);
     public static void RaiseItemPickedUp(ItemData item, int amount) => OnItemPickedUp?.Invoke(item, amount);

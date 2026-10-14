@@ -7,6 +7,12 @@
 // Other scripts reach it with: GameManager.Instance.Inventory
 // (inside an interactable, use player.Inventory instead).
 //
+// Holding: the player can hold ONE item in the hand. Holding does not take the item
+// out of the bag (Count stays the same), and the hand empties itself when the last
+// of that item is gone. A puzzle asks "is the player holding the right thing?" with:
+//   if (player.Inventory.IsHolding(keyItem)) { ... }
+// Every change raises GameEvents.OnHeldItemChanged.
+//
 // Put this on: the "Managers" GameObject (next to the GameManager).
 // Assign in Inspector: Item Database (used to rebuild items when loading a save).
 
@@ -22,8 +28,14 @@ public class Inventory : MonoBehaviour, ISaveParticipant
     // The slots the player currently owns.
     private readonly List<InventorySlot> slots = new List<InventorySlot>();
 
+    // The item in the player's hand. Null while the hand is empty.
+    private ItemData heldItem;
+
     // The current slots, read only.
     public IReadOnlyList<InventorySlot> Slots => slots;
+
+    // The item in the player's hand, or null while the hand is empty.
+    public ItemData HeldItem => heldItem;
 
     private void Start()
     {
@@ -86,6 +98,12 @@ public class Inventory : MonoBehaviour, ISaveParticipant
             }
         }
 
+        // The last one is gone, so it cannot stay in the hand.
+        if (heldItem != null && !Has(heldItem))
+        {
+            SetHeldItem(null);
+        }
+
         GameEvents.RaiseInventoryChanged(slots);
         return true;
     }
@@ -108,6 +126,43 @@ public class Inventory : MonoBehaviour, ISaveParticipant
     public bool Has(ItemData item, int amount = 1)
     {
         return Count(item) >= amount;
+    }
+
+    // Takes an item from the bag into the hand. Only one item is held at a time, so this
+    // replaces whatever was held. Returns false if the player does not have the item.
+    public bool Hold(ItemData item)
+    {
+        if (item == null || !Has(item))
+        {
+            return false;
+        }
+
+        SetHeldItem(item);
+        return true;
+    }
+
+    // Empties the hand. The item stays in the bag.
+    public void StopHolding()
+    {
+        SetHeldItem(null);
+    }
+
+    // True if this item is in the player's hand right now.
+    public bool IsHolding(ItemData item)
+    {
+        return item != null && heldItem == item;
+    }
+
+    // Changes the held item and announces it, but only when it really changed.
+    private void SetHeldItem(ItemData item)
+    {
+        if (heldItem == item)
+        {
+            return;
+        }
+
+        heldItem = item;
+        GameEvents.RaiseHeldItemChanged(heldItem);
     }
 
     // Shared add logic without raising the change event (used by Add and by loading).
@@ -152,12 +207,15 @@ public class Inventory : MonoBehaviour, ISaveParticipant
         {
             data.inventoryEntries.Add(new InventoryEntry { itemId = slot.Item.Id, count = slot.Count });
         }
+
+        data.heldItemId = heldItem != null ? heldItem.Id : string.Empty;
     }
 
-    // Rebuilds the inventory from the save data.
+    // Rebuilds the inventory, and what was in the hand, from the save data.
     public void RestoreState(GameSaveData data)
     {
         slots.Clear();
+        ItemData savedHeldItem = null;
 
         if (itemDatabase != null)
         {
@@ -169,8 +227,21 @@ public class Inventory : MonoBehaviour, ISaveParticipant
                     AddInternal(item, entry.count);
                 }
             }
+
+            // A save made before holding existed has no id here: the hand is simply empty.
+            if (!string.IsNullOrEmpty(data.heldItemId))
+            {
+                savedHeldItem = itemDatabase.GetById(data.heldItemId);
+            }
+        }
+
+        // Only something that is really in the bag can be held.
+        if (savedHeldItem != null && !Has(savedHeldItem))
+        {
+            savedHeldItem = null;
         }
 
         GameEvents.RaiseInventoryChanged(slots);
+        SetHeldItem(savedHeldItem);
     }
 }

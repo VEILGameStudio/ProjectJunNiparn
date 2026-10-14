@@ -20,7 +20,7 @@ MonoBehaviour:
   description:
     english: Used for unlocking.
     thai: "\u0E40\u0E2D\u0E32\u0E44\u0E27\u0E49\u0E44\u0E02\u0E01\u0E38\u0E0D\u0E41\u0E08"
-  icon: {fileID: 10913, guid: 0000000000000000f000000000000000, type: 0}
+  icon: {fileID: 21300000, guid: 51dad1a06abcd64478684223ca23a500, type: 3}
   maxStack: 1
   healAmount: 0
   staminaAmount: 0
