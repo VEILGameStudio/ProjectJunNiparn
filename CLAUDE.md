@@ -86,6 +86,25 @@ Never write code that sorts sprites by position or scales them by distance. An e
 project had a Y-sorting system; it was deleted deliberately when the game moved to 3D. Do not rebuild
 it, and do not "restore" it if you find traces of it.
 
+**Parallax backgrounds are built by placing layers, not by writing a script.** `SideView` is a
+perspective camera, so a layer further from the camera already slides more slowly — that is what
+perspective *is*. A layer at distance *D* moves at 20/*D* of the play plane's rate, so 40 gives half
+speed, 100 gives a fifth, 200 gives a tenth. Pick the distance that gives the speed; there is nothing
+to code. Two consequences the art has to know, at 1080p:
+
+- The visible height at distance *D* is 0.335 × *D* world units, so **PPU = 1080 ÷ (0.335 × D)**.
+  A backdrop 100 units out is drawn at PPU 32 against the foreground's 161. Export it at the character
+  PPU and it comes out five times too small.
+- The width has to cover the screen *plus* the camera's whole travel: 0.335 × *D* × aspect, which at
+  21:9 and *D* = 100 is 79 units before travel is added. Far layers are large. The 36-unit back wall is
+  a near-plane number and does not apply to them.
+
+**`ThreeQuarter` cannot have parallax at all.** It is orthographic, and an orthographic projection has
+no perspective divide, so distance has no effect on apparent motion — a layer 500 units back moves
+exactly like one 5 units back. No placement fixes this and no script is allowed to fake it. Those
+rooms are enclosed anyway; depth there comes from fog, from a darker and less saturated far layer, and
+from SSAO. If a scene genuinely needs a moving horizon, it is a `SideView` scene.
+
 Elevation (steps, raised platforms, bridges) is allowed — 3D handles it — but use it deliberately,
 because it affects camera framing and how readable the floor is.
 
@@ -223,8 +242,9 @@ only thing an owner tag forbids is **editing the contents of the file**. Anyone 
 as "don't use this" and writes their own copy of something that already exists there has made the
 problem worse than editing it would have.
 
-**This map is not true on disk yet.** Four places differ, and all four are listed in §12 with where
-they are going. Until they move, these paths are what is real:
+**This map is not true on disk yet.** Several paths differ from it. The ones that have to move are
+listed in §12, with the order to move them in; the rest simply stay where they are. Until then, these
+paths are what is real:
 
 | On disk | Owner | Rule |
 |---|---|---|
@@ -364,6 +384,83 @@ is the quad's depth × sin(tilt + camera pitch), so a `SideView` blob tilted 45�
 field exists so that "the character looks like it is floating" is a one-number fix later rather than a
 redesign. A shadow quad is a decal, not a character sprite, so it may use a soft alpha-blended
 material — it is the one exception to the alpha-clipping rule above.
+
+### Giving the world depth
+
+Four techniques, and the object decides which one:
+
+| Object | Technique |
+|---|---|
+| Characters and NPCs with animation | billboard + normal map |
+| Grass, trees, flowers | billboard + wind |
+| Chests, carts, barrels, small buildings — anything read as a solid volume | **a real 3D model**, blocked out in MagicaVoxel and exported as `.obj` |
+| Anything that must be correct from every angle | the same: a real 3D model |
+
+**CRITICAL — no sprite stacking.** Stacking a prop out of horizontal slices earns its cost by looking
+right from *any* camera yaw. Our yaw is locked at 45° and 0° and §0 rule 5 keeps it there, so every
+prop is seen from exactly one angle for the life of the project — and a prop seen from one fixed angle
+is a single drawing. Stacking would pay for a freedom this game does not have.
+
+The arithmetic, so nobody has to redo it: `ThreeQuarter` is orthographic at Size 5, which is 108 px per
+world unit at 1080p, and a slice spacing of *d* lands `d × cos(30°) × 108` pixels apart on screen. To
+keep the banding under one pixel a waist-high chest needs about 65 slices, a cart 112, a small building
+280 — and at two pixels of banding, still visible, it is 33 / 56 / 140. A MagicaVoxel model of the same
+chest is one mesh, casts a real shadow, receives SSAO, occludes correctly by depth, and is quicker to
+make than thirty aligned drawings. (`SideView` is worse, not better: slices read as solid while
+`d/D < tan(pitch)`, and tan 10° = 0.176 against tan 30° = 0.577.)
+
+Models are ordinary geometry: they **cast and receive shadows normally**. The no-shadow rule in §0 is
+about flat cards, and it does not reach anything with real volume.
+
+**Normal maps on sprites.** The sprite shader writes a fixed normal and tangent in the vertex stage
+because `SpriteRenderer` supplies none; a normal map rides along as a Secondary Texture on the sprite,
+so it follows automatically when an animation swaps frames.
+
+- **One file per sheet, the same size and layout as the sheet.** A Secondary Texture is sampled with
+  the sprite's own UV rect, so a small standalone image lands correctly on the first cell and nowhere
+  else. Whatever the map contains, it is painted into every cell of a full-size copy of the sheet.
+- **A hand-painted normal map is stretched with its sprite** — the same ×1.155 or ×1.015, exported
+  together — and **its green channel is left alone.** The stretch and the camera's foreshortening
+  cancel exactly, so the image on screen matches the original drawing, which means the lighting must
+  match the original drawing too. Re-baking the slopes would break what the stretch just fixed.
+- Normalize after sampling. Resampling and bilinear filtering both leave vectors off unit length.
+- **Start with one soft cylinder normal map shared by every frame** — bulging toward the camera at the
+  centre, curving away at the edges. It does not match the drawing frame by frame, but it buys the
+  thing actually worth having: the figure stops reading as a flat sticker. Per-frame normal maps are a
+  trap at this scale: one NPC with eight directions and eight frames is 64 of them.
+  - A cylinder is a horizontal gradient and **does not vary along Y, so stretching it does nothing**.
+    Build it at the exported sheet's size from the start and skip the stretch step entirely.
+  - Check the sheet first: if the figure drifts around inside its cell between frames, the cylinder
+    has to be placed per cell rather than tiled, which is still one file but not one paste.
+
+**Wind.** Vertex displacement in the shader, masked so the base holds still and the top moves.
+
+- The mask is **`positionOS.y` with no divisor** — the pivot sits at the feet, and PPU is computed from
+  the stretched image, so object-space Y *is* the height above the ground in world units. Scaling a
+  card does not break this: the offset is built in object space and scaled by the same matrix as the
+  height, so the sway *angle* stays put and the sway distance keeps tracking the card's real world
+  height. Tall grass
+  therefore sways further than short grass, which is what real grass does, and one material serves
+  every height with no script, no `MaterialPropertyBlock`, and no SRP Batcher break. Linear, or
+  `pow(max(y, 0), 1.5)`; never squared, which makes a 1.0 blade sway eleven times a 0.3 one. Never
+  `UV.y` — a sprite inside an atlas does not span 0–1.
+- The displacement must run in **every pass the sprite is drawn in**, including `DepthNormals` (SSAO
+  reads it) and the outline pass. Miss the outline pass and the outline stands still while the blade
+  sways, which compiles perfectly and looks broken.
+- Mesh Type `Tight` gives a sprite 8–20 vertices instead of Full Rect's 4, so the bend is softer. It is
+  still a shear, not a curve. Real curvature needs a subdivided mesh, which a `SpriteRenderer` cannot
+  provide — plan around that rather than discovering it late. Anything with an outline stays Full Rect:
+  a Tight mesh hugs the alpha, leaving no margin for the outline to be drawn in.
+
+**Shader time follows game time.** URP sets `_Time` from `Time.time`, which `timeScale` already scales,
+so wind and every other time-driven shader stop on their own when the game pauses. Nothing needs
+writing, and a global time uniform must not be added to "fix" it. In Edit mode URP uses
+`realtimeSinceStartup` instead, so grass sways in the Scene view with play stopped; that is correct.
+
+**Depth of Field is never used in a `ThreeQuarter` room.** It makes a puzzle harder to read, and URP's
+DoF shaders compute distance with `LinearEyeDepth`, a perspective-only formula, so against an
+orthographic camera the blur is simply wrong. It is available to `SideView` corridors through that
+zone's own Volume.
 
 ### Camera
 
