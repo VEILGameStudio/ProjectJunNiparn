@@ -1,16 +1,27 @@
 // SaveManager
 // Saves and loads the game. There are two files:
-//   - gamesave.json  : the autosave (inventory, level, player position, time).
-//   - settings.json  : the global settings (music, sound, brightness, language).
+//   - gamesave.json  : the autosave (inventory, level, player position, time, and
+//                      which one-time things were already used).
+//   - settings.json  : the global settings (music, sound, brightness, language) and
+//                      the secret items the player has found.
 // Both files are stored in Application.persistentDataPath (a safe folder Unity
 // gives every game on the player's computer).
+//
+// One-time things (a key that was picked up, a chest that was opened) are remembered
+// here by their Unique Id, so they do not come back after loading. InteractableBase
+// does that by itself; other scripts do not need to call it. When a scene starts, this
+// also checks that every one-time object in it has its own Unique Id.
 //
 // Systems that want their data saved implement ISaveParticipant and call
 // Register(this) / Unregister(this). The SaveManager then asks each of them to
 // fill in the save when SaveGame() runs.
 //
+// It autosaves by listening to GameEvents: when a new scene is ready
+// (OnSceneReady) and when the player picks up an item (OnItemPickedUp).
+// For "level complete", call SaveGame() (for example through SaveActions).
+//
 // Put this on: the "Managers" GameObject (the prefab that lives in every scene).
-// Assign in Inspector: nothing required.
+// Assign in Inspector: Autosave On Scene Load (ticked by default).
 
 using System.Collections;
 using System.Collections.Generic;
@@ -20,6 +31,10 @@ using UnityEngine.SceneManagement;
 
 public class SaveManager : Singleton<SaveManager>
 {
+    [Header("Autosave")]
+    [Tooltip("If ticked, the game autosaves each time a new scene finishes loading.")]
+    [SerializeField] private bool autosaveOnSceneLoad = true;
+
     // File names inside Application.persistentDataPath.
     private const string GameSaveFileName = "gamesave.json";
     private const string SettingsFileName = "settings.json";
@@ -33,13 +48,19 @@ public class SaveManager : Singleton<SaveManager>
     // True if an autosave file already exists on disk.
     public bool HasSave => File.Exists(GameSavePath);
 
-    // True while a saved game is being loaded and restored. Other systems (like the
-    // SceneLoader) check this so they do not autosave over the file mid-load.
+    // True while a saved game is being loaded and restored. Other systems check
+    // this so they do not autosave over the file mid-load.
     public bool IsRestoring { get; private set; }
 
     // The save being restored right now, and whether a restore is in progress.
     private GameSaveData loadingData;
     private bool restorePending;
+
+    // The one-time things that were already used, each as "<scene name>/<Unique Id>".
+    private readonly HashSet<string> usedOneShotIds = new HashSet<string>();
+
+    // The scene whose Unique Ids were already checked, so each scene is checked once.
+    private Scene checkedScene;
 
     private string GameSavePath => Path.Combine(Application.persistentDataPath, GameSaveFileName);
     private string SettingsPath => Path.Combine(Application.persistentDataPath, SettingsFileName);
@@ -47,14 +68,30 @@ public class SaveManager : Singleton<SaveManager>
     protected override void Awake()
     {
         base.Awake();
-        LoadSettings(); // Settings should always be ready as soon as the game starts.
-        GameEvents.SceneLoadFinished += HandleSceneLoadFinished;
+        ReadSettingsFile(); // Settings are ready for other scripts from the very start.
     }
 
-    protected override void OnDestroy()
+    private void Start()
     {
-        base.OnDestroy();
-        GameEvents.SceneLoadFinished -= HandleSceneLoadFinished;
+        // Applied in Start, so the GameManager and its systems are ready first.
+        ApplySettings();
+
+        // Also checked here, in case this manager was created after its scene had loaded.
+        CheckUniqueIds(SceneManager.GetActiveScene());
+    }
+
+    private void OnEnable()
+    {
+        GameEvents.OnSceneReady += HandleSceneReady;
+        GameEvents.OnItemPickedUp += HandleItemPickedUp;
+        SceneManager.sceneLoaded += HandleSceneLoaded;
+    }
+
+    private void OnDisable()
+    {
+        GameEvents.OnSceneReady -= HandleSceneReady;
+        GameEvents.OnItemPickedUp -= HandleItemPickedUp;
+        SceneManager.sceneLoaded -= HandleSceneLoaded;
     }
 
     // A system asks to be included in the autosave. If a load is in progress, the
@@ -82,7 +119,7 @@ public class SaveManager : Singleton<SaveManager>
     }
 
     // Collects data from every registered system and writes the autosave file.
-    // Call this to autosave (scene load, item pickup, level complete).
+    // Call this to autosave (for example on level complete).
     public void SaveGame()
     {
         GameSaveData data = new GameSaveData();
@@ -92,8 +129,48 @@ public class SaveManager : Singleton<SaveManager>
         {
             participant.CaptureState(data);
         }
+        data.usedOneShotIds.AddRange(usedOneShotIds);
 
         WriteJson(GameSavePath, data);
+    }
+
+    // True if the one-time thing with this saved id ("<scene name>/<Unique Id>") was already used.
+    public bool IsOneShotUsed(string savedId)
+    {
+        return !string.IsNullOrEmpty(savedId) && usedOneShotIds.Contains(savedId);
+    }
+
+    // Remembers that a one-time thing was used, and autosaves at once so it stays used after loading.
+    public void MarkOneShotUsed(string savedId)
+    {
+        if (string.IsNullOrEmpty(savedId) || !usedOneShotIds.Add(savedId))
+        {
+            return; // No id, or already remembered.
+        }
+
+        if (!IsRestoring)
+        {
+            SaveGame();
+        }
+    }
+
+    // True if the player has found the secret item with this id.
+    public bool IsSecretFound(string itemId)
+    {
+        return !string.IsNullOrEmpty(itemId) && Settings.foundSecretIds.Contains(itemId);
+    }
+
+    // Remembers that the player found a secret item. It goes into the settings file, not the
+    // autosave, so it is kept when a new game starts.
+    public void MarkSecretFound(string itemId)
+    {
+        if (string.IsNullOrEmpty(itemId) || Settings.foundSecretIds.Contains(itemId))
+        {
+            return; // No id, or already found.
+        }
+
+        Settings.foundSecretIds.Add(itemId);
+        SaveSettings();
     }
 
     // Loads the saved game: reads the file, loads the saved scene, and restores all
@@ -116,6 +193,16 @@ public class SaveManager : Singleton<SaveManager>
         restorePending = true;
         IsRestoring = true;
 
+        // Known before the scene loads, so its one-time objects can switch themselves off as they start.
+        usedOneShotIds.Clear();
+        if (loadingData.usedOneShotIds != null)
+        {
+            foreach (string savedId in loadingData.usedOneShotIds)
+            {
+                usedOneShotIds.Add(savedId);
+            }
+        }
+
         // Restore systems that already exist (like the inventory, which lives on the
         // Managers object). Per-scene systems are restored as they register after load.
         foreach (ISaveParticipant participant in participants)
@@ -123,27 +210,64 @@ public class SaveManager : Singleton<SaveManager>
             participant.RestoreState(loadingData);
         }
 
-        if (SceneLoader.Instance != null)
+        if (GameManager.Instance != null && GameManager.Instance.SceneLoader != null)
         {
-            SceneLoader.Instance.LoadScene(loadingData.sceneName, null);
+            GameManager.Instance.SceneLoader.LoadScene(loadingData.sceneName, null);
         }
         else
         {
+            Debug.LogError("SaveManager: no SceneLoader found, so the saved scene cannot load. Make sure the Managers object has a SceneLoader.", this);
             ClearRestore();
         }
         return true;
     }
 
-    // After the saved scene has loaded, give its new objects a couple of frames to
-    // register (and be restored), then finish the restore.
-    private void HandleSceneLoadFinished()
+    // A new scene is ready: finish a Continue that is in progress, or autosave.
+    private void HandleSceneReady()
     {
         if (restorePending)
         {
             StartCoroutine(FinishRestore());
+            return;
+        }
+
+        if (autosaveOnSceneLoad)
+        {
+            SaveGame();
         }
     }
 
+    // Autosaves right after the player picks something up.
+    private void HandleItemPickedUp(ItemData item, int amount)
+    {
+        SaveGame();
+    }
+
+    // Unity finished loading a scene.
+    private void HandleSceneLoaded(Scene scene, LoadSceneMode mode)
+    {
+        CheckUniqueIds(scene);
+    }
+
+    // Says so in the Console when a one-time object in the scene has no Unique Id, or shares one
+    // with another object. Objects that are switched off are checked too. Runs once per scene.
+    private void CheckUniqueIds(Scene scene)
+    {
+        // A spare copy of this manager is about to be removed (see Singleton), so it stays quiet.
+        if (Instance != this || scene == checkedScene)
+        {
+            return;
+        }
+        checkedScene = scene;
+
+        foreach (string problem in InteractableBase.FindIdProblems(scene))
+        {
+            Debug.LogError(problem, this);
+        }
+    }
+
+    // Gives the loaded scene's new objects a couple of frames to register (and be
+    // restored), then finishes the restore.
     private IEnumerator FinishRestore()
     {
         yield return null; // Let new objects' Start run and register.
@@ -167,16 +291,27 @@ public class SaveManager : Singleton<SaveManager>
     // Reads the settings file (or uses defaults the first time) and applies them.
     public void LoadSettings()
     {
-        if (File.Exists(SettingsPath))
+        ReadSettingsFile();
+        ApplySettings();
+    }
+
+    // Reads the settings file into Settings. Keeps the defaults if there is no file yet.
+    private void ReadSettingsFile()
+    {
+        if (!File.Exists(SettingsPath))
         {
-            SettingsSaveData loaded = ReadJson<SettingsSaveData>(SettingsPath);
-            if (loaded != null)
-            {
-                Settings = loaded;
-            }
+            return;
         }
 
-        ApplySettings();
+        SettingsSaveData loaded = ReadJson<SettingsSaveData>(SettingsPath);
+        if (loaded != null)
+        {
+            Settings = loaded;
+        }
+        if (Settings.foundSecretIds == null)
+        {
+            Settings.foundSecretIds = new List<string>();
+        }
     }
 
     // Pushes the current settings into the systems that use them.
@@ -187,13 +322,18 @@ public class SaveManager : Singleton<SaveManager>
             AudioManager.Instance.SetMusicVolume(Settings.musicVolume);
             AudioManager.Instance.SetSoundVolume(Settings.soundVolume);
         }
-        if (LocalizationManager.Instance != null)
+
+        if (GameManager.Instance == null)
         {
-            LocalizationManager.Instance.SetLanguage(Settings.language);
+            return;
         }
-        if (BrightnessController.Instance != null)
+        if (GameManager.Instance.Localization != null)
         {
-            BrightnessController.Instance.ApplyBrightness(Settings.brightness);
+            GameManager.Instance.Localization.SetLanguage(Settings.language);
+        }
+        if (GameManager.Instance.Brightness != null)
+        {
+            GameManager.Instance.Brightness.ApplyBrightness(Settings.brightness);
         }
     }
 

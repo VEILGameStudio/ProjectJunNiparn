@@ -23,6 +23,5 @@ public class SpawnPoint : MonoBehaviour
     {
         Gizmos.color = Color.cyan;
         Gizmos.DrawWireSphere(transform.position, 0.4f);
-        Gizmos.DrawRay(transform.position, transform.forward * 0.8f);
     }
 }

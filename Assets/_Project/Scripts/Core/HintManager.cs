@@ -3,13 +3,14 @@
 // If the player is stuck (no interaction for the Idle Hint Seconds), it turns on
 // "hint mode", and interactable objects with a HighlightEffect glow to guide the
 // player. Any interaction resets the timer.
+// Other scripts reach it with: GameManager.Instance.HintManager
 //
-// Put this on: the "Managers" GameObject (the prefab that lives in every scene).
+// Put this on: the "Managers" GameObject (next to the GameManager).
 // Assign in Inspector: Idle Hint Seconds (how long before hints appear).
 
 using UnityEngine;
 
-public class HintManager : Singleton<HintManager>
+public class HintManager : MonoBehaviour
 {
     [Header("Hint")]
     [Tooltip("How many seconds without interacting before hint highlights appear.")]

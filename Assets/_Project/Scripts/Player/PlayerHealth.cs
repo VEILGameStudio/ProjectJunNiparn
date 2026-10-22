@@ -1,14 +1,14 @@
 // PlayerHealth
-// Keeps the player's health and shows it on a UI bar. Traps and monsters hurt the
-// player by calling TakeDamage (through the IDamageable interface). When health
-// reaches 0, it runs the On Death event. Later the GameOverManager will listen to
-// this to show the game over screen; for now wire whatever you like in On Death.
+// Keeps the player's health. Traps and monsters hurt the player by calling
+// TakeDamage (through the IDamageable interface). Every change raises
+// GameEvents.OnHealthChanged, so the health bar updates itself. When health
+// reaches 0 it runs the On Death event and raises GameEvents.OnGameOver, which
+// starts the shared game over sequence.
 //
 // Put this on: the Player GameObject.
 // Assign in Inspector:
 //   - Max Health: the starting and highest health.
-//   - Health Bar (optional): the UIStatBar that shows health.
-//   - On Death: what happens when health hits 0.
+//   - On Death (optional): extra things to do when health hits 0 (e.g. a death animation).
 
 using UnityEngine;
 using UnityEngine.Events;
@@ -19,12 +19,8 @@ public class PlayerHealth : MonoBehaviour, IDamageable
     [Tooltip("The starting and maximum health.")]
     [SerializeField] private int maxHealth = 100;
 
-    [Header("UI")]
-    [Tooltip("The bar that shows current health. Optional.")]
-    [SerializeField] private UIStatBar healthBar;
-
     [Header("Events")]
-    [Tooltip("Runs once when health reaches 0. The GameOverManager will use this later.")]
+    [Tooltip("Runs once when health reaches 0, just before the game over sequence starts.")]
     [SerializeField] private UnityEvent onDeath;
 
     private int currentHealth;
@@ -40,7 +36,7 @@ public class PlayerHealth : MonoBehaviour, IDamageable
 
     private void Start()
     {
-        UpdateBar();
+        GameEvents.RaiseHealthChanged(currentHealth, maxHealth);
     }
 
     // Lowers health by the amount (from IDamageable). Ignores negative numbers.
@@ -52,7 +48,7 @@ public class PlayerHealth : MonoBehaviour, IDamageable
         }
 
         currentHealth = Mathf.Max(0, currentHealth - amount);
-        UpdateBar();
+        GameEvents.RaiseHealthChanged(currentHealth, maxHealth);
 
         if (currentHealth == 0)
         {
@@ -69,7 +65,7 @@ public class PlayerHealth : MonoBehaviour, IDamageable
         }
 
         currentHealth = Mathf.Min(maxHealth, currentHealth + amount);
-        UpdateBar();
+        GameEvents.RaiseHealthChanged(currentHealth, maxHealth);
     }
 
     // Runs the death event once, then starts the shared game over sequence.
@@ -77,19 +73,6 @@ public class PlayerHealth : MonoBehaviour, IDamageable
     {
         isDead = true;
         onDeath?.Invoke();
-
-        if (GameOverManager.Instance != null)
-        {
-            GameOverManager.Instance.TriggerGameOver();
-        }
-    }
-
-    // Updates the health bar to match the current health.
-    private void UpdateBar()
-    {
-        if (healthBar != null)
-        {
-            healthBar.SetFill((float)currentHealth / maxHealth);
-        }
+        GameEvents.RaiseGameOver();
     }
 }

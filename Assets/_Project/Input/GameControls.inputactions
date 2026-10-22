@@ -170,6 +170,17 @@
                 },
                 {
                     "name": "",
+                    "id": "b3e1f5a2-6c47-4d19-9a8e-2f0d7c5b1e64",
+                    "path": "<Keyboard>/i",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "Keyboard&Mouse",
+                    "action": "OpenInventory",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
                     "id": "4c916e42-acd5-48f0-8c49-6a50b359b9be",
                     "path": "<Keyboard>/tab",
                     "interactions": "",

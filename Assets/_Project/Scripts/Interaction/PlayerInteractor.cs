@@ -1,47 +1,48 @@
 // PlayerInteractor
-// Turns a mouse click into an interaction. When the player clicks, it shoots a ray
-// from the camera through the mouse pointer to find what was clicked, then calls
-// Interact on it. It works in both game modes:
-//   - 2D scenes use a 2D physics ray (needs Collider2D on interactables).
-//   - 2.5D scenes use a 3D physics ray (needs a 3D Collider on interactables).
-// Choose which one with the Raycast Mode field.
+// Lets the player use interactable objects in two ways, and sends both to the same code:
+//   - Click: a ray goes from the camera through the mouse. The first click box it hits
+//     on the Interactable layer is used (the nearest one, so no sorting is needed).
+//   - Touch: pushing into an object's small solid collider (its Blocker, on the Blocking
+//     layer), or walking into a trigger on the TouchZone layer. The big click box never
+//     counts as a touch.
+// Touching the same object again within the Touch Cooldown is ignored, and the cooldown
+// starts again every frame the player is still touching it. So pushing or sliding along
+// an object counts as one touch.
+// Every successful interaction also resets the idle hint timer.
 //
-// Put this on: the Player GameObject.
+// Put this on: the Player root (the object with the CharacterController).
 // Assign in Inspector:
 //   - Input Reader: the shared MainInputReader asset.
 //   - Interaction Camera (optional): leave empty to use the Main Camera.
-//   - Raycast Mode: 2D for side-view scenes, 2.5D for top-down scenes.
-//   - Interactable Layers: which layers can be clicked (leave as Everything to start).
+//   - Touch Cooldown Seconds: how long the player must stop touching an object before it can be touched again.
 
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.InputSystem;
 
+[RequireComponent(typeof(CharacterController))]
 public class PlayerInteractor : MonoBehaviour
 {
-    // Which kind of physics ray to use, chosen per scene type.
-    private enum RaycastMode { Mode2D, Mode25D }
-
     [Header("Input")]
     [Tooltip("Drag the shared Input Reader asset here.")]
     [SerializeField] private InputReader inputReader;
 
     [Header("Camera")]
-    [Tooltip("The camera clicks are measured from. Leave empty to use the Main Camera.")]
+    [Tooltip("The camera clicks are cast from. Leave empty to use the Main Camera.")]
     [SerializeField] private Camera interactionCamera;
 
-    [Header("Raycast")]
-    [Tooltip("Use 2D for side-view scenes and 2.5D for top-down 3D scenes.")]
-    [SerializeField] private RaycastMode raycastMode = RaycastMode.Mode2D;
+    [Header("Touch")]
+    [Tooltip("After touching an object, touching the SAME object again is ignored until the player has stopped touching it for this many seconds. Stops repeat triggers while pushing or sliding along it.")]
+    [SerializeField] private float touchCooldownSeconds = 0.5f;
 
-    [Tooltip("Which layers can be clicked on. Leave as Everything to start.")]
-    [SerializeField] private LayerMask interactableLayers = ~0;
-
-    [Tooltip("How far the 2.5D ray reaches, in units.")]
-    [SerializeField] private float maxDistance = 100f;
+    private PlayerHealth health;
+    private IInteractable lastTouched;
+    private float lastTouchTime;
 
     private void Awake()
     {
+        health = GetComponent<PlayerHealth>();
+
         if (interactionCamera == null)
         {
             interactionCamera = Camera.main;
@@ -50,6 +51,10 @@ public class PlayerInteractor : MonoBehaviour
         {
             Debug.LogError($"PlayerInteractor on '{name}': Input Reader is not assigned. Drag the MainInputReader asset here.", this);
         }
+
+        GameLayers.CheckExists(GameLayers.Blocking, this);
+        GameLayers.CheckExists(GameLayers.Interactable, this);
+        GameLayers.CheckExists(GameLayers.TouchZone, this);
     }
 
     // Checks for a click each frame (polling the shared Input Reader).
@@ -57,14 +62,14 @@ public class PlayerInteractor : MonoBehaviour
     {
         if (inputReader != null && inputReader.InteractPressed)
         {
-            HandleInteract();
+            HandleClick();
         }
     }
 
-    // Runs when the player clicks. Finds what was clicked and interacts with it.
-    private void HandleInteract()
+    // Runs when the player clicks. Uses the nearest interactable under the mouse.
+    private void HandleClick()
     {
-        if (!CanInteract() || interactionCamera == null || Mouse.current == null)
+        if (interactionCamera == null || Mouse.current == null)
         {
             return;
         }
@@ -75,49 +80,126 @@ public class PlayerInteractor : MonoBehaviour
             return;
         }
 
-        Vector2 screenPosition = Mouse.current.position.ReadValue();
-        IInteractable interactable = raycastMode == RaycastMode.Mode25D
-            ? Raycast3D(screenPosition)
-            : Raycast2D(screenPosition);
-
-        if (interactable != null)
+        IInteractable target = FindInteractableUnderMouse();
+        if (target != null && AllowsClick(target.Activation))
         {
-            interactable.Interact(gameObject);
-
-            // Reset the idle hint timer whenever the player interacts.
-            if (HintManager.Instance != null)
-            {
-                HintManager.Instance.NotifyInteraction();
-            }
+            TryInteract(target);
         }
     }
 
+    // Runs every frame the CharacterController pushes into a collider while moving.
+    // Only solid colliders on the Blocking layer (an object's Blocker) count as a touch.
+    private void OnControllerColliderHit(ControllerColliderHit hit)
+    {
+        if (!GameLayers.IsOnLayer(hit.gameObject, GameLayers.Blocking))
+        {
+            return; // The floor and other objects are not touch points.
+        }
+
+        IInteractable target = hit.collider.GetComponentInParent<IInteractable>();
+        if (target != null)
+        {
+            TryTouch(target);
+        }
+    }
+
+    // Runs when the player walks into a trigger. Only TouchZone triggers count as a touch.
+    private void OnTriggerEnter(Collider other)
+    {
+        if (!GameLayers.IsOnLayer(other.gameObject, GameLayers.TouchZone))
+        {
+            return; // The big click boxes (Interactable layer) must never fire a touch.
+        }
+
+        IInteractable target = other.GetComponentInParent<IInteractable>();
+        if (target != null)
+        {
+            TryTouch(target);
+        }
+    }
+
+    // Uses a touched object if it allows Touch and was not still being touched a moment ago.
+    private void TryTouch(IInteractable target)
+    {
+        if (!AllowsTouch(target.Activation))
+        {
+            return;
+        }
+
+        bool stillTouching = target == lastTouched && Time.time - lastTouchTime < touchCooldownSeconds;
+
+        // Remembered on every contact, so pushing or sliding along the object counts as one touch.
+        lastTouched = target;
+        lastTouchTime = Time.time;
+
+        if (!stillTouching)
+        {
+            TryInteract(target);
+        }
+    }
+
+    // The one shared path for click and touch: check, interact, reset the hint timer.
+    private void TryInteract(IInteractable target)
+    {
+        if (!IsGamePlaying())
+        {
+            return;
+        }
+
+        PlayerContext context = CreateContext();
+        if (!target.CanInteract(context))
+        {
+            return;
+        }
+
+        target.Interact(context);
+
+        if (GameManager.Instance != null && GameManager.Instance.HintManager != null)
+        {
+            GameManager.Instance.HintManager.NotifyInteraction();
+        }
+    }
+
+    // Casts a ray from the camera through the mouse and returns the first interactable it hits.
+    private IInteractable FindInteractableUnderMouse()
+    {
+        Ray ray = interactionCamera.ScreenPointToRay(Mouse.current.position.ReadValue());
+
+        // Click boxes are triggers, so the ray must be allowed to hit triggers.
+        bool hitSomething = Physics.Raycast(ray, out RaycastHit hit, Mathf.Infinity, GameLayers.InteractableMask, QueryTriggerInteraction.Collide);
+        if (!hitSomething)
+        {
+            return null;
+        }
+
+        return hit.collider.GetComponentInParent<IInteractable>();
+    }
+
+    // Bundles what an interactable may need to know about the player.
+    private PlayerContext CreateContext()
+    {
+        Inventory inventory = null;
+        if (GameManager.Instance != null)
+        {
+            inventory = GameManager.Instance.Inventory;
+        }
+
+        return new PlayerContext(transform, inventory, health);
+    }
+
     // The player can only interact during normal gameplay.
-    private bool CanInteract()
+    private bool IsGamePlaying()
     {
         return GameManager.Instance == null || GameManager.Instance.IsPlaying;
     }
 
-    // Finds an interactable under the pointer using 3D physics (for 2.5D scenes).
-    private IInteractable Raycast3D(Vector2 screenPosition)
+    private bool AllowsClick(ActivationMode mode)
     {
-        Ray ray = interactionCamera.ScreenPointToRay(screenPosition);
-        if (Physics.Raycast(ray, out RaycastHit hit, maxDistance, interactableLayers))
-        {
-            return hit.collider.GetComponentInParent<IInteractable>();
-        }
-        return null;
+        return mode == ActivationMode.Click || mode == ActivationMode.Both;
     }
 
-    // Finds an interactable under the pointer using 2D physics (for 2D scenes).
-    private IInteractable Raycast2D(Vector2 screenPosition)
+    private bool AllowsTouch(ActivationMode mode)
     {
-        Ray ray = interactionCamera.ScreenPointToRay(screenPosition);
-        RaycastHit2D hit = Physics2D.GetRayIntersection(ray, Mathf.Infinity, interactableLayers);
-        if (hit.collider != null)
-        {
-            return hit.collider.GetComponentInParent<IInteractable>();
-        }
-        return null;
+        return mode == ActivationMode.Touch || mode == ActivationMode.Both;
     }
 }

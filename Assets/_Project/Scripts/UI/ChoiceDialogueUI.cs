@@ -56,12 +56,12 @@ public class ChoiceDialogueUI : MonoBehaviour
 
     private void OnEnable()
     {
-        GameEvents.LanguageChanged += RefreshText;
+        GameEvents.OnLanguageChanged += RefreshText;
     }
 
     private void OnDisable()
     {
-        GameEvents.LanguageChanged -= RefreshText;
+        GameEvents.OnLanguageChanged -= RefreshText;
     }
 
     private void Start()
@@ -145,8 +145,11 @@ public class ChoiceDialogueUI : MonoBehaviour
     // Turns a LocalizedString into text in the current language.
     private string Localize(LocalizedString value)
     {
-        return LocalizationManager.Instance != null
-            ? LocalizationManager.Instance.Get(value)
-            : value.english;
+        if (GameManager.Instance == null || GameManager.Instance.Localization == null)
+        {
+            return value.english;
+        }
+
+        return GameManager.Instance.Localization.Get(value);
     }
 }

@@ -5,10 +5,9 @@
 //   slider 10 (the minimum) = normal brightness (Post Exposure 0).
 //   slider at its maximum    = the brightest allowed (Max Post Exposure).
 // The maximum brightness is capped in the Inspector so the screen never gets too
-// bright.
+// bright. Other scripts reach it with: GameManager.Instance.Brightness
 //
-// Put this on: a persistent object that also has a URP Global Volume (for example
-//   a "GlobalVolume" object, or the Managers object with a Volume added).
+// Put this on: the "Managers" GameObject (next to the GameManager).
 // Assign in Inspector:
 //   - Volume: the URP Volume whose profile has a Color Adjustments override.
 //   - Slider Maximum: the highest slider value (kept between 50 and 70).
@@ -18,7 +17,7 @@ using UnityEngine;
 using UnityEngine.Rendering;
 using UnityEngine.Rendering.Universal;
 
-public class BrightnessController : Singleton<BrightnessController>
+public class BrightnessController : MonoBehaviour
 {
     // The slider always starts at 10, which means normal brightness.
     public const float SliderMinimum = 10f;
@@ -39,10 +38,8 @@ public class BrightnessController : Singleton<BrightnessController>
     // The highest value the brightness slider should use.
     public float SliderMaximum => sliderMaximum;
 
-    protected override void Awake()
+    private void Awake()
     {
-        base.Awake();
-
         if (volume == null)
         {
             Debug.LogError("BrightnessController: Volume is not assigned. Drag a URP Global Volume here.", this);

@@ -1,20 +1,22 @@
 // SceneLoader
-// Changes from one scene to another the smooth way: fade to black, (optionally)
-// autosave, load the new scene, place the player at the correct spawn point, then
-// fade back in. This is used by doors, including doors that switch between the 2D
-// and 2.5D modes (each mode is just a different scene).
+// Changes from one scene to another the smooth way: fade to black, load the new
+// scene, place the player at the correct spawn point, then fade back in. Doors use
+// this. When the new scene is ready it raises GameEvents.OnSceneReady (the
+// SaveManager listens to that to autosave).
+// It can also move the player to another place in the SAME scene behind the same
+// fade (MovePlayerTo). Doors between camera zones use that.
+// Other scripts reach it with: GameManager.Instance.SceneLoader
 //
-// Put this on: the "Managers" GameObject (the prefab that lives in every scene).
+// Put this on: the "Managers" GameObject (next to the GameManager).
 // Assign in Inspector:
 //   - Screen Fader: the ScreenFader on the persistent fade Canvas.
 //   - Player Tag: the tag on your player object (default "Player").
-//   - Autosave On Load: tick to autosave every time a new scene is entered.
 
 using System.Collections;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
-public class SceneLoader : Singleton<SceneLoader>
+public class SceneLoader : MonoBehaviour
 {
     [Header("References")]
     [Tooltip("The ScreenFader used to fade the screen in and out during a scene change.")]
@@ -23,9 +25,6 @@ public class SceneLoader : Singleton<SceneLoader>
     [Header("Settings")]
     [Tooltip("The tag on your player GameObject. The loader moves this object to the spawn point.")]
     [SerializeField] private string playerTag = "Player";
-
-    [Tooltip("If ticked, the game autosaves each time a new scene finishes loading.")]
-    [SerializeField] private bool autosaveOnLoad = true;
 
     // The spawn point the player should appear at in the scene being loaded.
     private string pendingSpawnPointId;
@@ -51,11 +50,54 @@ public class SceneLoader : Singleton<SceneLoader>
         StartCoroutine(LoadRoutine(sceneName));
     }
 
+    // Moves the player to another place in the SAME scene behind a fade: fade to black,
+    // move the player, fade back in. Doors between camera zones use this.
+    public void MovePlayerTo(Vector3 position)
+    {
+        if (isLoading)
+        {
+            return;
+        }
+
+        StartCoroutine(MoveRoutine(position));
+    }
+
+    // Handles the whole fade-out, move-player, fade-in sequence inside one scene.
+    private IEnumerator MoveRoutine(Vector3 position)
+    {
+        isLoading = true;
+
+        if (screenFader != null)
+        {
+            yield return screenFader.FadeOut();
+        }
+
+        GameObject player = GameObject.FindGameObjectWithTag(playerTag);
+        if (player == null)
+        {
+            Debug.LogWarning($"SceneLoader: no object tagged '{playerTag}' was found, so the player could not be moved.");
+        }
+        else
+        {
+            PlacePlayer(player, position);
+        }
+
+        // Two frames in the dark: the camera zone switches on, then the camera cuts to it.
+        yield return null;
+        yield return null;
+
+        if (screenFader != null)
+        {
+            yield return screenFader.FadeIn();
+        }
+
+        isLoading = false;
+    }
+
     // Handles the whole fade-out, load, place-player, fade-in sequence.
     private IEnumerator LoadRoutine(string sceneName)
     {
         isLoading = true;
-        GameEvents.RaiseSceneLoadStarted();
 
         if (screenFader != null)
         {
@@ -69,13 +111,7 @@ public class SceneLoader : Singleton<SceneLoader>
         }
 
         PlacePlayerAtSpawnPoint();
-
-        if (autosaveOnLoad && SaveManager.Instance != null && !SaveManager.Instance.IsRestoring)
-        {
-            SaveManager.Instance.SaveGame();
-        }
-
-        GameEvents.RaiseSceneLoadFinished();
+        GameEvents.RaiseSceneReady();
 
         if (screenFader != null)
         {
@@ -107,13 +143,28 @@ public class SceneLoader : Singleton<SceneLoader>
             return;
         }
 
-        player.transform.SetPositionAndRotation(target.transform.position, target.transform.rotation);
+        PlacePlayer(player, target.transform.position);
+    }
+
+    // Puts the player on a spot. PlayerMovement teleports safely; setting the position
+    // directly would be undone by the CharacterController.
+    private void PlacePlayer(GameObject player, Vector3 position)
+    {
+        PlayerMovement movement = player.GetComponent<PlayerMovement>();
+        if (movement != null)
+        {
+            movement.TeleportTo(position);
+        }
+        else
+        {
+            player.transform.position = position;
+        }
     }
 
     // Looks through the loaded scene for a spawn point with the matching id.
     private SpawnPoint FindSpawnPoint(string spawnPointId)
     {
-        SpawnPoint[] spawnPoints = FindObjectsByType<SpawnPoint>(FindObjectsSortMode.None);
+        SpawnPoint[] spawnPoints = FindObjectsByType<SpawnPoint>();
         foreach (SpawnPoint spawnPoint in spawnPoints)
         {
             if (spawnPoint.SpawnPointId == spawnPointId)

@@ -1,0 +1,1444 @@
+fileFormatVersion: 2
+guid: 81a6d1f583b18a94ea5c2589662f711d
+TextureImporter:
+  internalIDToNameTable: []
+  externalObjects: {}
+  serializedVersion: 13
+  mipmaps:
+    mipMapMode: 0
+    enableMipMap: 0
+    sRGBTexture: 1
+    linearTexture: 0
+    fadeOut: 0
+    borderMipMap: 0
+    mipMapsPreserveCoverage: 0
+    alphaTestReferenceValue: 0.5
+    mipMapFadeDistanceStart: 1
+    mipMapFadeDistanceEnd: 3
+  bumpmap:
+    convertToNormalMap: 0
+    externalNormalMap: 0
+    heightScale: 0.25
+    normalMapFilter: 0
+    flipGreenChannel: 0
+  isReadable: 0
+  streamingMipmaps: 0
+  streamingMipmapsPriority: 0
+  vTOnly: 0
+  ignoreMipmapLimit: 0
+  grayScaleToAlpha: 0
+  generateCubemap: 6
+  cubemapConvolution: 0
+  seamlessCubemap: 0
+  textureFormat: 1
+  maxTextureSize: 2048
+  textureSettings:
+    serializedVersion: 2
+    filterMode: 1
+    aniso: 1
+    mipBias: 0
+    wrapU: 1
+    wrapV: 1
+    wrapW: 1
+  nPOTScale: 0
+  lightmap: 0
+  compressionQuality: 50
+  spriteMode: 2
+  spriteExtrude: 1
+  spriteMeshType: 0
+  alignment: 9
+  spritePivot: {x: 0.5, y: 0.13513513}
+  spritePixelsToUnits: 128
+  spriteBorder: {x: 0, y: 0, z: 0, w: 0}
+  spriteGenerateFallbackPhysicsShape: 0
+  alphaUsage: 1
+  alphaIsTransparency: 1
+  spriteTessellationDetail: -1
+  textureType: 8
+  textureShape: 1
+  singleChannelComponent: 0
+  flipbookRows: 1
+  flipbookColumns: 1
+  maxTextureSizeSet: 0
+  compressionQualitySet: 0
+  textureFormatSet: 0
+  ignorePngGamma: 0
+  applyGammaDecoding: 0
+  swizzle: 50462976
+  cookieLightType: 0
+  platformSettings:
+  - serializedVersion: 4
+    buildTarget: DefaultTexturePlatform
+    maxTextureSize: 4096
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 0
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: Standalone
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: Android
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: WebGL
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: WindowsStoreApps
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  spriteSheet:
+    serializedVersion: 2
+    sprites:
+    - serializedVersion: 2
+      name: Mannequin_ThreeQuarter_Down_0
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 2072
+        width: 256
+        height: 296
+      alignment: 9
+      pivot: {x: 0.5, y: 0.13513513}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 05e116d7402954644ae900af006af832
+      internalID: 721752864
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Mannequin_ThreeQuarter_Down_1
+      rect:
+        serializedVersion: 2
+        x: 256
+        y: 2072
+        width: 256
+        height: 296
+      alignment: 9
+      pivot: {x: 0.5, y: 0.13513513}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 9e2ea71e91fdb3c4da5d1c41c5777650
+      internalID: -1144028063
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Mannequin_ThreeQuarter_Down_2
+      rect:
+        serializedVersion: 2
+        x: 512
+        y: 2072
+        width: 256
+        height: 296
+      alignment: 9
+      pivot: {x: 0.5, y: 0.13513513}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: e130e84d0ae63e441b50aa00fb7e7eb8
+      internalID: -1100908308
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Mannequin_ThreeQuarter_Down_3
+      rect:
+        serializedVersion: 2
+        x: 768
+        y: 2072
+        width: 256
+        height: 296
+      alignment: 9
+      pivot: {x: 0.5, y: 0.13513513}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 7c4c59fdcb21fb14989fb4c811f4f50e
+      internalID: 1606004059
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Mannequin_ThreeQuarter_Down_4
+      rect:
+        serializedVersion: 2
+        x: 1024
+        y: 2072
+        width: 256
+        height: 296
+      alignment: 9
+      pivot: {x: 0.5, y: 0.13513513}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: addedf6bc43a7b9488e6e6e00964f655
+      internalID: -1958455962
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Mannequin_ThreeQuarter_Down_5
+      rect:
+        serializedVersion: 2
+        x: 1280
+        y: 2072
+        width: 256
+        height: 296
+      alignment: 9
+      pivot: {x: 0.5, y: 0.13513513}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 5ba3a02a4e02703409951bfdd21cc9bc
+      internalID: -1533152800
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Mannequin_ThreeQuarter_Down_6
+      rect:
+        serializedVersion: 2
+        x: 1536
+        y: 2072
+        width: 256
+        height: 296
+      alignment: 9
+      pivot: {x: 0.5, y: 0.13513513}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 359ca252030382a489067d9b638dee81
+      internalID: -1915248559
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Mannequin_ThreeQuarter_DownRight_0
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 1776
+        width: 256
+        height: 296
+      alignment: 9
+      pivot: {x: 0.5, y: 0.13513513}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 6752c24976da8bb44bb902ef86fb70d7
+      internalID: 486266581
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Mannequin_ThreeQuarter_DownRight_1
+      rect:
+        serializedVersion: 2
+        x: 256
+        y: 1776
+        width: 256
+        height: 296
+      alignment: 9
+      pivot: {x: 0.5, y: 0.13513513}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: b837ab8841118164a93a3a2c1912cb04
+      internalID: -1882910704
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Mannequin_ThreeQuarter_DownRight_2
+      rect:
+        serializedVersion: 2
+        x: 512
+        y: 1776
+        width: 256
+        height: 296
+      alignment: 9
+      pivot: {x: 0.5, y: 0.13513513}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: be400308197eb4842beb23b9f588f63f
+      internalID: 506616859
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Mannequin_ThreeQuarter_DownRight_3
+      rect:
+        serializedVersion: 2
+        x: 768
+        y: 1776
+        width: 256
+        height: 296
+      alignment: 9
+      pivot: {x: 0.5, y: 0.13513513}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: a8f24c08258b50a4cb35956c8d7452c3
+      internalID: 2107038564
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Mannequin_ThreeQuarter_DownRight_4
+      rect:
+        serializedVersion: 2
+        x: 1024
+        y: 1776
+        width: 256
+        height: 296
+      alignment: 9
+      pivot: {x: 0.5, y: 0.13513513}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 3fc6a3bf52638c3499ae685123a0d61b
+      internalID: 84167685
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Mannequin_ThreeQuarter_DownRight_5
+      rect:
+        serializedVersion: 2
+        x: 1280
+        y: 1776
+        width: 256
+        height: 296
+      alignment: 9
+      pivot: {x: 0.5, y: 0.13513513}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 1930dd60ccdcb8b49a9fc984c369c9ab
+      internalID: -1066316456
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Mannequin_ThreeQuarter_DownRight_6
+      rect:
+        serializedVersion: 2
+        x: 1536
+        y: 1776
+        width: 256
+        height: 296
+      alignment: 9
+      pivot: {x: 0.5, y: 0.13513513}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 9443b25ac8c96ff43913471c2c8ff965
+      internalID: -1343682500
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Mannequin_ThreeQuarter_Right_0
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 1480
+        width: 256
+        height: 296
+      alignment: 9
+      pivot: {x: 0.5, y: 0.13513513}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: f54e0e3f8f1903d4bb04044e833fceec
+      internalID: -444582980
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Mannequin_ThreeQuarter_Right_1
+      rect:
+        serializedVersion: 2
+        x: 256
+        y: 1480
+        width: 256
+        height: 296
+      alignment: 9
+      pivot: {x: 0.5, y: 0.13513513}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 7d2a75163ce88e14eb456132c05be040
+      internalID: -634836558
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Mannequin_ThreeQuarter_Right_2
+      rect:
+        serializedVersion: 2
+        x: 512
+        y: 1480
+        width: 256
+        height: 296
+      alignment: 9
+      pivot: {x: 0.5, y: 0.13513513}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 42fd3c06b628bc941bc57d379801171c
+      internalID: -1863142125
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Mannequin_ThreeQuarter_Right_3
+      rect:
+        serializedVersion: 2
+        x: 768
+        y: 1480
+        width: 256
+        height: 296
+      alignment: 9
+      pivot: {x: 0.5, y: 0.13513513}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: af3e75f822762a146ba27c3b7f59d97c
+      internalID: 1202269017
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Mannequin_ThreeQuarter_Right_4
+      rect:
+        serializedVersion: 2
+        x: 1024
+        y: 1480
+        width: 256
+        height: 296
+      alignment: 9
+      pivot: {x: 0.5, y: 0.13513513}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 08d456c487f83594995654b8bb714b75
+      internalID: -2069654218
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Mannequin_ThreeQuarter_Right_5
+      rect:
+        serializedVersion: 2
+        x: 1280
+        y: 1480
+        width: 256
+        height: 296
+      alignment: 9
+      pivot: {x: 0.5, y: 0.13513513}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 374227916a0208b4bbca508ac7961c3b
+      internalID: 259974450
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Mannequin_ThreeQuarter_Right_6
+      rect:
+        serializedVersion: 2
+        x: 1536
+        y: 1480
+        width: 256
+        height: 296
+      alignment: 9
+      pivot: {x: 0.5, y: 0.13513513}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 4bcb0ca7f774d5c42bacc2631d0004aa
+      internalID: 521960344
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Mannequin_ThreeQuarter_UpRight_0
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 1184
+        width: 256
+        height: 296
+      alignment: 9
+      pivot: {x: 0.5, y: 0.13513513}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 3f9db2c742b2cd445a3abaea43060086
+      internalID: 52871678
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Mannequin_ThreeQuarter_UpRight_1
+      rect:
+        serializedVersion: 2
+        x: 256
+        y: 1184
+        width: 256
+        height: 296
+      alignment: 9
+      pivot: {x: 0.5, y: 0.13513513}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: b84cd685e11acc24b984784646bbabb1
+      internalID: -371829270
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Mannequin_ThreeQuarter_UpRight_2
+      rect:
+        serializedVersion: 2
+        x: 512
+        y: 1184
+        width: 256
+        height: 296
+      alignment: 9
+      pivot: {x: 0.5, y: 0.13513513}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: ed8e6f42b529cec429e576158b05a8b6
+      internalID: 1956625751
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Mannequin_ThreeQuarter_UpRight_3
+      rect:
+        serializedVersion: 2
+        x: 768
+        y: 1184
+        width: 256
+        height: 296
+      alignment: 9
+      pivot: {x: 0.5, y: 0.13513513}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 6d54c73b13b05b3408ad305c68688809
+      internalID: 963553217
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Mannequin_ThreeQuarter_UpRight_4
+      rect:
+        serializedVersion: 2
+        x: 1024
+        y: 1184
+        width: 256
+        height: 296
+      alignment: 9
+      pivot: {x: 0.5, y: 0.13513513}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: bd758dad669ed104fa7a6b4750ccda9a
+      internalID: 689787911
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Mannequin_ThreeQuarter_UpRight_5
+      rect:
+        serializedVersion: 2
+        x: 1280
+        y: 1184
+        width: 256
+        height: 296
+      alignment: 9
+      pivot: {x: 0.5, y: 0.13513513}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 7b06ce65c7138d54fa1b0a704b76294a
+      internalID: 115601568
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Mannequin_ThreeQuarter_UpRight_6
+      rect:
+        serializedVersion: 2
+        x: 1536
+        y: 1184
+        width: 256
+        height: 296
+      alignment: 9
+      pivot: {x: 0.5, y: 0.13513513}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 3fa77900ffca0ab43b7f5df944c1c74e
+      internalID: -1638728517
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Mannequin_ThreeQuarter_Up_0
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 888
+        width: 256
+        height: 296
+      alignment: 9
+      pivot: {x: 0.5, y: 0.13513513}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: f3071434f188eaf4c952a7299cdc15d4
+      internalID: 116678249
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Mannequin_ThreeQuarter_Up_1
+      rect:
+        serializedVersion: 2
+        x: 256
+        y: 888
+        width: 256
+        height: 296
+      alignment: 9
+      pivot: {x: 0.5, y: 0.13513513}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 6b8fc2ae3ed8f4d4db94afcd27c997f1
+      internalID: 1463278150
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Mannequin_ThreeQuarter_Up_2
+      rect:
+        serializedVersion: 2
+        x: 512
+        y: 888
+        width: 256
+        height: 296
+      alignment: 9
+      pivot: {x: 0.5, y: 0.13513513}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: f36fa4119d610ac47bb137a5cca8fa52
+      internalID: 437268125
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Mannequin_ThreeQuarter_Up_3
+      rect:
+        serializedVersion: 2
+        x: 768
+        y: 888
+        width: 256
+        height: 296
+      alignment: 9
+      pivot: {x: 0.5, y: 0.13513513}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: ce4cc1c07d0be4345b6621ad609ef6a3
+      internalID: -163421100
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Mannequin_ThreeQuarter_Up_4
+      rect:
+        serializedVersion: 2
+        x: 1024
+        y: 888
+        width: 256
+        height: 296
+      alignment: 9
+      pivot: {x: 0.5, y: 0.13513513}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 8ef25c56219eca24e847cd359c8e1f35
+      internalID: 935006757
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Mannequin_ThreeQuarter_Up_5
+      rect:
+        serializedVersion: 2
+        x: 1280
+        y: 888
+        width: 256
+        height: 296
+      alignment: 9
+      pivot: {x: 0.5, y: 0.13513513}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 78489fa9736571a4fb4d5e52bcd05bb3
+      internalID: -435372628
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Mannequin_ThreeQuarter_Up_6
+      rect:
+        serializedVersion: 2
+        x: 1536
+        y: 888
+        width: 256
+        height: 296
+      alignment: 9
+      pivot: {x: 0.5, y: 0.13513513}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: ff6128f2c9559334f9a9a98375dc5b27
+      internalID: 1171881051
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Mannequin_ThreeQuarter_UpLeft_0
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 592
+        width: 256
+        height: 296
+      alignment: 9
+      pivot: {x: 0.5, y: 0.13513513}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 41aa67a7ad587ad4f91367aaf75e5005
+      internalID: -1556722438
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Mannequin_ThreeQuarter_UpLeft_1
+      rect:
+        serializedVersion: 2
+        x: 256
+        y: 592
+        width: 256
+        height: 296
+      alignment: 9
+      pivot: {x: 0.5, y: 0.13513513}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: f4a327945940e734bba1e2f6342ab6eb
+      internalID: -104067678
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Mannequin_ThreeQuarter_UpLeft_2
+      rect:
+        serializedVersion: 2
+        x: 512
+        y: 592
+        width: 256
+        height: 296
+      alignment: 9
+      pivot: {x: 0.5, y: 0.13513513}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 8b15697097ef4404c8871f9bff3ce133
+      internalID: 1748242258
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Mannequin_ThreeQuarter_UpLeft_3
+      rect:
+        serializedVersion: 2
+        x: 768
+        y: 592
+        width: 256
+        height: 296
+      alignment: 9
+      pivot: {x: 0.5, y: 0.13513513}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 371707df40117d84081b41ad12d869fe
+      internalID: -1477620374
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Mannequin_ThreeQuarter_UpLeft_4
+      rect:
+        serializedVersion: 2
+        x: 1024
+        y: 592
+        width: 256
+        height: 296
+      alignment: 9
+      pivot: {x: 0.5, y: 0.13513513}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 395ab22b292061f4f8037cf960299782
+      internalID: 331058000
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Mannequin_ThreeQuarter_UpLeft_5
+      rect:
+        serializedVersion: 2
+        x: 1280
+        y: 592
+        width: 256
+        height: 296
+      alignment: 9
+      pivot: {x: 0.5, y: 0.13513513}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 76751e99333f28f40a1989d0e8318e5c
+      internalID: -1149825498
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Mannequin_ThreeQuarter_UpLeft_6
+      rect:
+        serializedVersion: 2
+        x: 1536
+        y: 592
+        width: 256
+        height: 296
+      alignment: 9
+      pivot: {x: 0.5, y: 0.13513513}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: e4c2ba687ffde6946b27a70a01201462
+      internalID: 2132604783
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Mannequin_ThreeQuarter_Left_0
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 296
+        width: 256
+        height: 296
+      alignment: 9
+      pivot: {x: 0.5, y: 0.13513513}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 8c23aa13b1073d94da2ce4e92631dbc8
+      internalID: -988124656
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Mannequin_ThreeQuarter_Left_1
+      rect:
+        serializedVersion: 2
+        x: 256
+        y: 296
+        width: 256
+        height: 296
+      alignment: 9
+      pivot: {x: 0.5, y: 0.13513513}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 54d7b1dd16106454ea723a93e9dd6d9b
+      internalID: 671309672
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Mannequin_ThreeQuarter_Left_2
+      rect:
+        serializedVersion: 2
+        x: 512
+        y: 296
+        width: 256
+        height: 296
+      alignment: 9
+      pivot: {x: 0.5, y: 0.13513513}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 74a3c42469043a348a9c15a3c2fa0c24
+      internalID: -230738015
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Mannequin_ThreeQuarter_Left_3
+      rect:
+        serializedVersion: 2
+        x: 768
+        y: 296
+        width: 256
+        height: 296
+      alignment: 9
+      pivot: {x: 0.5, y: 0.13513513}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 8d656982d44379149a172e4239077207
+      internalID: 557949611
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Mannequin_ThreeQuarter_Left_4
+      rect:
+        serializedVersion: 2
+        x: 1024
+        y: 296
+        width: 256
+        height: 296
+      alignment: 9
+      pivot: {x: 0.5, y: 0.13513513}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 73608ff163f940e46b233cc229e32636
+      internalID: -108584527
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Mannequin_ThreeQuarter_Left_5
+      rect:
+        serializedVersion: 2
+        x: 1280
+        y: 296
+        width: 256
+        height: 296
+      alignment: 9
+      pivot: {x: 0.5, y: 0.13513513}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 1690aa529edcda349a7149065c5ecdb5
+      internalID: 1478324284
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Mannequin_ThreeQuarter_Left_6
+      rect:
+        serializedVersion: 2
+        x: 1536
+        y: 296
+        width: 256
+        height: 296
+      alignment: 9
+      pivot: {x: 0.5, y: 0.13513513}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: e37c1d6f659efe14585887ff5db65160
+      internalID: -711239708
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Mannequin_ThreeQuarter_DownLeft_0
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 0
+        width: 256
+        height: 296
+      alignment: 9
+      pivot: {x: 0.5, y: 0.13513513}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 3fc361be4cc1f0e409c78517a2dcba94
+      internalID: 2113058321
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Mannequin_ThreeQuarter_DownLeft_1
+      rect:
+        serializedVersion: 2
+        x: 256
+        y: 0
+        width: 256
+        height: 296
+      alignment: 9
+      pivot: {x: 0.5, y: 0.13513513}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: b4570276ffe11ae40879acb2b2d3ca02
+      internalID: 658741403
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Mannequin_ThreeQuarter_DownLeft_2
+      rect:
+        serializedVersion: 2
+        x: 512
+        y: 0
+        width: 256
+        height: 296
+      alignment: 9
+      pivot: {x: 0.5, y: 0.13513513}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: b093362a3e836624ebb105aeaa7bcc54
+      internalID: 1882311152
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Mannequin_ThreeQuarter_DownLeft_3
+      rect:
+        serializedVersion: 2
+        x: 768
+        y: 0
+        width: 256
+        height: 296
+      alignment: 9
+      pivot: {x: 0.5, y: 0.13513513}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 17ced60b33f78424997c1fc389535d74
+      internalID: 2053503867
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Mannequin_ThreeQuarter_DownLeft_4
+      rect:
+        serializedVersion: 2
+        x: 1024
+        y: 0
+        width: 256
+        height: 296
+      alignment: 9
+      pivot: {x: 0.5, y: 0.13513513}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 6a492af430063794f8bb7b183cf3fc1a
+      internalID: -130665715
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Mannequin_ThreeQuarter_DownLeft_5
+      rect:
+        serializedVersion: 2
+        x: 1280
+        y: 0
+        width: 256
+        height: 296
+      alignment: 9
+      pivot: {x: 0.5, y: 0.13513513}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: a7906a6b392336c47933b6998afdeb04
+      internalID: -665926566
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Mannequin_ThreeQuarter_DownLeft_6
+      rect:
+        serializedVersion: 2
+        x: 1536
+        y: 0
+        width: 256
+        height: 296
+      alignment: 9
+      pivot: {x: 0.5, y: 0.13513513}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 218daa2559c0dca4b8bfd9d11fd27ff1
+      internalID: 1577507817
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    outline: []
+    customData: 
+    physicsShape: []
+    bones: []
+    spriteID: d1f30a092ed31754bb4b3c6c78d4419c
+    internalID: 0
+    vertices: []
+    indices: 
+    edges: []
+    weights: []
+    secondaryTextures: []
+    spriteCustomMetadata:
+      entries: []
+    nameFileIdTable:
+      Mannequin_ThreeQuarter_DownLeft_0: 2113058321
+      Mannequin_ThreeQuarter_DownLeft_1: 658741403
+      Mannequin_ThreeQuarter_DownLeft_2: 1882311152
+      Mannequin_ThreeQuarter_DownLeft_3: 2053503867
+      Mannequin_ThreeQuarter_DownLeft_4: -130665715
+      Mannequin_ThreeQuarter_DownLeft_5: -665926566
+      Mannequin_ThreeQuarter_DownLeft_6: 1577507817
+      Mannequin_ThreeQuarter_DownRight_0: 486266581
+      Mannequin_ThreeQuarter_DownRight_1: -1882910704
+      Mannequin_ThreeQuarter_DownRight_2: 506616859
+      Mannequin_ThreeQuarter_DownRight_3: 2107038564
+      Mannequin_ThreeQuarter_DownRight_4: 84167685
+      Mannequin_ThreeQuarter_DownRight_5: -1066316456
+      Mannequin_ThreeQuarter_DownRight_6: -1343682500
+      Mannequin_ThreeQuarter_Down_0: 721752864
+      Mannequin_ThreeQuarter_Down_1: -1144028063
+      Mannequin_ThreeQuarter_Down_2: -1100908308
+      Mannequin_ThreeQuarter_Down_3: 1606004059
+      Mannequin_ThreeQuarter_Down_4: -1958455962
+      Mannequin_ThreeQuarter_Down_5: -1533152800
+      Mannequin_ThreeQuarter_Down_6: -1915248559
+      Mannequin_ThreeQuarter_Left_0: -988124656
+      Mannequin_ThreeQuarter_Left_1: 671309672
+      Mannequin_ThreeQuarter_Left_2: -230738015
+      Mannequin_ThreeQuarter_Left_3: 557949611
+      Mannequin_ThreeQuarter_Left_4: -108584527
+      Mannequin_ThreeQuarter_Left_5: 1478324284
+      Mannequin_ThreeQuarter_Left_6: -711239708
+      Mannequin_ThreeQuarter_Right_0: -444582980
+      Mannequin_ThreeQuarter_Right_1: -634836558
+      Mannequin_ThreeQuarter_Right_2: -1863142125
+      Mannequin_ThreeQuarter_Right_3: 1202269017
+      Mannequin_ThreeQuarter_Right_4: -2069654218
+      Mannequin_ThreeQuarter_Right_5: 259974450
+      Mannequin_ThreeQuarter_Right_6: 521960344
+      Mannequin_ThreeQuarter_UpLeft_0: -1556722438
+      Mannequin_ThreeQuarter_UpLeft_1: -104067678
+      Mannequin_ThreeQuarter_UpLeft_2: 1748242258
+      Mannequin_ThreeQuarter_UpLeft_3: -1477620374
+      Mannequin_ThreeQuarter_UpLeft_4: 331058000
+      Mannequin_ThreeQuarter_UpLeft_5: -1149825498
+      Mannequin_ThreeQuarter_UpLeft_6: 2132604783
+      Mannequin_ThreeQuarter_UpRight_0: 52871678
+      Mannequin_ThreeQuarter_UpRight_1: -371829270
+      Mannequin_ThreeQuarter_UpRight_2: 1956625751
+      Mannequin_ThreeQuarter_UpRight_3: 963553217
+      Mannequin_ThreeQuarter_UpRight_4: 689787911
+      Mannequin_ThreeQuarter_UpRight_5: 115601568
+      Mannequin_ThreeQuarter_UpRight_6: -1638728517
+      Mannequin_ThreeQuarter_Up_0: 116678249
+      Mannequin_ThreeQuarter_Up_1: 1463278150
+      Mannequin_ThreeQuarter_Up_2: 437268125
+      Mannequin_ThreeQuarter_Up_3: -163421100
+      Mannequin_ThreeQuarter_Up_4: 935006757
+      Mannequin_ThreeQuarter_Up_5: -435372628
+      Mannequin_ThreeQuarter_Up_6: 1171881051
+  mipmapLimitGroupName: 
+  pSDRemoveMatte: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 

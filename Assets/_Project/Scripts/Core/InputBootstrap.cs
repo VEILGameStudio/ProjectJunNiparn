@@ -1,9 +1,14 @@
 // InputBootstrap
-// Switches the shared controls on when the scene starts and off when it ends.
+// Switches the shared controls on when the game starts and off when it ends.
 // It also runs a quick self-check in the Editor that says exactly what is wrong if
 // the input setup is broken, instead of the player just not moving.
 //
-// Put this on: the "Managers" GameObject in every gameplay scene (one per scene).
+// Only ONE InputBootstrap owns the controls: the first one that starts. When a
+// scene is reloaded (for example after game over), that scene's copy of the
+// Managers object is a duplicate that gets removed. The duplicate does nothing,
+// so removing it can never switch the controls off.
+//
+// Put this on: the "Managers" GameObject (the one with the GameManager).
 // Assign in Inspector: Input Reader = the MainInputReader asset.
 
 using UnityEngine;
@@ -15,30 +20,47 @@ public class InputBootstrap : MonoBehaviour
     [Tooltip("Drag the shared MainInputReader asset here.")]
     [SerializeField] private InputReader inputReader;
 
+    // The bootstrap that switched the controls on. Only this one may switch them off.
+    private static InputBootstrap activeBootstrap;
+
+    // True when this bootstrap owns the controls (it is not a duplicate).
+    private bool IsActiveBootstrap => activeBootstrap == this;
+
+    // Switches the controls on, unless another bootstrap already did.
     private void Awake()
     {
+        if (activeBootstrap != null && activeBootstrap != this)
+        {
+            return; // A duplicate from a reloaded scene. The first bootstrap owns the controls.
+        }
+
         if (inputReader == null)
         {
             Debug.LogError($"InputBootstrap on '{name}': Input Reader is not assigned. Drag the MainInputReader asset here.", this);
             return;
         }
 
+        activeBootstrap = this;
         inputReader.Initialize();
     }
 
+    // Switches the controls off, but only if this bootstrap switched them on.
     private void OnDestroy()
     {
-        if (inputReader != null)
+        if (!IsActiveBootstrap)
         {
-            inputReader.Shutdown();
+            return;
         }
+
+        activeBootstrap = null;
+        inputReader.Shutdown();
     }
 
 #if UNITY_EDITOR || DEVELOPMENT_BUILD
     // Checks the input setup once the scene is running and reports anything wrong.
     private void Start()
     {
-        if (inputReader == null)
+        if (!IsActiveBootstrap)
         {
             return;
         }

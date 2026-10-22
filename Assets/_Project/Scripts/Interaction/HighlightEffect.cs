@@ -3,11 +3,14 @@
 //   1. The player walks near it.
 //   2. The player has not interacted with anything for a while (a hint), handled
 //      by the HintManager.
-// It turns the outline on by setting the Outline Thickness on the sprite's
-// material (the sprite must use the "Game/Sprite Outline" shader/material).
+// It turns the outline on by setting _OutlineThickness and _OutlineColor through a
+// MaterialPropertyBlock on this one renderer only. The shared material file is never
+// changed, so other sprites do not light up and nothing is left changed after Play mode.
 //
-// Put this on: the interactable sprite GameObject (it needs a SpriteRenderer whose
-//   material uses the Sprite Outline shader).
+// Put this on: the interactable sprite GameObject (it needs a SpriteRenderer using the
+//   SpriteLit material, shader "Game/SpriteLitOutline"). The sprite needs a transparent
+//   border at least as wide as the outline, and its import setting Mesh Type = Full Rect,
+//   or the outline has nowhere to be drawn.
 // Assign in Inspector:
 //   - Outline Color / Outline Thickness: how the highlight looks.
 //   - Show Distance: how close the player must be to light it up.
@@ -58,6 +61,13 @@ public class HighlightEffect : MonoBehaviour
         SetOutline(false); // Start hidden.
     }
 
+    // Hides the outline when switched off (for example after a one-shot interactable is used).
+    private void OnDisable()
+    {
+        isShown = false;
+        SetOutline(false);
+    }
+
     private void Update()
     {
         bool shouldShow = ShouldShow();
@@ -75,11 +85,19 @@ public class HighlightEffect : MonoBehaviour
         {
             return true;
         }
-        if (useIdleHint && HintManager.Instance != null && HintManager.Instance.ShouldShowHint)
+        if (useIdleHint && IsHintTime())
         {
             return true;
         }
         return false;
+    }
+
+    // True when the HintManager says the player has been idle long enough.
+    private bool IsHintTime()
+    {
+        return GameManager.Instance != null
+            && GameManager.Instance.HintManager != null
+            && GameManager.Instance.HintManager.ShouldShowHint;
     }
 
     // True when the player is within Show Distance.
