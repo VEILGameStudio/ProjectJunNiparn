@@ -12,15 +12,15 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3b77da5a71e66e742915af4f2bb86a21, type: 3}
   m_Name: Cutter_Item
   m_EditorClassIdentifier: Assembly-CSharp::ItemData
-  id: 
+  id: cutter
   category: 0
   displayName:
-    english: 
-    thai: 
+    english: Cutter
+    thai: "\u0E04\u0E31\u0E15\u0E40\u0E15\u0E2D\u0E23\u0E4C"
   description:
-    english: 
-    thai: 
-  icon: {fileID: 0}
+    english: A sharp cutter. It can cut tape.
+    thai: "\u0E04\u0E31\u0E15\u0E40\u0E15\u0E2D\u0E23\u0E4C\u0E04\u0E21\u0E46 \u0E43\u0E0A\u0E49\u0E15\u0E31\u0E14\u0E40\u0E17\u0E1B\u0E44\u0E14\u0E49"
+  icon: {fileID: 21300000, guid: a9ef2fa171cc9b74bbaeb6668ccfb06c, type: 3}
   maxStack: 1
   healAmount: 0
   staminaAmount: 0

@@ -12,15 +12,15 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3b77da5a71e66e742915af4f2bb86a21, type: 3}
   m_Name: Key
   m_EditorClassIdentifier: Assembly-CSharp::ItemData
-  id: 
+  id: cookie_key
   category: 0
   displayName:
-    english: 
-    thai: 
+    english: Key
+    thai: "\u0E01\u0E38\u0E0D\u0E41\u0E08"
   description:
     english: 
     thai: 
-  icon: {fileID: 0}
+  icon: {fileID: 21300000, guid: 1f93f28281f5eeb41bf3f5fc1719a62a, type: 3}
   maxStack: 1
   healAmount: 0
   staminaAmount: 0
