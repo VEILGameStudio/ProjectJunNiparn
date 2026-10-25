@@ -3801,7 +3801,7 @@ MonoBehaviour:
   amount: 1
   showMessageOnPickup: 1
   pickupMessage:
-    english: 
+    english: got the cutter
     thai: 
 --- !u!65 &1145327016
 BoxCollider:
