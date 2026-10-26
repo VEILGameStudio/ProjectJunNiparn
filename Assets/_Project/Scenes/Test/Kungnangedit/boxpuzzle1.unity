@@ -119,6 +119,51 @@ NavMeshSettings:
     debug:
       m_Flags: 0
   m_NavMeshData: {fileID: 0}
+--- !u!1 &157516178
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 157516180}
+  - component: {fileID: 157516179}
+  m_Layer: 0
+  m_Name: ClickHandler
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &157516179
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 157516178}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5e71db670c06cd942b96fabe9a322788, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::SceneClickInteractor
+  interactionCamera: {fileID: 0}
+--- !u!4 &157516180
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 157516178}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 2.28919, y: -1.00066, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &426614750
 GameObject:
   m_ObjectHideFlags: 0
@@ -198,7 +243,7 @@ SpriteRenderer:
   m_GlobalIlluminationMeshLod: 0
   m_SortingLayerID: 0
   m_SortingLayer: 0
-  m_SortingOrder: 0
+  m_SortingOrder: 2
   m_MaskInteraction: 0
   m_Sprite: {fileID: 21300000, guid: 64d3bf5812106e54f850ad42118f77c7, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
@@ -290,7 +335,7 @@ SpriteRenderer:
   m_GlobalIlluminationMeshLod: 0
   m_SortingLayerID: 0
   m_SortingLayer: 0
-  m_SortingOrder: 0
+  m_SortingOrder: 4
   m_MaskInteraction: 0
   m_Sprite: {fileID: 21300000, guid: c18b699b47d12bc4f8c6c50dd3fa55e6, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
@@ -364,8 +409,8 @@ Camera:
   near clip plane: 0.3
   far clip plane: 1000
   field of view: 60
-  orthographic: 0
-  orthographic size: 5
+  orthographic: 1
+  orthographic size: 3
   m_Depth: -1
   m_CullingMask:
     serializedVersion: 2
@@ -519,7 +564,7 @@ SpriteRenderer:
   m_GlobalIlluminationMeshLod: 0
   m_SortingLayerID: 0
   m_SortingLayer: 0
-  m_SortingOrder: 0
+  m_SortingOrder: 5
   m_MaskInteraction: 0
   m_Sprite: {fileID: 21300000, guid: 4c100e6297d084b46b30f0945b0f336a, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
@@ -738,7 +783,7 @@ SpriteRenderer:
   m_GlobalIlluminationMeshLod: 0
   m_SortingLayerID: 0
   m_SortingLayer: 0
-  m_SortingOrder: 0
+  m_SortingOrder: 1
   m_MaskInteraction: 0
   m_Sprite: {fileID: 21300000, guid: 22e4096b9e666ba4eace1fda6ab64ce3, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
@@ -922,7 +967,7 @@ SpriteRenderer:
   m_GlobalIlluminationMeshLod: 0
   m_SortingLayerID: 0
   m_SortingLayer: 0
-  m_SortingOrder: 0
+  m_SortingOrder: 3
   m_MaskInteraction: 0
   m_Sprite: {fileID: 21300000, guid: 1f93f28281f5eeb41bf3f5fc1719a62a, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
@@ -967,28 +1012,30 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::CookieBox
   activation: 0
-  maxInteractDistance: 2
+  maxInteractDistance: 100
   oneShot: 0
-  uniqueId: 
+  uniqueId: cookie_box
   clickArea: {fileID: 0}
   requiredItem: {fileID: 0}
   blockedMessage:
-    english: 
-    thai: 
+    english: I don't have a cutter.
+    thai: "\u0E09\u0E31\u0E19\u0E44\u0E21\u0E48\u0E21\u0E35\u0E04\u0E31\u0E15\u0E40\u0E15\u0E2D\u0E23\u0E4C\n"
   mustBeHeld: 0
   notHeldMessage: {fileID: 0}
   interactSound: {fileID: 0}
-  cutLayer: {fileID: 0}
-  openedLayer: {fileID: 0}
-  tapeScraps: []
-  lid: {fileID: 0}
-  keyLayer: {fileID: 0}
+  cutLayer: {fileID: 1554987921}
+  openedLayer: {fileID: 426614750}
+  tapeScraps:
+  - {fileID: 1153444066}
+  lid: {fileID: 665620486}
+  keyLayer: {fileID: 1857750098}
   keyItem: {fileID: 0}
   cutToOpenDelay: 1
+  fadeTime: 0.6
   lidShowDelay: 0.4
-  lidSlideOffset: {x: 1, y: 0.2, z: 0}
   lidSlideTime: 0.5
-  keyShowTime: 1
+  keyShowTime: 5
+  lidSlideOffset: {x: 30, y: 8, z: 0}
 --- !u!65 &1958864696
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -1008,7 +1055,7 @@ BoxCollider:
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 3
-  m_Size: {x: 81.92, y: 81.92, z: 0.2}
+  m_Size: {x: 54, y: 40, z: 0.2}
   m_Center: {x: 0, y: 0, z: 1}
 --- !u!212 &1958864697
 SpriteRenderer:
@@ -1079,8 +1126,8 @@ Transform:
   m_GameObject: {fileID: 1958864694}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 6.8824}
-  m_LocalScale: {x: 5.385271, y: 5.385271, z: 5.385271}
+  m_LocalPosition: {x: -0.04, y: 1.13, z: 0}
+  m_LocalScale: {x: 0.1, y: 0.1, z: 0.1}
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 426614751}
@@ -1098,3 +1145,4 @@ SceneRoots:
   - {fileID: 1273867044}
   - {fileID: 1958864698}
   - {fileID: 1856307017}
+  - {fileID: 157516180}
