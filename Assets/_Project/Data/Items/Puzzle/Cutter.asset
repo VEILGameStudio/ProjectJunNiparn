@@ -12,15 +12,15 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3b77da5a71e66e742915af4f2bb86a21, type: 3}
   m_Name: Cutter
   m_EditorClassIdentifier: Assembly-CSharp::ItemData
-  id: 
+  id: 004
   category: 0
   displayName:
-    english: 
+    english: Cutter
     thai: 
   description:
-    english: 
+    english: Use cutter saa
     thai: 
-  icon: {fileID: 0}
+  icon: {fileID: 456440527, guid: c92455b9bd7bc6d41817bde7786de6f5, type: 3}
   maxStack: 1
   healAmount: 0
   staminaAmount: 0
