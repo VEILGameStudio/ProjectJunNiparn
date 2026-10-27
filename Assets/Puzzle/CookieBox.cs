@@ -45,24 +45,26 @@ public class CookieBox : InteractableBase
 
     private IEnumerator OpenSequence(PlayerContext player)
     {
-        // 1) ตัดเทป: เปลี่ยนเป็นภาพ cookie และเศษเทปโผล่ทันที (ไม่มี fade)
+        // 1) ตัดเทป: เปลี่ยนเป็นภาพ cookie และเศษเทปโผล่ทันที
         if (cutLayer != null) cutLayer.SetActive(true);
         SetScraps(true);
 
         // 2) ค้างภาพ cookie
         yield return new WaitForSeconds(cutToOpenDelay);
 
-        // 3) สลับเป็นกล่องเปิด: Incookie อยู่ใต้ฝา ฝาอยู่ที่เดิม แล้วเลื่อนออกทันที
+        // 3) กล่องเปิด: Incookie, ฝา และกุญแจโผล่พร้อมกันทันที
         if (openedLayer != null) openedLayer.SetActive(true);
         if (lid != null)
         {
             lid.localPosition = lidStartPos;
             lid.gameObject.SetActive(true);
         }
-        yield return SlideLid();
-
-        // 4) กุญแจโผล่ ค้างไว้ แล้วเข้ากระเป๋า
         if (keyLayer != null) keyLayer.SetActive(true);
+
+        // ฝาเลื่อนออกไปพร้อมกัน (ไม่รอให้เลื่อนเสร็จ)
+        StartCoroutine(SlideLid());
+
+        // 4) ค้างกุญแจให้เห็น แล้วเข้ากระเป๋า
         yield return new WaitForSeconds(keyShowTime);
 
         if (player != null && player.Inventory != null && keyItem != null)
