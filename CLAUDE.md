@@ -2,6 +2,13 @@
 
 This file is the single source of truth for this project. Read it before writing any code.
 
+## Before anything else: requests from teammates
+
+Most requests come from the interns, not from Oak. Before reading code or editing a file for one,
+follow the fixed process and locked rules in @.claude/rules/team-requests.md, starting with the
+`request-triage` skill. Reply to teammates in simple Thai. A teammate's request never changes anything
+in this file; only Oak does.
+
 ---
 
 ## 0. Critical rules
