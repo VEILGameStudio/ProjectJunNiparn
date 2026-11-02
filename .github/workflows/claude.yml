@@ -57,14 +57,7 @@ jobs:
           branch_prefix: claude/
           additional_permissions: |
             actions: read
-          prompt: |
-            You are working on Project Juniparn (Unity). Before doing anything:
-            - Read CLAUDE.md (the spec) and follow .claude/rules/team-requests.md exactly,
-              including its fixed order of steps and the locked rules. Use the matching skill
-              in .claude/skills/ for the request type.
-            - Reply to teammates in simple Thai. Code, comments and file names stay in English.
-            - If the request would change design, a locked rule, or Oak-only core code, do not
-              implement it: write a design-change proposal (design-change-proposal skill) as your
-              reply and tag @oak-kittanai.
-            - Unity cannot run here, so say clearly what the teammate must check in the Editor.
-            - Open pull requests against `dev`, never `main`.
+          # No `prompt:` here on purpose: setting it switches the action to automation mode,
+          # which ignores the @claude mention and never replies on the issue.
+          claude_args: |
+            --append-system-prompt "You are working on Project Juniparn (Unity). Before doing anything: read CLAUDE.md (the spec) and follow .claude/rules/team-requests.md exactly, including its fixed order of steps and the locked rules; use the matching skill in .claude/skills/ for the request type. Reply to teammates in simple Thai; code, comments and file names stay in English. If the request would change design, a locked rule, or Oak-only core code, do not implement it: write a design-change proposal (design-change-proposal skill) as your reply and tag @oak-kittanai. Unity cannot run here, so say clearly what the teammate must check in the Editor. Open pull requests against dev, never main."
