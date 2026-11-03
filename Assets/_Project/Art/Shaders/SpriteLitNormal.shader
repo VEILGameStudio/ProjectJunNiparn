@@ -1,17 +1,27 @@
 // SpriteLitNormal
-// A lit sprite shader with alpha clipping, wind, and a normal map read from the sprite's
+// A lit sprite shader with alpha clipping, foliage wind, and a normal map read from the sprite's
 // Secondary Texture named "_NormalMap". This is what makes a flat tree card catch the light.
 //
 // Put this on: nothing. Make a material from it (Create > Material, pick Project/SpriteLitNormal)
-// and use that material on the SpriteRenderer. See SpriteLit_Wind_Normal.mat.
+// and use that material on the SpriteRenderer. See SpriteLit_Wind_Normal.mat (leaves),
+// SpriteLit_Wind_Normal_Overlay.mat (holey leaf layer), SpriteLit_Trunk.mat (no wind) and
+// SpriteLit_FlowGrass.mat (grass).
 // Needs: the sprite has a Secondary Texture called _NormalMap (Sprite Editor > Secondary Textures).
+// Without one the sprite is lit as if it were flat, which is fine for grass.
+//
+// How the wind works (CLAUDE.md section 7, "Wind"):
+// The card itself never moves. Each pixel reads the sprite from a slightly shifted spot, so the
+// leaves ripple inside the card. The shift comes from the Flow Noise texture (red = sideways,
+// green = up and down, 0.5 = still), slid slowly across the world, plus a push from any
+// FoliagePusher nearby (the player). Shifts are rounded to whole texels so the art stays sharp.
 //
 // Rules from CLAUDE.md this shader follows:
 // - Alpha clipping, never alpha blending (the sprite is Opaque and writes depth).
 // - No ShadowCaster pass, so a sprite never casts a flat card-shaped shadow.
 // - The wind runs in every pass that draws the sprite (Forward, DepthOnly, DepthNormals).
-// - The wind mask is object-space Y with no divisor (the pivot is at the feet).
+// - The wind's height mask is world height above the pivot (the pivot is at the feet), no UV.y.
 // - Time is _Time, so wind stops when the game is paused.
+// - The sprite needs Mesh Type Full Rect with a transparent margin, or moving pixels get cut off.
 Shader "Project/SpriteLitNormal"
 {
     Properties
@@ -21,10 +31,16 @@ Shader "Project/SpriteLitNormal"
         _Color ("Tint", Color) = (1, 1, 1, 1)
         _NormalStrength ("Normal Strength", Range(0, 2)) = 1
         _AlphaClipThreshold ("Alpha Clip Threshold", Range(0, 1)) = 0.5
-        _WindStrength ("Wind Strength (peak sway = 1.5 x this x height)", Float) = 0.12
-        _WindSpeed ("Wind Speed", Float) = 2
-        _WindFrequency ("Wind Frequency (higher = neighbours sway less in step)", Float) = 0.7
-        _WindDirection ("Wind Direction (world)", Vector) = (1, 0, 0, 0)
+        [NoScaleOffset] _FlowNoise ("Flow Noise (RG, sRGB off; 0.5 = still)", 2D) = "grey" {}
+        _GustStrength ("Gust Strength (world units, big slow sway)", Float) = 0.04
+        _RustleStrength ("Rustle Strength (world units, small fast ripple)", Float) = 0.02
+        _GustSize ("Gust Size (world units across one gust)", Float) = 5
+        _WindSpeed ("Wind Speed (world units per second the gusts travel)", Float) = 1
+        _FlowFullHeight ("Full Movement Height (world units above the feet; 0 = whole sprite moves)", Float) = 1.5
+        _PushStrength ("Push Strength (world units a passing player shifts it)", Float) = 0.2
+        _PushScale ("Push Scale (1 = base leaves, about 0.25 = holey overlay layer)", Range(0, 1)) = 1
+        _PushDepthReach ("Push Depth Reach (how far in front or behind the player still pushes)", Float) = 6
+        [ToggleUI] _SnapToTexels ("Snap To Whole Texels", Float) = 1
     }
 
     SubShader
@@ -47,36 +63,101 @@ Shader "Project/SpriteLitNormal"
         SAMPLER(sampler_MainTex);
         TEXTURE2D(_NormalMap);
         SAMPLER(sampler_NormalMap);
+        TEXTURE2D(_FlowNoise);
+        SAMPLER(sampler_FlowNoise);
 
         CBUFFER_START(UnityPerMaterial)
             float4 _MainTex_ST;
             float4 _Color;
             float _NormalStrength;
             float _AlphaClipThreshold;
-            float _WindStrength;
+            float4 _MainTex_TexelSize;
+            float _GustStrength;
+            float _RustleStrength;
+            float _GustSize;
             float _WindSpeed;
-            float _WindFrequency;
-            float4 _WindDirection;
+            float _FlowFullHeight;
+            float _PushStrength;
+            float _PushScale;
+            float _PushDepthReach;
+            float _SnapToTexels;
         CBUFFER_END
 
-        // Moves the top of the card sideways. The feet (object-space Y = 0) stay still.
-        float3 ApplyWind(float3 positionOS)
+        // Written once per frame by the scene's FoliageWindFeed from every FoliagePusher.
+        #define FOLIAGE_MAX_PUSHERS 8
+        float4 _FoliagePusherPosition[FOLIAGE_MAX_PUSHERS]; // xyz = world centre, w = radius
+        float4 _FoliagePusherPush[FOLIAGE_MAX_PUSHERS];     // xyz = push (0 to 1 long), w unused
+        float _FoliagePusherCount;
+
+        // World height of this point above the sprite's pivot (its feet).
+        float HeightAbovePivot(float3 positionWS)
         {
-            float3 windDirectionWS = _WindDirection.xyz;
-            if (dot(windDirectionWS, windDirectionWS) < 0.0001)
+            return positionWS.y - UNITY_MATRIX_M._m13;
+        }
+
+        // Reads the flow noise: red and green around 0.5 become a shift between -1 and 1.
+        float2 SampleFlow(float2 noiseUV)
+        {
+            return (SAMPLE_TEXTURE2D(_FlowNoise, sampler_FlowNoise, noiseUV).rg - 0.5) * 2.0;
+        }
+
+        // Returns the UV to sample instead of uv, moved by the wind and by nearby pushers.
+        // Call it in every pass before sampling _MainTex, so colour, depth and SSAO agree.
+        float2 FoliageWindUV(float2 uv, float3 positionWS, float heightAbovePivot)
+        {
+            // The card's own axes in the world: right, up, and away from the camera.
+            float3 cardRightWS = normalize(float3(UNITY_MATRIX_M._m00, UNITY_MATRIX_M._m10, UNITY_MATRIX_M._m20));
+            float3 cardForwardWS = normalize(float3(UNITY_MATRIX_M._m02, UNITY_MATRIX_M._m12, UNITY_MATRIX_M._m22));
+            float2 cardPosition = float2(dot(positionWS, cardRightWS), positionWS.y);
+
+            // How much UV one world unit across the card is, measured from neighbouring pixels.
+            // Works for any Pixels Per Unit, any scale, and inside a sprite atlas.
+            float2 uvDx = ddx(uv);
+            float2 uvDy = ddy(uv);
+            float2 cardDx = ddx(cardPosition);
+            float2 cardDy = ddy(cardPosition);
+            float2 uvPerUnit;
+            uvPerUnit.x = (uvDx.x * cardDx.x + uvDy.x * cardDy.x) / max(cardDx.x * cardDx.x + cardDy.x * cardDy.x, 1e-8);
+            uvPerUnit.y = (uvDx.y * cardDx.y + uvDy.y * cardDy.y) / max(cardDx.y * cardDx.y + cardDy.y * cardDy.y, 1e-8);
+
+            // Wind: big slow gusts plus a small fast ripple, both sliding sideways over time.
+            float gustScale = 1.0 / max(_GustSize, 0.01);
+            float travel = _Time.y * _WindSpeed;
+            float2 gust = SampleFlow((cardPosition - float2(travel, 0.0)) * gustScale);
+            float2 rustle = SampleFlow((cardPosition - float2(travel * 1.6, travel * 0.3)) * gustScale * 4.0 + 0.37);
+            float2 offset = gust * _GustStrength + rustle * _RustleStrength;
+
+            // Push: every pusher near this pixel shoves it along its movement and out from its centre.
+            float depthReach = max(_PushDepthReach, 0.001);
+            int pusherCount = (int)_FoliagePusherCount;
+            [loop] for (int i = 0; i < pusherCount; i++)
             {
-                windDirectionWS = float3(1.0, 0.0, 0.0);
+                float3 toPixel = positionWS - _FoliagePusherPosition[i].xyz;
+                float2 acrossCard = float2(dot(toPixel, cardRightWS), toPixel.y);
+                float distanceAcross = length(acrossCard);
+                float reach = 1.0 - distanceAcross / max(_FoliagePusherPosition[i].w, 0.001);
+                float falloff = saturate(reach) * saturate(reach) * saturate(1.0 - abs(dot(toPixel, cardForwardWS)) / depthReach);
+                float3 push = _FoliagePusherPush[i].xyz;
+                float2 pushAcross = float2(dot(push, cardRightWS), push.y);
+                float2 outward = acrossCard / max(distanceAcross, 0.0001) * length(push);
+                offset += (pushAcross * 0.6 + outward * 0.4) * falloff * _PushStrength * _PushScale;
             }
-            float3 windDirectionOS = TransformWorldToObjectDir(windDirectionWS, false);
 
-            // The phase comes from where the object stands, so neighbours do not sway in step.
-            float3 objectOriginWS = float3(UNITY_MATRIX_M._m03, UNITY_MATRIX_M._m13, UNITY_MATRIX_M._m23);
-            float phase = (objectOriginWS.x + objectOriginWS.z) * _WindFrequency;
-            float t = _Time.y * _WindSpeed;
-            float sway = sin(t + phase) + 0.5 * sin(2.3 * t + 1.7 * phase);
+            // Feet stay still; full movement from Full Movement Height upward.
+            if (_FlowFullHeight > 0.0)
+            {
+                offset *= saturate(heightAbovePivot / _FlowFullHeight);
+            }
 
-            float height = max(positionOS.y, 0.0);
-            return positionOS + windDirectionOS * (sway * height * _WindStrength);
+            float2 offsetUV = offset * uvPerUnit;
+            // The texel-size check skips snapping if Unity did not pass the sprite's real texture size.
+            if (_SnapToTexels > 0.5 && _MainTex_TexelSize.x > 0.0 && _MainTex_TexelSize.x < 0.25)
+            {
+                // Whole texels only: the art shifts, it never smears.
+                offsetUV = round(offsetUV / _MainTex_TexelSize.xy) * _MainTex_TexelSize.xy;
+            }
+            // A pixel that moves right shows what was on its left.
+            return uv - offsetUV;
         }
         ENDHLSL
 
@@ -116,14 +197,15 @@ Shader "Project/SpriteLitNormal"
                 float3 normalWS : TEXCOORD2;
                 float3 tangentWS : TEXCOORD3;
                 float fogFactor : TEXCOORD4;
+                float heightAbovePivot : TEXCOORD5;
             };
 
             Varyings vert(Attributes input)
             {
                 Varyings output;
-                float3 positionOS = ApplyWind(input.positionOS);
-                output.positionWS = TransformObjectToWorld(positionOS);
+                output.positionWS = TransformObjectToWorld(input.positionOS);
                 output.positionCS = TransformWorldToHClip(output.positionWS);
+                output.heightAbovePivot = HeightAbovePivot(output.positionWS);
                 output.uv = TRANSFORM_TEX(input.uv, _MainTex);
                 output.color = input.color * _Color;
 
@@ -136,11 +218,12 @@ Shader "Project/SpriteLitNormal"
 
             half4 frag(Varyings input) : SV_Target
             {
-                half4 sprite = SAMPLE_TEXTURE2D(_MainTex, sampler_MainTex, input.uv) * input.color;
+                float2 uv = FoliageWindUV(input.uv, input.positionWS, input.heightAbovePivot);
+                half4 sprite = SAMPLE_TEXTURE2D(_MainTex, sampler_MainTex, uv) * input.color;
                 clip(sprite.a - _AlphaClipThreshold);
 
                 // Unpack the tangent-space normal, scale its tilt, then move it to world space.
-                half3 normalTS = UnpackNormal(SAMPLE_TEXTURE2D(_NormalMap, sampler_NormalMap, input.uv));
+                half3 normalTS = UnpackNormal(SAMPLE_TEXTURE2D(_NormalMap, sampler_NormalMap, uv));
                 normalTS.xy *= _NormalStrength;
                 normalTS = normalize(normalTS);
 
@@ -206,13 +289,16 @@ Shader "Project/SpriteLitNormal"
                 float4 positionCS : SV_POSITION;
                 float2 uv : TEXCOORD0;
                 float alphaTint : TEXCOORD1;
+                float3 positionWS : TEXCOORD2;
+                float heightAbovePivot : TEXCOORD3;
             };
 
             Varyings vert(Attributes input)
             {
                 Varyings output;
-                float3 positionOS = ApplyWind(input.positionOS);
-                output.positionCS = TransformObjectToHClip(positionOS);
+                output.positionWS = TransformObjectToWorld(input.positionOS);
+                output.positionCS = TransformWorldToHClip(output.positionWS);
+                output.heightAbovePivot = HeightAbovePivot(output.positionWS);
                 output.uv = TRANSFORM_TEX(input.uv, _MainTex);
                 output.alphaTint = input.color.a * _Color.a;
                 return output;
@@ -220,7 +306,8 @@ Shader "Project/SpriteLitNormal"
 
             half4 frag(Varyings input) : SV_Target
             {
-                half alpha = SAMPLE_TEXTURE2D(_MainTex, sampler_MainTex, input.uv).a * input.alphaTint;
+                float2 uv = FoliageWindUV(input.uv, input.positionWS, input.heightAbovePivot);
+                half alpha = SAMPLE_TEXTURE2D(_MainTex, sampler_MainTex, uv).a * input.alphaTint;
                 clip(alpha - _AlphaClipThreshold);
                 return 0;
             }
@@ -252,13 +339,16 @@ Shader "Project/SpriteLitNormal"
                 float2 uv : TEXCOORD0;
                 float alphaTint : TEXCOORD1;
                 float3 normalWS : TEXCOORD2;
+                float3 positionWS : TEXCOORD3;
+                float heightAbovePivot : TEXCOORD4;
             };
 
             Varyings vert(Attributes input)
             {
                 Varyings output;
-                float3 positionOS = ApplyWind(input.positionOS);
-                output.positionCS = TransformObjectToHClip(positionOS);
+                output.positionWS = TransformObjectToWorld(input.positionOS);
+                output.positionCS = TransformWorldToHClip(output.positionWS);
+                output.heightAbovePivot = HeightAbovePivot(output.positionWS);
                 output.uv = TRANSFORM_TEX(input.uv, _MainTex);
                 output.alphaTint = input.color.a * _Color.a;
                 output.normalWS = TransformObjectToWorldNormal(float3(0.0, 0.0, -1.0));
@@ -267,7 +357,8 @@ Shader "Project/SpriteLitNormal"
 
             void frag(Varyings input, out half4 outNormalWS : SV_Target0)
             {
-                half alpha = SAMPLE_TEXTURE2D(_MainTex, sampler_MainTex, input.uv).a * input.alphaTint;
+                float2 uv = FoliageWindUV(input.uv, input.positionWS, input.heightAbovePivot);
+                half alpha = SAMPLE_TEXTURE2D(_MainTex, sampler_MainTex, uv).a * input.alphaTint;
                 clip(alpha - _AlphaClipThreshold);
 
                 float3 normalWS = normalize(input.normalWS);

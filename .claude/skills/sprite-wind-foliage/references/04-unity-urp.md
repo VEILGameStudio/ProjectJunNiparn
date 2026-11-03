@@ -1,87 +1,71 @@
-# 04 — เอามาใช้ใน Unity 6.5 URP ของโปรเจกต์นี้
+# 04 — ลมแบบคลิปในโปรเจกต์นี้ (Unity 6.5 URP) — ใช้งานจริงแล้ว
 
-## 0. สถานะ
+สถานะ (2026-11-03): Oak สั่งให้ **แทนลมแบบเดิม** ด้วยวิธีนี้ และแก้ CLAUDE.md §7 "Wind" ให้ตรงแล้ว
+⚠ ยังไม่เคยเปิดใน Unity — compile/ภาพจริงต้องเช็กในเครื่อง Oak (รายการเช็กอยู่ท้ายไฟล์)
 
-- **ยังไม่ได้ใส่อะไรในโปรเจกต์** โค้ดใน `snippets/` เป็นต้นแบบ ไม่เคย compile หรือรันใน Unity
-- ต้องให้ Oak ตัดสินก่อนนำเข้า เพราะ:
-  - CLAUDE.md §7 "Wind" กำหนดให้ลมเป็น **vertex displacement** และ shader อยู่ใน `Art/Shaders/` ที่ Oak เขียน
-  - script ส่งตำแหน่งผู้เล่นให้ shader ต้องอยู่ในโฟลเดอร์ core (`Scripts/Player/` เป็นของ Oak)
-  - การซ้อนชั้นใบไม้ "หน้าผู้เล่น" ใช้ตำแหน่ง z ของการ์ด (depth buffer) — ไม่ใช่โค้ด sort จึง **ไม่ขัด** กฎ §0.7
+## 1. ไฟล์ที่เกี่ยวข้อง
 
-## 1. ของเดิมที่มีอยู่แล้ว vs ของในคลิป
+| ไฟล์ | หน้าที่ |
+|---|---|
+| `Assets/_Project/Art/Shaders/SpriteLitNormal.shader` | `FoliageWindUV()` เลื่อน UV ใน Forward / DepthOnly / DepthNormals (ลบลม vertex เดิมออกแล้ว) |
+| `Assets/_Project/Art/Shaders/FoliageFlowNoise.png` | noise RG 256² tileable, import sRGB **ปิด**, Wrap Repeat |
+| `Art/Materials/SpriteLit_Wind_Normal.mat` | ใบหลัก (ลมเต็ม, ดันเต็ม) |
+| `Art/Materials/SpriteLit_Wind_Normal_Overlay.mat` | ใบเจาะรู (ลม **เท่ากัน**, `Push Scale` 0.25) |
+| `Art/Materials/SpriteLit_Trunk.mat` | ลำต้น (ไม่มีลม) |
+| `Art/Materials/SpriteLit_FlowGrass.mat` | หญ้า (`Full Movement Height` 0.5, `Push Depth Reach` 0.8) |
+| `Art/Sprites/ThreeQuarter/Trees/Layers/` | 5 ต้น × (Trunk, Leaves, LeavesOverlay, Layers_N) ขอบใส 32 px, Full Rect |
+| `Prefabs/Trees/Tree_*.prefab` | `Visual` = ลำต้น, ลูก `Leaves` (z −0.05), `LeavesOverlay` (z −0.1) |
+| `Scripts/Environment/FoliagePusher.cs` | บน Player root (`Prefabs/Player.prefab`) — แปลงการเดินเป็นแรงดัน |
+| `Scripts/Environment/FoliageWindFeed.cs` | 1 อันต่อฉาก (ไม่ใช่ singleton) — ส่งแรงดันสูงสุด 8 ตัวให้ shader |
+| `Scenes/Test/Test_Forest.unity` | object `FoliageWind` + หญ้า 26 กอใช้ `SpriteLit_FlowGrass` |
 
-| | `SpriteLitNormal.shader` (ของเรา) | คลิป |
-|---|---|---|
-| ขยับอะไร | vertex: เฉือนการ์ดทั้งใบ ยอดไป เท้าอยู่ | pixel: เลื่อน UV ทีละพิกเซล |
-| ลายลม | `sin` 2 ลูก เฟสตามตำแหน่งต้น (`_WindFrequency`) | noise texture ใหญ่กว่าต้นไม้ เลื่อนช้า ๆ |
-| ความเร็ว | `_WindSpeed 2` → ~0.32 Hz + ฮาร์มอนิก ×2.3 | วัดได้ 0.17–0.22 Hz |
-| ผู้เล่นดัน | ไม่มี | มี (disturbance) |
-| ใบไหวภายในพุ่ม | ไม่ได้ (mesh 4–20 จุด เป็นแค่การเฉือน — CLAUDE.md เขียนไว้เอง) | ได้ |
+## 2. ค่าใน material (หน่วย world unit ทั้งหมด)
 
-**สองอย่างนี้ใช้ร่วมกันได้และควรใช้ร่วมกัน:** vertex wind = ทั้งต้นเอนช้า ๆ (ลมใหญ่), flow UV = ใบไหวภายในพุ่ม + ผู้เล่นแหวก
-ถ้าเพิ่ม flow แล้ว ให้ลด `_WindStrength` ของต้นใหญ่ลง (คลิปโยกทั้งพุ่มแค่ 1–2.5% ของความกว้าง)
-และพิจารณาลด `_WindSpeed` ลงใกล้ 1.2–1.4 ให้ใกล้ 0.2 Hz ของคลิป (ตัดสินจากภาพจริง)
+| ช่อง | ใบหลัก | ใบเจาะรู | ลำต้น | หญ้า | มาจาก |
+|---|---|---|---|---|---|
+| Gust Strength | 0.04 | 0.04 | 0 | 0.05 | คลิป: ทั้งพุ่มโยก 1–2.5% ของความกว้าง |
+| Rustle Strength | 0.02 | 0.02 | 0 | 0.03 | คลิป: ไหวเฉพาะที่ ~0.6% |
+| Gust Size | 5 | 5 | – | 4 | ลมก้อนใหญ่กว่าต้นไม้ |
+| Wind Speed | 1 | 1 | – | 1 | gust 5 unit ÷ 1 unit/s ≈ 0.2 Hz ตามคลิป |
+| Full Movement Height | 1.5 | 1.5 | – | 0.5 | โคน/หญ้าที่ฐานต้นนิ่ง |
+| Push Strength | 0.2 | 0.2 | 0 | 0.25 | คลิป: ~4% ของความกว้าง |
+| Push Scale | 1 | **0.25** | – | 1 | "dulled a lot" |
+| Push Depth Reach | 6 | 6 | – | 0.8 | ต้นไม้หลังทางเดิน (z 4–6) ยังตอบสนอง; หญ้าเฉพาะกอที่เดินทับ |
+| Snap To Whole Texels | ✓ | ✓ | ✓ | ✓ | ภาพคม ไม่เบลอ |
 
-## 2. วิธีต่อเข้า shader (ตาม `snippets/FoliageFlow.hlsl`)
+**ห้ามให้ค่าลมของใบหลักกับใบเจาะรูต่างกัน** — ตอนนิ่งจะเห็นภาพซ้อน
 
-1. ใส่ `_FlowNoise` (texture RG) และค่าต่อ material ลง `UnityPerMaterial` ⇒ SRP Batcher ยังทำงาน ไม่ต้องใช้ `MaterialPropertyBlock`
-2. vertex stage ส่ง `positionWS` และ `heightOS = max(positionOS.y, 0)` ไปทุก pass
-3. fragment ทุก pass (Forward, DepthOnly, DepthNormals) เรียก `FoliageFlowUV(...)` **ก่อน** sample `_MainTex` และก่อน `clip()`
-   — ถ้าลืม pass ไหน SSAO/depth จะเห็นขอบใบตำแหน่งเดิม ขณะที่สีเลื่อนไปแล้ว (บั๊กแบบเดียวกับ "outline นิ่งแต่ใบไหว" ใน CLAUDE.md)
-4. normal map: sample ด้วย UV ที่เลื่อนแล้วเหมือนกัน ไม่งั้นแสงจะไม่ตามใบ
-5. `_Time` ตาม `Time.timeScale` อยู่แล้ว ⇒ pause แล้วใบหยุดเอง (script ฝั่งผู้เล่นก็ข้ามเฟรมที่ `deltaTime = 0`)
+## 3. ทำงานยังไงใน shader (สั้น ๆ)
 
-## 3. กับดักเฉพาะ SpriteRenderer (ต้องเช็กทุกข้อ)
+1. ตำแหน่งบนการ์ด = (แกนขวาของการ์ด · positionWS, positionWS.y) — ใช้ได้ทั้ง yaw 0 และ 45
+2. UV ต่อ 1 world unit วัดจาก `ddx/ddy` ⇒ ไม่ต้องรู้ PPU, scale, หรือ atlas
+3. offset = gust × Gust Strength + rustle × Rustle Strength + แรงดันจาก pusher ทุกตัว (ตามทิศเดิน 60% + ผลักออกจากตัว 40%) × falloff ระยะบนการ์ด × falloff ความลึก
+4. คูณ height ramp (`Full Movement Height`) แล้วปัดเป็น texel เต็ม (ถ้า Unity ส่ง `_MainTex_TexelSize` มา)
+5. `uv − offset` ใช้กับทั้งสี, normal map, และ `clip()` ในทุก pass
 
-| กับดัก | อาการ | แก้ |
-|---|---|---|
-| sprite อยู่ใน Sprite Atlas | ขอบใบดึงพิกเซลของ sprite ข้าง ๆ มาโผล่ | ไม่ pack ต้นไม้ลง atlas หรือ padding ≥ offset สูงสุด + 2 |
-| Mesh Type = Tight | ใบที่เลื่อนออกนอก mesh ถูกตัดหาย ขอบ silhouette แหว่ง | ใช้ **Full Rect** และเว้นขอบโปร่งใสรอบภาพ ≥ offset สูงสุด |
-| Filter = Bilinear + offset ไม่ปัด | ใบสั่นเป็นคลื่น/เบลอ (slime ยิ่งชัด) | `round()` เป็น texel เต็ม (มีใน snippet) — งาน pixel art ใช้ Point filter |
-| Wrap = Repeat | ขอบบนดึงพิกเซลขอบล่างมา | Wrap Mode = **Clamp** |
-| แกน G กลับด้าน | ใบปลิวขึ้นแทนลง | texture จาก GameMaker/Aseprite แนว "เขียว = ลง" ต้องกลับ `flow.y` |
-| การ์ดหมุน yaw 45 (ThreeQuarter) | ลมไปผิดทิศ | snippet ใช้แกนขวาของการ์ด (`cardRightWS`) ไม่ใช่แกน x โลก |
+## 4. ทำต้นไม้ใหม่ให้มีลมแบบนี้ (สำหรับน้อง B)
 
-## 4. ชั้นใบไม้ในโลก 3D (ซ้อนการ์ด)
+1. วาดต้นไม้ทั้งต้นตามปกติ + normal map (`_N`) ขนาดเท่ากัน
+2. รัน `python3 -I .claude/skills/sprite-wind-foliage/scripts/split_tree_layers.py tree.png tree_N.png <Layers folder> <ชื่อ>`
+   (พืชที่ลำต้นเป็นสีเขียว เช่น กล้วย: ต่อท้าย `32 48 0.65 6 all`)
+3. ตั้ง import ของ 3 ภาพ: Sprite, Mesh Type **Full Rect**, Pivot Custom (0.5, ค่า pivot y ที่สคริปต์พิมพ์), PPU เท่าต้นเดิม,
+   Secondary Texture `_NormalMap` = ไฟล์ `_Layers_N`
+4. Duplicate prefab ต้นไม้ที่มีอยู่ แล้วเปลี่ยน sprite ทั้ง 3 ชั้น (material ไม่ต้องเปลี่ยน)
+5. ย้อมสี/Flip X ต้องทำ **ทั้ง 3 renderer**
 
-ในคลิปเป็นเกม 2D จึงซ้อนชั้นด้วยลำดับวาด ของเราเป็น 3D + alpha clip + depth buffer จึง **ซ้อนด้วยตำแหน่ง z ของการ์ด** แทน:
+## 5. ข้อจำกัดที่รู้แล้ว
 
-| การ์ด | ตำแหน่งเทียบกับ pivot ของต้น (แกนเข้าหากล้อง) | `_DisturbScale` |
-|---|---|---|
-| ลำต้น | +0.30 (ไกลกล้องสุด) | – (ใช้ material ไม่มีลม หรือ flow = 0) |
-| ใบหลัก | +0.15 | 1 |
-| ผู้เล่นเดินผ่าน | 0 ± 0.1 | – |
-| ใบเจาะรู | −0.15 (ใกล้กล้องสุด) | ~0.25 |
+- `SpriteLitOutline` (shadergraph) + `SpriteWind.shadersubgraph` ยังเป็นลม vertex แบบเก่า — ฉากอื่น (Test_Zones) ยังใช้อยู่
+- ถ้า `_MainTex_TexelSize` ไม่ถูกส่งมาสำหรับ SpriteRenderer การปัด texel จะถูกข้าม (ใบยังขยับได้ แต่อาจนุ่ม/เบลอเล็กน้อย)
+- `Push Depth Reach` 6 ทำให้ต้นไม้ตอบสนองเมื่อผู้เล่นเดิน "ผ่านหน้า" แม้ไม่ได้แตะจริง — ตั้งใจให้เหมือนคลิป ปรับลดได้ต่อ material
+- pusher เกิน 8 ตัว ตัวที่เกินไม่ดันใบ (log warning ครั้งเดียว)
 
-- ใช้ material 2 อัน (ใบหลัก / ใบเจาะรู) ต่างกันแค่ `_DisturbScale` — ไม่ใช้ `MaterialPropertyBlock`
-- **ใช้ได้เฉพาะพืชที่ผู้เล่นเดินทะลุได้จริง** (ไม่มี Blocking collider) และอยู่บนเส้นทางเดิน; SideView มีความลึกเดิน ~3 unit
-  ถ้าผู้เล่นเดินอยู่หน้าต้นไม้ ชั้นเจาะรูจะไม่บังผู้เล่น — ถูกต้อง เพราะผู้เล่นไม่ได้อยู่ในพุ่ม
-- ห้ามเขียนโค้ด sort ตามตำแหน่ง (CLAUDE.md §0.7) — z ของการ์ดตั้งครั้งเดียวใน prefab แล้ว depth buffer จัดการ
-- ห่าง ±0.15 ใน SideView (D = 20) ทำให้ชั้นเลื่อนต่างกัน < 1% ตอนกล้องแพน แทบไม่เห็น parallax ภายในต้น — ตั้งใจ
+## 6. เช็กใน Unity ครั้งแรก
 
-## 5. หญ้าและพุ่มเตี้ย
-
-- **หญ้าทีละกอ (sprite เล็ก):** vertex wind เดิมพอแล้ว เพิ่มแรงดันผู้เล่นใน vertex stage ได้ด้วยตัวแปร global เดียวกัน
-  (`offset = push ฉายลงการ์ด × positionOS.y`) — เท้าอยู่ ยอดเอนหนี
-- **หญ้าเป็นแถบยาว (sprite เดียวหลายกอ):** ใช้ flow UV + `_FlowFullHeight` (เช่น 0.4 unit) ⇒ โคนนิ่ง ยอดไหว แต่ละจุดตามลายลมไม่เท่ากัน
-  ซึ่ง vertex shear ทำไม่ได้ (ทั้งแถบจะเอนพร้อมกัน)
-- **พุ่มเล็ก/mini tree ที่ตัวละครกระโดดทะลุ (คลิป 2–5 วิ):** ทั้งก้อนสั่นเป็นจังหวะ ใช้ flow + disturbance เต็ม ไม่ต้องมี overlay
-
-## 6. ค่าเริ่มต้นที่แนะนำ (แปลงจากคลิป ต้องจูนในเกม)
-
-| ค่า | ต้นใหญ่ ใบหลัก | ต้นใหญ่ ใบเจาะรู | หญ้าแถบ |
-|---|---|---|---|
-| `_FlowTexels` | ~0.6% ของความกว้างพุ่ม (texel) | เท่ากับใบหลัก **เสมอ** | 1–2 |
-| `_FlowScale` | 1 / (2–3 × ความกว้างต้นใน unit) | เท่ากับใบหลัก | เท่ากัน |
-| `_FlowScroll` | (0.04, 0.01) /วินาที | เท่ากับใบหลัก | เท่ากัน |
-| `_DisturbTexels` | ~4% ของความกว้างพุ่ม | เท่ากับใบหลัก | 3–4 |
-| `_DisturbScale` | 1 | **~0.25** | 1 |
-| `FoliageDisturber.radius` | ~1.5 × ความสูงตัวละคร | | |
-
-ค่า wind ของสองชั้นต้อง **เหมือนกันทุกตัว** ไม่งั้นตอนนิ่งจะเห็นภาพซ้อน (double exposure)
-
-## 7. Flow noise texture
-
-`scripts/make_flow_noise.py` สร้าง texture 256×256 RG แบบ tileable (ลายใหญ่ + ลายเล็ก 30%) neutral = 0.5
-ตั้ง import: sRGB **ปิด** (เป็นข้อมูล ไม่ใช่สี), Compression None, Filter Bilinear, Wrap Repeat, ไม่ต้อง mipmap
-(sRGB เปิดอยู่ = ค่า 0.5 กลายเป็น ~0.21 ใบไม้จะลอยไปทางซ้ายล่างตลอด)
+1. Console ไม่มี error ของ shader `Project/SpriteLitNormal` และ script ใหม่ compile ผ่าน
+2. เปิด Test_Forest กด Play: ใบไม้ไหวเบา ๆ (รอบละ ~5 วิ) ลำต้นนิ่ง ไม่มีภาพซ้อนตอนนิ่ง
+3. เดินผ่านหน้าต้นไม้: ใบล่างแหวกตามทิศเดิน ใบชั้นบนขยับน้อยกว่า แล้วค่อย ๆ คืนที่
+4. เดินทับหญ้าในทางเดิน: หญ้าเอนหนี โคนนิ่ง
+5. กด pause (เปิดเมนู): ทุกอย่างหยุด
+6. ขอบใบไม่ถูกตัดเป็นเส้นตรง (ถ้าโดน = Mesh Type ยังเป็น Tight หรือขอบใสไม่พอ)
+7. เปิด SSAO: เงารอบใบขยับตามใบ

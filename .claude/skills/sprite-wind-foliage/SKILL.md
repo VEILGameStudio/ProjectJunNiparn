@@ -29,7 +29,8 @@ description: Use when making trees, bushes or grass sway in the wind or react wh
 | เข้าใจว่าคลิปทำอะไร ทีละวินาที | `references/01-clip-breakdown.md` |
 | ตั้งค่าลม / ระบบผู้เล่นดัน / ตัวเลขที่วัดได้ | `references/02-flow-and-disturbance.md` |
 | วาด/แยกชั้นต้นไม้ แก้ slime | `references/03-layering-fix.md` |
-| ใส่ใน Unity URP ของโปรเจกต์นี้ (shader, กับดัก, ค่าเริ่มต้น, หญ้า) | `references/04-unity-urp.md` + `snippets/` |
+| ลมนี้ในโปรเจกต์ (ไฟล์, ค่า material, ทำต้นไม้ใหม่, เช็กใน Unity) | `references/04-unity-urp.md` |
+| แยกต้นไม้เป็น 3 ชั้น | `python3 -I scripts/split_tree_layers.py tree.png tree_N.png <out> <name>` |
 | ลองค่าโดยไม่เปิด Unity | `python3 -I scripts/foliage_flow_sim.py <out> [overlay_scale] [wind_px] [disturb_px]` |
 | ทำ texture noise ลม | `python3 -I scripts/make_flow_noise.py out.png 256 4 0.0` (หรือใช้ `img/w09-flow-noise-256.png`) |
 | วัดลมในคลิป ref ใหม่ | `python3 -I scripts/measure_foliage_motion.py clip.mp4 t0 t1 art_px canopy_box anchor_box` |
@@ -41,20 +42,18 @@ description: Use when making trees, bushes or grass sway in the wind or react wh
 | `references/01-clip-breakdown.md` | คำบรรยายเต็ม + สิ่งที่เห็นต่อช่วงเวลา + สรุปเทคนิค |
 | `references/02-flow-and-disturbance.md` | การเข้ารหัสสี, ตัวเลขลมที่วัดได้, disturbance texture, ทำไมเป็น slime + ทางแก้ 3 แบบ |
 | `references/03-layering-fix.md` | ชั้นต้นไม้ 4 ชั้น, การวัดชั้นเจาะรู, วิธีวาดสำหรับ artist |
-| `references/04-unity-urp.md` | เทียบกับ `SpriteLitNormal`, ต่อเข้า shader, กับดัก SpriteRenderer, ซ้อนการ์ดใน 3D, หญ้า, ค่าเริ่มต้น |
+| `references/04-unity-urp.md` | ไฟล์ที่ใช้จริงในโปรเจกต์, ค่าทุก material, วิธีทำต้นไม้ใหม่, ข้อจำกัด, เช็กลิสต์ Unity |
 | `references/img/w01–w05` | เฟรมจากคลิป: ต้นไม้, texture ลม/disturbance, ชั้น, heatmap การเคลื่อนไหว, ก่อน–หลังแก้ |
 | `references/img/w06–w08` | ภาพจำลอง Python: slime vs แยกชั้น (ภาพนิ่ง + GIF), ชั้นที่สร้างอัตโนมัติ |
 | `references/img/w09-flow-noise-256.png` | texture ลม tileable พร้อมใช้ (import: sRGB ปิด) |
-| `snippets/FoliageFlow.hlsl` | ฟังก์ชัน `FoliageFlowUV` สำหรับ shader (ต้นแบบ ยังไม่ compile) |
-| `snippets/FoliageDisturber.cs` | `FoliageDisturber` (บนผู้เล่น) + `FoliageWindFeed` (ส่งค่าให้ shader) (ต้นแบบ ยังไม่ compile) |
-| `scripts/` | `measure_foliage_motion.py`, `foliage_flow_sim.py`, `make_flow_noise.py` |
+| `scripts/` | `measure_foliage_motion.py`, `foliage_flow_sim.py`, `make_flow_noise.py`, `split_tree_layers.py` |
 
-## ก่อนนำเข้าโปรเจกต์
+## สถานะในโปรเจกต์
 
-- **ยังไม่มีอะไรในนี้ถูกใส่ใน `Assets/`** — snippets ไม่เคยรันใน Unity
-- ขัด/ต้องเพิ่มใน CLAUDE.md: §7 Wind เขียนว่าลมเป็น vertex displacement; shader และ `Scripts/Player/` เป็นของ Oak
-  ⇒ ถ้าเป็นคำขอจากน้องในทีม ใช้ skill `design-change-proposal` ส่ง Oak ก่อน
-- ไม่ขัด: ซ้อนชั้นด้วย z ของการ์ด (depth buffer) ไม่ใช่โค้ด sort; ยังเป็น alpha clip; `_Time` หยุดตอน pause; ไม่ใช้ MaterialPropertyBlock
+- **ใช้งานจริงแล้ว** (Oak สั่ง 2026-11-03): `SpriteLitNormal` ใช้ลมแบบนี้แทนลม vertex เดิม, ต้นไม้ 5 prefab เป็น 3 ชั้น,
+  ผู้เล่นมี `FoliagePusher`, Test_Forest มี `FoliageWindFeed` และหญ้าใช้ `SpriteLit_FlowGrass`
+- กฎอยู่ใน CLAUDE.md §7 "Wind" — ถ้า skill นี้กับ CLAUDE.md ขัดกัน ยึด CLAUDE.md
+- ยังไม่เคยเปิดใน Unity: เช็กลิสต์อยู่ใน `references/04-unity-urp.md` §6
 
 ## Critique — เช็กก่อนส่ง
 
