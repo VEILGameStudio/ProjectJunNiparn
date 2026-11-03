@@ -51,4 +51,19 @@ description: Use when designing, painting, critiquing or setting up a side-view 
 | `references/05-color-light-atmosphere.md` | สี แสง หมอก บรรยากาศ เวลา |
 | `references/06-unity-implementation.md` | แปลงทั้งหมดเป็นตัวเลขใน Unity ของโปรเจกต์นี้ |
 | `references/07-critique-checklist.md` | เช็กลิสต์ตรวจงาน + ข้อผิดพลาดที่เจอบ่อย |
+| `references/08-camera-measurements.md` | ตัวเลขกล้องที่วัดจากคลิป: zoom/pan/ease 25 ครั้ง, impact punch, เส้นเวลาเปลี่ยนกลางวัน→ค่ำ |
+| `references/09-value-color-study.md` | สัดส่วน value + palette ของ ref เทียบฉากเรา, palette ที่เสนอต่อชั้น, สิ่งที่ grade แก้ไม่ได้ |
+| `references/10-test-forest-pass.md` | สิ่งที่ปรับใน Test_Forest และวิธีสลับ preset กลางวัน/ค่ำ |
 | `references/img/` | ภาพอ้างอิง (rough, value, color kit, in-game day/dusk, cutscene wide/zoom) |
+| `references/img/study/` | ภาพ value 4 ระดับ, palette, ภาพจำลอง Test_Forest ก่อน/หลัง |
+| `scripts/` | `forest_grade.py` (ใส่ preset สีลงฉาก), `forest_sim.py` (ภาพจำลองมุมกล้อง SideView), `measure_camera_moves.py`, `measure_grade_timeline.py` (วัดคลิป) |
+| `presets/` | `forest-day.json`, `forest-dusk.json`, `forest-legacy-night.json` |
+| `Docs/proposals/2026-11-03-cutscene-dolly-camera.md` | ข้อเสนอกล้อง cutscene dolly + letterbox (รอ Oak อนุมัติ) |
+
+## เมื่อได้คลิป reference ใหม่
+
+1. แตกเฟรม contact sheet (`ffmpeg -vf "fps=1/3,scale=640:-1,tile=2x4"`) ดูภาพรวมก่อน
+2. `scripts/measure_camera_moves.py clip.mp4` → ได้ตาราง zoom/pan/ease
+3. `scripts/measure_grade_timeline.py clip.mp4 <y0> <y1> 1.5` → ได้การเปลี่ยนสีตามเวลา
+4. ทำ value 4 ระดับ + k-means palette (วิธีใน 09) เทียบกับฉากเรา
+5. เขียนผลลง reference ไฟล์ใหม่ อย่าเขียนทับของเดิม

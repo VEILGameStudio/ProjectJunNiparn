@@ -1,0 +1,2 @@
+# Small study reference frames, kept in plain git (LFS upload is not reachable from cloud sessions).
+*.jpg -filter -diff -merge binary
