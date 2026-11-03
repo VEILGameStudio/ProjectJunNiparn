@@ -8,7 +8,7 @@ Material:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_Name: SpriteLit_FlowGrass
-  m_Shader: {fileID: 4800000, guid: 296b8fa8b7ba4bfb9857630266455fd5, type: 3}
+  m_Shader: {fileID: 4800000, guid: eb1b852286f143cd866defd8b3fdcdf1, type: 3}
   m_Parent: {fileID: 0}
   m_ModifiedSerializedProperties: 0
   m_ValidKeywords: []
@@ -32,20 +32,18 @@ Material:
         m_Texture: {fileID: 0}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
-    - _NormalMap:
-        m_Texture: {fileID: 0}
-        m_Scale: {x: 1, y: 1}
-        m_Offset: {x: 0, y: 0}
     m_Ints: []
     m_Floats:
     - _AlphaClipThreshold: 0.5
+    - _BendCurve: 2
     - _FlowFullHeight: 0.5
     - _GustSize: 4
     - _GustStrength: 0.05
-    - _NormalStrength: 0
+    - _Lighting: 1
     - _PushDepthReach: 0.8
     - _PushScale: 1
     - _PushStrength: 0.25
+    - _RootHeight: 0
     - _RustleStrength: 0.03
     - _SnapToTexels: 1
     - _WindSpeed: 1

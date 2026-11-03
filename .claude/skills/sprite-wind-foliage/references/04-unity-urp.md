@@ -1,18 +1,22 @@
 # 04 — ลมแบบคลิปในโปรเจกต์นี้ (Unity 6.5 URP) — ใช้งานจริงแล้ว
 
 สถานะ (2026-11-03): Oak สั่งให้ **แทนลมแบบเดิม** ด้วยวิธีนี้ และแก้ CLAUDE.md §7 "Wind" ให้ตรงแล้ว
-⚠ ยังไม่เคยเปิดใน Unity — compile/ภาพจริงต้องเช็กในเครื่อง Oak (รายการเช็กอยู่ท้ายไฟล์)
+ต้นไม้เช็กใน Unity แล้ว (2026-11-03) ไม่มี error; shader หญ้า `SpriteGrass` เพิ่มทีหลัง — เช็กตามรายการท้ายไฟล์
 
 ## 1. ไฟล์ที่เกี่ยวข้อง
 
 | ไฟล์ | หน้าที่ |
 |---|---|
-| `Assets/_Project/Art/Shaders/SpriteLitNormal.shader` | `FoliageWindUV()` เลื่อน UV ใน Forward / DepthOnly / DepthNormals (ลบลม vertex เดิมออกแล้ว) |
+| `Assets/_Project/Art/Shaders/FoliageWind.hlsl` | โค้ดลมตัวเดียวของโปรเจกต์: `FoliageWindUV(uv, positionWS, movementWeight)` + ตัวแปร pusher |
+| `Assets/_Project/Art/Shaders/SpriteLitNormal.shader` | ต้นไม้: include ลมข้างบน, height mask แบบเส้นตรง (`TreeMovementWeight`), มี normal map |
+| `Assets/_Project/Art/Shaders/SpriteGrass.shader` | หญ้า: include ลมเดียวกัน + `Still Below Height`, `Bend Curve`, `Scene Lighting` (0 = สีตามที่วาด) |
 | `Assets/_Project/Art/Shaders/FoliageFlowNoise.png` | noise RG 256² tileable, import sRGB **ปิด**, Wrap Repeat |
 | `Art/Materials/SpriteLit_Wind_Normal.mat` | ใบหลัก (ลมเต็ม, ดันเต็ม) |
 | `Art/Materials/SpriteLit_Wind_Normal_Overlay.mat` | ใบเจาะรู (ลม **เท่ากัน**, `Push Scale` 0.25) |
 | `Art/Materials/SpriteLit_Trunk.mat` | ลำต้น (ไม่มีลม) |
-| `Art/Materials/SpriteLit_FlowGrass.mat` | หญ้า (`Full Movement Height` 0.5, `Push Depth Reach` 0.8) |
+| `Art/Materials/SpriteLit_FlowGrass.mat` | กอหญ้าบนทาง (shader `SpriteGrass`, รับแสง, `Push Depth Reach` 0.8) |
+| `Art/Materials/SpriteGrass_Undergrowth.mat` | แถบพุ่มหลังทาง `fr_L4_undergrowth` (ไม่รับแสง, โคนดิน 0.6 นิ่ง) |
+| `Art/Materials/SpriteGrass_ForegroundLip.mat` | แถบหญ้าดำหน้าจอ `fr_L6_fg_lip` (ไม่รับแสง, แถบทึบล่าง 0.3 นิ่ง) |
 | `Art/Sprites/ThreeQuarter/Trees/Layers/` | 5 ต้น × (Trunk, Leaves, LeavesOverlay, Layers_N) ขอบใส 32 px, Full Rect |
 | `Prefabs/Trees/Tree_*.prefab` | `Visual` = ลำต้น, ลูก `Leaves` (z −0.05), `LeavesOverlay` (z −0.1) |
 | `Scripts/Environment/FoliagePusher.cs` | บน Player root (`Prefabs/Player.prefab`) — แปลงการเดินเป็นแรงดัน |
@@ -35,6 +39,20 @@
 
 **ห้ามให้ค่าลมของใบหลักกับใบเจาะรูต่างกัน** — ตอนนิ่งจะเห็นภาพซ้อน
 
+### หญ้า (`SpriteGrass`)
+
+| ช่อง | กอหญ้า (FlowGrass) | แถบพุ่มหลังทาง | แถบหญ้าหน้าจอ | หมายเหตุ |
+|---|---|---|---|---|
+| Scene Lighting | 1 | 0 | 0 | แถบวาดสีมาแล้ว ไม่ให้แสงฉากเปลี่ยนสี |
+| Gust / Rustle Strength | 0.05 / 0.03 | 0.05 / 0.03 | 0.04 / 0.03 | |
+| Gust Size / Wind Speed | 4 / 1 | 5 / 0.5 | 5 / 0.5 | แถบใช้ speed เดียวกับใบไม้ที่ Oak ปรับเป็น 0.5 |
+| Still Below Height | 0 | 0.6 | 0.6 | แถบดินล่าง 0.62 u; แถบหน้าจอ: ขอบล่างจออยู่ที่ ~0.75 u เหนือ pivot จึงให้นิ่งถึง 0.6 |
+| Full Movement Height | 0.5 | 1.4 | 0.9 | ปลายหญ้าสูงสุด ~2.1 u / ~1.4 u เหนือ pivot |
+| Bend Curve | 2 | 2 | 2 | ปลายขยับมากกว่ากลาง |
+| Push Strength / Depth Reach | 0.25 / 0.8 | 0.25 / 6 | 0.25 / 8 | แถบอยู่ลึก z 3.8 และ z −5 จากทางเดิน |
+| Alpha Clip Threshold | 0.5 | 0.5 | 0.3 | เส้นหญ้าบางในแถบหน้าจอขาดเป็นจุดที่ 0.5 |
+| Snap To Whole Texels | ✓ | ✗ | ✗ | แถบเป็นภาพวาด (bilinear) ไม่ใช่ pixel art — เปิดไว้ขอบจะหยักขั้นบันได |
+
 ## 3. ทำงานยังไงใน shader (สั้น ๆ)
 
 1. ตำแหน่งบนการ์ด = (แกนขวาของการ์ด · positionWS, positionWS.y) — ใช้ได้ทั้ง yaw 0 และ 45
@@ -55,6 +73,7 @@
 
 ## 5. ข้อจำกัดที่รู้แล้ว
 
+- ลมเขียนไว้ที่เดียวใน `FoliageWind.hlsl` — ห้าม copy ไปใส่ shader ที่สาม ให้ include แทน
 - `SpriteLitOutline` (shadergraph) + `SpriteWind.shadersubgraph` ยังเป็นลม vertex แบบเก่า — ฉากอื่น (Test_Zones) ยังใช้อยู่
 - ถ้า `_MainTex_TexelSize` ไม่ถูกส่งมาสำหรับ SpriteRenderer การปัด texel จะถูกข้าม (ใบยังขยับได้ แต่อาจนุ่ม/เบลอเล็กน้อย)
 - `Push Depth Reach` 6 ทำให้ต้นไม้ตอบสนองเมื่อผู้เล่นเดิน "ผ่านหน้า" แม้ไม่ได้แตะจริง — ตั้งใจให้เหมือนคลิป ปรับลดได้ต่อ material
@@ -69,3 +88,4 @@
 5. กด pause (เปิดเมนู): ทุกอย่างหยุด
 6. ขอบใบไม่ถูกตัดเป็นเส้นตรง (ถ้าโดน = Mesh Type ยังเป็น Tight หรือขอบใสไม่พอ)
 7. เปิด SSAO: เงารอบใบขยับตามใบ
+8. หญ้า (`SpriteGrass`): แถบพุ่มหลังทางและแถบหญ้าหน้าจอสีเหมือนเดิมทุกอย่าง (Scene Lighting 0), ปลายหญ้าไหว, แถบดิน/แถบทึบล่างนิ่ง

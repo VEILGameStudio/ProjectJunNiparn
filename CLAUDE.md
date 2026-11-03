@@ -441,10 +441,12 @@ so it follows automatically when an animation swaps frames.
   - Check the sheet first: if the figure drifts around inside its cell between frames, the cylinder
     has to be placed per cell rather than tiled, which is still one file but not one paste.
 
-**Wind.** The card never moves. The shader (`SpriteLitNormal`) shifts which texel each pixel reads,
-so the leaves ripple *inside* the card the way a hand-drawn tree does. This replaced the old
-vertex-shear wind, which could only lean the whole card. The study it came from, with measured
-numbers and a Python preview, is the `sprite-wind-foliage` skill.
+**Wind.** The card never moves. The shader shifts which texel each pixel reads, so the leaves ripple
+*inside* the card the way a hand-drawn tree does. This replaced the old vertex-shear wind, which could
+only lean the whole card. The study it came from, with measured numbers and a Python preview, is the
+`sprite-wind-foliage` skill. The wind is written once, in `Art/Shaders/FoliageWind.hlsl`, and two
+shaders include it: `SpriteLitNormal` for trees and `SpriteGrass` for grass. Change the wind there,
+never by copying it into a third shader.
 
 - **Flow noise** is `Art/Shaders/FoliageFlowNoise.png`: red = sideways, green = up and down, 0.5 =
   still. It is data, not colour, so it is imported with **sRGB off** and Wrap Repeat; with sRGB on, 0.5
@@ -464,7 +466,7 @@ numbers and a Python preview, is the `sprite-wind-foliage` skill.
   only move inside the sprite's mesh: a Tight mesh hugs the alpha and cuts moving leaves off at the
   silhouette. The tree layers are exported with 32 px of padding for this.
 - `SpriteLitOutline` and `SpriteWind.shadersubgraph` still carry the old vertex wind. They are legacy:
-  new foliage uses `SpriteLitNormal`. A sprite that needs both an outline and this wind does not exist
+  new foliage uses `SpriteLitNormal` or `SpriteGrass`. A sprite that needs both an outline and this wind does not exist
   yet; ask before building one.
 
 **A tree is three layers, never one sprite.** One smooth shift over a whole canopy stretches it like
@@ -489,6 +491,20 @@ slime the moment anything pushes it.
   buffer orders them. There is no sorting code (§0 rule 7).
 - **Tint and Flip X go on all three renderers.** A tree tinted on `Visual` alone keeps green leaves
   on a tinted trunk.
+
+**Grass uses `SpriteGrass`, not the tree shader.** It is one layer, because a blade is too thin to
+look like slime, and it adds three fields a tree does not need:
+
+| Field | What it does |
+|---|---|
+| `Still Below Height` | world units above the pivot that never move: soil, roots, the solid band at the bottom of a strip |
+| `Bend Curve` | 1 = the blade leans straight, 2 = the tips move most and the middle less, so it bends |
+| `Scene Lighting` | 1 = lit by the scene, 0 = colours exactly as drawn, for painted strips that were never meant to be lit |
+
+The pivot is where the grass meets the ground, the mesh is Full Rect, and there is transparent space
+above the tips. A painted strip of grass or undergrowth uses the same shader as a single tuft; only the
+material differs. `Snap To Whole Texels` is for pixel art: a painted, bilinear-filtered strip turns it
+off, or its edges step like a staircase as neighbouring pixels land on different texels.
 
 **Push.** `FoliagePusher` on the Player root turns its movement into a push that eases in, fades over
 `Fade Time` after stopping, and freezes while paused. One `FoliageWindFeed` per scene — not a
