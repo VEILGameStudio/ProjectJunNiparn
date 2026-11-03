@@ -50,3 +50,29 @@ python3 $S/scripts/forest_sim.py   Assets/_Project/Scenes/Test/Test_Forest.unity
 2. material ต้นไม้รับ fog จริงไหม (ถ้าแถว Deep ไม่จางเลย = shader ไม่ได้เปิด fog)
 3. Post-processing Volume ของโซน (ถ้ามี) อาจดึง exposure/สีเพี้ยนจากภาพจำลอง
 4. ถ่าย screenshot เก็บไว้ที่ `img/study/` แล้วไล่ `07-critique-checklist.md`
+
+## 5. รอบที่ 2: ทำแบบ Ref เต็ม ๆ (Oak สั่ง ไม่ยึด GDD) — 2026-11-03
+
+ภาพจำลอง: `img/study/s02-forest-ref-style-preview.jpg` (กล้อง x = 0, −9, +9; composite ด้วย Python ไม่ใช่ Unity)
+
+**ปัญหาของกล้อง SideView ที่ต้องรู้:** pitch 10° กับ FOV 19° ทำให้ขอบฟ้าอยู่ *เหนือ* ขอบจอบน ถ้าพื้นยาวถึงไกล
+กล้องจะเห็นแต่พื้น ป่าไกลจะโผล่แค่แถบบนสุด ภาพแบบ Ref จึงทำไม่ได้ถ้าวางต้นไม้ยืนบน y = 0
+**วิธีแก้แบบฉากละคร:** ตัดพื้นให้เหลือแค่แถบเดิน (z −6.5 ถึง 3.8) แล้วให้ทุกชั้นหลังเป็น "ฉากผ้า" ตั้งตรงที่ระยะของมันเอง
+โดย *เส้นพื้นที่วาดในภาพ* วางที่ความสูง `y = 5.47 − 0.2328 × (z + 19.7)` ซึ่งเป็นจุดที่ขอบหลังของแถบเดินไปตกบนระนาบนั้นพอดี
+ทุกชั้นจึงต่อกันเป็นภาพเดียวที่เส้นพื้นเดียวกัน และยังได้ parallax จริงตามระยะ
+
+| วัตถุ | z | PPU | Sorting order | หมายเหตุ |
+|---|---|---|---|---|
+| `fr_L0_haze` | 180 | 16 | −60 | gradient + แสงเรืองกลางบน |
+| `fr_L1_deep_pines` | 100 | 27 | −50 | สนเงาจาง + หมอกพื้น |
+| `fr_L2_far_trunks` | 45 | 48 | −40 | ลำต้นตรงจาง + กิ่งสน |
+| `fr_L3_mid_trunks` | 22 | 72 | −30 | ลำต้นเข้ม ลายเปลือก มอส lime ด้านขวา, เว้นช่องกลางให้แสงลง |
+| `fr_rays` | 14 | 24 | −25 | god rays (alpha blend) |
+| ต้นไม้เดิมแถว Near | 4.4–5.9 | — | — | เหลือ 7 ต้น, ย้าย OakBig_4 → x −6.5 และ Willow_10 → x 6.5 เป็นปีกซ้าย/ขวา |
+| `fr_L4_undergrowth` | 3.8 | 96 | −20 | แถบเฟิร์น/พุ่ม บังโคนต้นไม้ + ดอกไม้ขาว เห็ดส้ม |
+| `fr_L5_ground` | นอนราบ y 0.01 | 84 | −15 | ดินไล่มืดเข้าหากล้อง (แทนแถบ UI ดำของ Ref) |
+| `fr_L6_fg_lip` | −5 | 110 | 10 | หญ้าดำขอบล่างจอ |
+
+- ปิด GameObject แถว Deep / Far / Mid / Undergrowth / Foreground เดิม (ไม่ได้ลบ เปิดคืนได้), ปิด MeshRenderer ของ Floor ใหญ่ (collider ยังอยู่)
+- ชั้นใหม่ใช้ material `Sprite-Unlit-Default` ของ URP (alpha blend, ไม่รับแสง/หมอก) — สีทั้งหมด bake ในภาพแบบ Ref
+- สร้างใหม่ได้: `scripts/paint_forest_layers.py <out>` → `scripts/preview_forest_layers.py <out> preview.png <camX>` → `scripts/place_forest_layers.py <out>` (รันบนฉากที่ยังไม่มี ForestRef)

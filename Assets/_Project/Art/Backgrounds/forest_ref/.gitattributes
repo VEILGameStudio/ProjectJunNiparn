@@ -1,0 +1,2 @@
+# Painted test layers kept in plain git (LFS upload is blocked from cloud sessions).
+*.png -filter -diff -merge binary
