@@ -503,7 +503,8 @@ look like slime, and it adds three fields a tree does not need:
 
 The pivot is where the grass meets the ground, the mesh is Full Rect, and there is transparent space
 above the tips. A painted strip of grass or undergrowth uses the same shader as a single tuft; only the
-material differs.
+material differs. `Snap To Whole Texels` is for pixel art: a painted, bilinear-filtered strip turns it
+off, or its edges step like a staircase as neighbouring pixels land on different texels.
 
 **Push.** `FoliagePusher` on the Player root turns its movement into a push that eases in, fades over
 `Fade Time` after stopping, and freezes while paused. One `FoliageWindFeed` per scene — not a

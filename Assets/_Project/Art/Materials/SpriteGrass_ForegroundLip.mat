@@ -34,18 +34,18 @@ Material:
         m_Offset: {x: 0, y: 0}
     m_Ints: []
     m_Floats:
-    - _AlphaClipThreshold: 0.5
+    - _AlphaClipThreshold: 0.3
     - _BendCurve: 2
-    - _FlowFullHeight: 1
+    - _FlowFullHeight: 0.9
     - _GustSize: 5
     - _GustStrength: 0.04
     - _Lighting: 0
     - _PushDepthReach: 8
     - _PushScale: 1
     - _PushStrength: 0.25
-    - _RootHeight: 0.3
+    - _RootHeight: 0.6
     - _RustleStrength: 0.03
-    - _SnapToTexels: 1
+    - _SnapToTexels: 0
     - _WindSpeed: 0.5
     m_Colors:
     - _Color: {r: 1, g: 1, b: 1, a: 1}

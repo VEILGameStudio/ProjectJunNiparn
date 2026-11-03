@@ -45,7 +45,7 @@ Material:
     - _PushStrength: 0.25
     - _RootHeight: 0.6
     - _RustleStrength: 0.03
-    - _SnapToTexels: 1
+    - _SnapToTexels: 0
     - _WindSpeed: 0.5
     m_Colors:
     - _Color: {r: 1, g: 1, b: 1, a: 1}
