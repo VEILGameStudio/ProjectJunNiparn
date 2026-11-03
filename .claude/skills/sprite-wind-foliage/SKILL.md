@@ -29,7 +29,7 @@ description: Use when making trees, bushes or grass sway in the wind or react wh
 | เข้าใจว่าคลิปทำอะไร ทีละวินาที | `references/01-clip-breakdown.md` |
 | ตั้งค่าลม / ระบบผู้เล่นดัน / ตัวเลขที่วัดได้ | `references/02-flow-and-disturbance.md` |
 | วาด/แยกชั้นต้นไม้ แก้ slime | `references/03-layering-fix.md` |
-| ลมนี้ในโปรเจกต์ (ไฟล์, ค่า material, ทำต้นไม้ใหม่, เช็กใน Unity) | `references/04-unity-urp.md` |
+| ลมนี้ในโปรเจกต์ (ไฟล์, ค่า material ต้นไม้/หญ้า, ทำต้นไม้ใหม่, เช็กใน Unity) | `references/04-unity-urp.md` |
 | แยกต้นไม้เป็น 3 ชั้น | `python3 -I scripts/split_tree_layers.py tree.png tree_N.png <out> <name>` |
 | ลองค่าโดยไม่เปิด Unity | `python3 -I scripts/foliage_flow_sim.py <out> [overlay_scale] [wind_px] [disturb_px]` |
 | ทำ texture noise ลม | `python3 -I scripts/make_flow_noise.py out.png 256 4 0.0` (หรือใช้ `img/w09-flow-noise-256.png`) |
@@ -51,9 +51,11 @@ description: Use when making trees, bushes or grass sway in the wind or react wh
 ## สถานะในโปรเจกต์
 
 - **ใช้งานจริงแล้ว** (Oak สั่ง 2026-11-03): `SpriteLitNormal` ใช้ลมแบบนี้แทนลม vertex เดิม, ต้นไม้ 5 prefab เป็น 3 ชั้น,
-  ผู้เล่นมี `FoliagePusher`, Test_Forest มี `FoliageWindFeed` และหญ้าใช้ `SpriteLit_FlowGrass`
+  ผู้เล่นมี `FoliagePusher`, Test_Forest มี `FoliageWindFeed`
+- หญ้าใช้ shader ของตัวเอง `SpriteGrass` (ลมเดียวกันจาก `FoliageWind.hlsl` + โคนนิ่ง, ปลายโค้ง, เลือกรับแสงหรือไม่):
+  กอหญ้า `SpriteLit_FlowGrass`, แถบพุ่ม/หญ้าในฉาก `SpriteGrass_Undergrowth` / `SpriteGrass_ForegroundLip`
 - กฎอยู่ใน CLAUDE.md §7 "Wind" — ถ้า skill นี้กับ CLAUDE.md ขัดกัน ยึด CLAUDE.md
-- ยังไม่เคยเปิดใน Unity: เช็กลิสต์อยู่ใน `references/04-unity-urp.md` §6
+- ต้นไม้ผ่านการเช็กใน Unity แล้ว (2026-11-03) เช็กลิสต์อยู่ใน `references/04-unity-urp.md` §6
 
 ## Critique — เช็กก่อนส่ง
 
