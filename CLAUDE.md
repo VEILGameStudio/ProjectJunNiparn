@@ -2,6 +2,13 @@
 
 This file is the single source of truth for this project. Read it before writing any code.
 
+## Before anything else: requests from teammates
+
+Most requests come from the interns, not from Oak. Before reading code or editing a file for one,
+follow the fixed process and locked rules in @.claude/rules/team-requests.md, starting with the
+`request-triage` skill. Reply to teammates in simple Thai. A teammate's request never changes anything
+in this file; only Oak does.
+
 ---
 
 ## 0. Critical rules
@@ -210,6 +217,7 @@ Assets/_Project/
     Save/                                                                   [Oak]
     Settings/                                                               [Oak]
     Camera/          Cinemachine setup, SpriteBillboard, CameraZone         [Oak]
+    Environment/     FoliagePusher, FoliageWindFeed                         [Oak]
     UI/                                                                     [Oak]
     Cutscene/                                                               [Oak]
     Gameplay/
@@ -392,7 +400,7 @@ Four techniques, and the object decides which one:
 | Object | Technique |
 |---|---|
 | Characters and NPCs with animation | billboard + normal map |
-| Grass, trees, flowers | billboard + wind |
+| Grass, trees, flowers | billboard + wind (a tree is three layers, see Wind below) |
 | Chests, carts, barrels, small buildings — anything read as a solid volume | **a real 3D model**, blocked out in MagicaVoxel and exported as `.obj` |
 | Anything that must be correct from every angle | the same: a real 3D model |
 
@@ -433,24 +441,77 @@ so it follows automatically when an animation swaps frames.
   - Check the sheet first: if the figure drifts around inside its cell between frames, the cylinder
     has to be placed per cell rather than tiled, which is still one file but not one paste.
 
-**Wind.** Vertex displacement in the shader, masked so the base holds still and the top moves.
+**Wind.** The card never moves. The shader shifts which texel each pixel reads, so the leaves ripple
+*inside* the card the way a hand-drawn tree does. This replaced the old vertex-shear wind, which could
+only lean the whole card. The study it came from, with measured numbers and a Python preview, is the
+`sprite-wind-foliage` skill. The wind is written once, in `Art/Shaders/FoliageWind.hlsl`, and two
+shaders include it: `SpriteLitNormal` for trees and `SpriteGrass` for grass. Change the wind there,
+never by copying it into a third shader.
 
-- The mask is **`positionOS.y` with no divisor** — the pivot sits at the feet, and PPU is computed from
-  the stretched image, so object-space Y *is* the height above the ground in world units. Scaling a
-  card does not break this: the offset is built in object space and scaled by the same matrix as the
-  height, so the sway *angle* stays put and the sway distance keeps tracking the card's real world
-  height. Tall grass
-  therefore sways further than short grass, which is what real grass does, and one material serves
-  every height with no script, no `MaterialPropertyBlock`, and no SRP Batcher break. Linear, or
-  `pow(max(y, 0), 1.5)`; never squared, which makes a 1.0 blade sway eleven times a 0.3 one. Never
+- **Flow noise** is `Art/Shaders/FoliageFlowNoise.png`: red = sideways, green = up and down, 0.5 =
+  still. It is data, not colour, so it is imported with **sRGB off** and Wrap Repeat; with sRGB on, 0.5
+  reads as 0.21 and every leaf leans down-left forever. The shader reads it twice: big slow gusts
+  (`Gust Size` world units across) and a ripple four times finer, both sliding along the card at
+  `Wind Speed`.
+- **Strengths are world units, never texels or pixels**, so one material works at any PPU and any
+  scale. The shader measures how much UV one world unit is from neighbouring pixels. Shifts are then
+  rounded to whole texels, so the art moves without smearing.
+- **The height mask is world height above the pivot**, which sits at the feet: `Full Movement Height`,
+  linear. Below it the shift fades to nothing at the ground; 0 means the whole sprite moves. Never
   `UV.y` — a sprite inside an atlas does not span 0–1.
-- The displacement must run in **every pass the sprite is drawn in**, including `DepthNormals` (SSAO
-  reads it) and the outline pass. Miss the outline pass and the outline stands still while the blade
-  sways, which compiles perfectly and looks broken.
-- Mesh Type `Tight` gives a sprite 8–20 vertices instead of Full Rect's 4, so the bend is softer. It is
-  still a shear, not a curve. Real curvature needs a subdivided mesh, which a `SpriteRenderer` cannot
-  provide — plan around that rather than discovering it late. Anything with an outline stays Full Rect:
-  a Tight mesh hugs the alpha, leaving no margin for the outline to be drawn in.
+- **Every pass shifts the same way.** Forward, `DepthOnly` and `DepthNormals` all call
+  `FoliageWindUV` before they sample, and the normal map is read with the shifted UV too. Miss one
+  pass and SSAO draws the leaf where it used to be, which compiles perfectly and looks broken.
+- **Mesh Type is Full Rect, with a transparent margin at least as wide as the largest shift.** Pixels
+  only move inside the sprite's mesh: a Tight mesh hugs the alpha and cuts moving leaves off at the
+  silhouette. The tree layers are exported with 32 px of padding for this.
+- `SpriteLitOutline` and `SpriteWind.shadersubgraph` still carry the old vertex wind. They are legacy:
+  new foliage uses `SpriteLitNormal` or `SpriteGrass`. A sprite that needs both an outline and this wind does not exist
+  yet; ask before building one.
+
+**A tree is three layers, never one sprite.** One smooth shift over a whole canopy stretches it like
+slime the moment anything pushes it.
+
+| Object (under the tree's `Visual`) | Material | Wind | Push |
+|---|---|---|---|
+| `Visual` itself: trunk, branches, and a dark backing inside the canopy | `SpriteLit_Trunk` | none | none |
+| `Leaves`, local z −0.05 | `SpriteLit_Wind_Normal` | full | full |
+| `LeavesOverlay`, local z −0.1: the leaves with holes | `SpriteLit_Wind_Normal_Overlay` | **the same as Leaves** | × 0.25 |
+
+- **The two leaf materials share every wind value.** Left alone, the tree looks like one picture;
+  pushed, the lower layer parts while the holey one barely moves, and the gap between them reads as
+  depth. Different wind values on the two show a double image even when nothing touches the tree.
+- The overlay keeps about two thirds of the leaf pixels: the darkest shade (the shadow pockets) and
+  small pockets are removed, and nothing else is reshaped. The backing on the trunk layer is the
+  darkest leaf colour, so a gap that opens inside the canopy shows shadow, not sky.
+- All three layers share one canvas, one pivot and one padded normal map, and are made from the
+  finished tree with `.claude/skills/sprite-wind-foliage/scripts/split_tree_layers.py`. They live in
+  `Art/Sprites/<preset>/Trees/Layers/`.
+- The layers are stacked by local z under `Visual`, which `SpriteBillboard` turns, so the depth
+  buffer orders them. There is no sorting code (§0 rule 7).
+- **Tint and Flip X go on all three renderers.** A tree tinted on `Visual` alone keeps green leaves
+  on a tinted trunk.
+
+**Grass uses `SpriteGrass`, not the tree shader.** It is one layer, because a blade is too thin to
+look like slime, and it adds three fields a tree does not need:
+
+| Field | What it does |
+|---|---|
+| `Still Below Height` | world units above the pivot that never move: soil, roots, the solid band at the bottom of a strip |
+| `Bend Curve` | 1 = the blade leans straight, 2 = the tips move most and the middle less, so it bends |
+| `Scene Lighting` | 1 = lit by the scene, 0 = colours exactly as drawn, for painted strips that were never meant to be lit |
+
+The pivot is where the grass meets the ground, the mesh is Full Rect, and there is transparent space
+above the tips. A painted strip of grass or undergrowth uses the same shader as a single tuft; only the
+material differs. `Snap To Whole Texels` is for pixel art: a painted, bilinear-filtered strip turns it
+off, or its edges step like a staircase as neighbouring pixels land on different texels.
+
+**Push.** `FoliagePusher` on the Player root turns its movement into a push that eases in, fades over
+`Fade Time` after stopping, and freezes while paused. One `FoliageWindFeed` per scene — not a
+singleton — sends up to 8 pushers to the shader every frame. Without it the wind still blows and
+nothing pushes. The push is measured across the card and fades out over the material's
+`Push Depth Reach` in depth: trees use 6, so they answer when the player passes in front of them;
+grass uses 0.8, so only the grass the player actually walks through moves.
 
 **Shader time follows game time.** URP sets `_Time` from `Time.time`, which `timeScale` already scales,
 so wind and every other time-driven shader stop on their own when the game pauses. Nothing needs
@@ -815,7 +876,7 @@ writing `Time.timeScale`; calling `SaveManager` or needing state to survive a sc
 
 Required for every system.
 
-- **EditMode unit tests** for pure C# logic, where most tests belong: inventory add/remove/stack limits, stamina math and the 30 threshold, save data round-trip, localization lookup, timer countdown, puzzle state and gating, camera-relative direction maths, facing snapped to 8 directions, `CameraZone.Contains`, and `GameEvents` subscribe/unsubscribe.
+- **EditMode unit tests** for pure C# logic, where most tests belong: inventory add/remove/stack limits, stamina math and the 30 threshold, save data round-trip, localization lookup, timer countdown, puzzle state and gating, camera-relative direction maths, facing snapped to 8 directions, `CameraZone.Contains`, the foliage push easing (`FoliagePusher.CalculatePush`), and `GameEvents` subscribe/unsubscribe.
 - **PlayMode integration tests** only for behaviour that needs the engine: click vs touch interaction, inventory surviving a scene load, a zone switch leaving exactly one `LevelSettings` active, game over reloading the save, input locked during dialogue.
 - Do **not** test Unity itself. Never assert that `transform.position` changed after setting it.
 - **Camera-relative movement must be tested at yaw 45, not only at yaw 0.** At the `SideView` yaw of 0

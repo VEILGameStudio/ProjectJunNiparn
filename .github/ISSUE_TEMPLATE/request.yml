@@ -1,0 +1,56 @@
+name: สั่งงาน Claude (Request)
+description: ขอให้ Claude ทำงานให้ เช่น เพิ่มไอเท็ม บทพูด ปริศนา แก้บั๊ก
+title: "[งาน] "
+labels: ["request"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        เขียนเป็นภาษาไทยได้เลย Claude จะทำตามกฎใน `.claude/rules/team-requests.md`
+        ถ้างานไปแตะดีไซน์หรือกฎที่ล็อกไว้ Claude จะไม่ทำเอง แต่จะเขียนข้อเสนอให้ Oak ตัดสิน
+        **ต้องมีคำว่า `@claude` ในช่องสุดท้าย Claude ถึงจะเริ่มทำงาน**
+  - type: dropdown
+    id: type
+    attributes:
+      label: ประเภทงาน
+      options:
+        - เพิ่มไอเท็ม (add-item)
+        - เพิ่มบทพูด (add-dialogue)
+        - เพิ่มของที่กดโต้ตอบได้ (add-interactable)
+        - เพิ่มปริศนา (add-puzzle)
+        - ตั้งค่าพื้นที่/ฉาก (setup-area)
+        - นำเข้าภาพ sprite (import-sprite-art)
+        - แก้บั๊ก (fix-bug)
+        - เขียนเทสต์ (write-tests)
+        - ขอเปลี่ยนดีไซน์ (ส่งให้ Oak)
+        - อื่นๆ / ไม่แน่ใจ
+    validations:
+      required: true
+  - type: textarea
+    id: what
+    attributes:
+      label: อยากให้เกิดอะไรขึ้นในเกม
+      description: เล่าว่าผู้เล่นจะเห็นหรือทำอะไร ไม่ต้องบอกว่าต้องแก้โค้ดตรงไหน
+    validations:
+      required: true
+  - type: textarea
+    id: where
+    attributes:
+      label: อยู่ตรงไหน
+      description: ฉาก / พื้นที่ / ตัวละคร / ไอเท็มที่เกี่ยวข้อง
+  - type: textarea
+    id: bug
+    attributes:
+      label: (ถ้าเป็นบั๊ก) ทำยังไงให้เกิด และควรเป็นยังไง
+  - type: textarea
+    id: refs
+    attributes:
+      label: รูป / ไฟล์ / ลิงก์อ้างอิง
+      description: ลากรูปหรือวิดีโอมาวางได้
+  - type: textarea
+    id: mention
+    attributes:
+      label: เรียก Claude
+      value: "@claude ช่วยทำงานนี้ตามกฎของทีม"
+    validations:
+      required: true

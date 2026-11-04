@@ -1,0 +1,69 @@
+---
+name: sprite-wind-foliage
+description: Use when making trees, bushes or grass sway in the wind or react when the player walks or jumps through them - per-pixel flow-map wind, a player "disturbance" push, the "leaves look like slime" problem and the layered-tree fix, or tuning the wind on SpriteLitNormal sprites.
+---
+
+# Sprite wind & foliage disturbance — ลมผ่านต้นไม้/ใบหญ้า
+
+ถอดจากคลิป devlog 78 วินาที (เกม pixel art side-scroller ใน GameMaker): ต้นไม้ไหวตามลมทีละพิกเซล
+และใบแหวกเมื่อตัวละครกระโดดทะลุ ครั้งแรกออกมาเป็น "slime" แล้วแก้ด้วยการแยกชั้นต้นไม้
+ตัวเลขทั้งหมดในโฟลเดอร์นี้วัดจากคลิปจริง (สคริปต์อยู่ใน `scripts/`) ส่วนไหนเดาจะเขียนกำกับไว้
+
+## หัวใจ 7 ข้อ
+
+1. **ลมที่ดูเป็นใบไม้คือการเลื่อนพิกเซล ไม่ใช่การเฉือนการ์ด** — อ่าน texture ที่ตำแหน่งเลื่อน (UV offset)
+   ค่าการเลื่อนมาจาก texture สี: **R = ซ้าย/ขวา, G = ขึ้น/ลง, 0.5 = นิ่ง** ("เหลืองขี้ม้า" = R 0.5 G 0.5)
+2. **ลม = noise ลายใหญ่กว่าต้นไม้ เลื่อนช้า ๆ** — โยกรอบละ ~5 วินาที (0.17–0.22 Hz), ทั้งพุ่มโยกแค่ 1–2.5% ของความกว้าง,
+   ใบไหวภายใน ~0.6% ลมเบามากก็พอ ตาเห็น "ลม" จากขอบเฉดสีที่ขยับทีละพิกเซล
+3. **ผู้เล่นดัน = disturbance บวกเข้ากับลม** — จุดนุ่มรอบตัวผู้เล่น ทิศตามที่ผู้เล่นเคลื่อน จางลงหลังผ่านไป ระบบเดียวใช้กับพืชทุกชนิด
+4. **slime เกิดเพราะ offset เรียบเกินไป** — พิกเซลติดกันเลื่อนเกือบเท่ากัน ทั้งพุ่มยืดเป็นเยลลี่ ลมเบาไม่เห็น แต่แรงดันผู้เล่นโชว์ชัด
+5. **แก้ด้วยการแยกชั้น:** ลำต้น (ไม่มีลม) → ใบหลัก (ลม + ดันเต็ม) → ผู้เล่น → **ใบซ้ำเจาะรู (ลมเท่ากัน + ดันแค่ ~¼)**
+   ลมเท่ากันทำให้ตอนนิ่งดูเป็นภาพเดียว ดันไม่เท่ากันทำให้ "แหวกเห็นความลึก" เฉพาะตอนโดนแตะ
+6. **ชั้นเจาะรูเหลือใบ ~2/3** — ลบเฉดมืดสุด (ร่องเงา) + จุดเล็ก ๆ กระจาย ห้ามแก้รูปทรงที่เหลือ
+7. **ทุกพิกเซลเลื่อนเป็นจำนวนเต็ม** — pixel art ต้องไม่มีครึ่งพิกเซล; ทุก pass ที่อ่าน texture ต้องเลื่อนเหมือนกัน
+
+## Workflow
+
+| อยากทำ | อ่าน / ใช้ |
+|---|---|
+| เข้าใจว่าคลิปทำอะไร ทีละวินาที | `references/01-clip-breakdown.md` |
+| ตั้งค่าลม / ระบบผู้เล่นดัน / ตัวเลขที่วัดได้ | `references/02-flow-and-disturbance.md` |
+| วาด/แยกชั้นต้นไม้ แก้ slime | `references/03-layering-fix.md` |
+| ลมนี้ในโปรเจกต์ (ไฟล์, ค่า material ต้นไม้/หญ้า, ทำต้นไม้ใหม่, เช็กใน Unity) | `references/04-unity-urp.md` |
+| แยกต้นไม้เป็น 3 ชั้น | `python3 -I scripts/split_tree_layers.py tree.png tree_N.png <out> <name>` |
+| ลองค่าโดยไม่เปิด Unity | `python3 -I scripts/foliage_flow_sim.py <out> [overlay_scale] [wind_px] [disturb_px]` |
+| ทำ texture noise ลม | `python3 -I scripts/make_flow_noise.py out.png 256 4 0.0` (หรือใช้ `img/w09-flow-noise-256.png`) |
+| วัดลมในคลิป ref ใหม่ | `python3 -I scripts/measure_foliage_motion.py clip.mp4 t0 t1 art_px canopy_box anchor_box` |
+
+## ไฟล์ในโฟลเดอร์นี้
+
+| ไฟล์ | เนื้อหา |
+|---|---|
+| `references/01-clip-breakdown.md` | คำบรรยายเต็ม + สิ่งที่เห็นต่อช่วงเวลา + สรุปเทคนิค |
+| `references/02-flow-and-disturbance.md` | การเข้ารหัสสี, ตัวเลขลมที่วัดได้, disturbance texture, ทำไมเป็น slime + ทางแก้ 3 แบบ |
+| `references/03-layering-fix.md` | ชั้นต้นไม้ 4 ชั้น, การวัดชั้นเจาะรู, วิธีวาดสำหรับ artist |
+| `references/04-unity-urp.md` | ไฟล์ที่ใช้จริงในโปรเจกต์, ค่าทุก material, วิธีทำต้นไม้ใหม่, ข้อจำกัด, เช็กลิสต์ Unity |
+| `references/img/w01–w05` | เฟรมจากคลิป: ต้นไม้, texture ลม/disturbance, ชั้น, heatmap การเคลื่อนไหว, ก่อน–หลังแก้ |
+| `references/img/w06–w08` | ภาพจำลอง Python: slime vs แยกชั้น (ภาพนิ่ง + GIF), ชั้นที่สร้างอัตโนมัติ |
+| `references/img/w09-flow-noise-256.png` | texture ลม tileable พร้อมใช้ (import: sRGB ปิด) |
+| `scripts/` | `measure_foliage_motion.py`, `foliage_flow_sim.py`, `make_flow_noise.py`, `split_tree_layers.py` |
+
+## สถานะในโปรเจกต์
+
+- **ใช้งานจริงแล้ว** (Oak สั่ง 2026-11-03): `SpriteLitNormal` ใช้ลมแบบนี้แทนลม vertex เดิม, ต้นไม้ 5 prefab เป็น 3 ชั้น,
+  ผู้เล่นมี `FoliagePusher`, Test_Forest มี `FoliageWindFeed`
+- หญ้าใช้ shader ของตัวเอง `SpriteGrass` (ลมเดียวกันจาก `FoliageWind.hlsl` + โคนนิ่ง, ปลายโค้ง, เลือกรับแสงหรือไม่):
+  กอหญ้า `SpriteLit_FlowGrass`, แถบพุ่ม/หญ้าในฉาก `SpriteGrass_Undergrowth` / `SpriteGrass_ForegroundLip`
+- กฎอยู่ใน CLAUDE.md §7 "Wind" — ถ้า skill นี้กับ CLAUDE.md ขัดกัน ยึด CLAUDE.md
+- ต้นไม้ผ่านการเช็กใน Unity แล้ว (2026-11-03) เช็กลิสต์อยู่ใน `references/04-unity-urp.md` §6
+
+## Critique — เช็กก่อนส่ง
+
+- [ ] ตอนไม่มีใครแตะ ต้นไม้ดูเป็นภาพเดียว (ไม่มีภาพซ้อน ขอบไม่สั่นสองชั้น)
+- [ ] ลมเบา: ทั้งพุ่มโยก ≤ 2.5% ของความกว้าง, รอบละ 4–6 วินาที — ถ้าดูเหมือน "ต้นไม้เต้น" แปลว่าแรงไป
+- [ ] ผู้เล่นทะลุ: เห็นชั้นล่างแหวกขณะก้อนใบชั้นบนเกือบนิ่ง ไม่ใช่ทั้งก้อนยืด
+- [ ] ผู้เล่นถูกก้อนใบบังบางส่วนเมื่ออยู่ในพุ่ม (ถ้าตั้งใจให้ทะลุได้)
+- [ ] ลำต้นนิ่งสนิท, เท้าหญ้านิ่ง
+- [ ] ไม่มีพิกเซลครึ่ง ๆ / เบลอ, ไม่มีพิกเซลจาก sprite อื่นโผล่ที่ขอบ, ขอบ silhouette ไม่แหว่ง
+- [ ] pause แล้วทุกอย่างหยุด, เล่นต่อแล้วไม่กระตุก
+- [ ] SSAO/เงารอบใบตรงกับใบที่เห็น (ทุก pass เลื่อนเหมือนกัน)
