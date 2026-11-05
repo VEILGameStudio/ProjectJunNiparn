@@ -15,7 +15,10 @@
 // Assign in Inspector:
 //   - Play On: when the cutscene starts.
 //   - Cutscene Type + Timeline/Video: what to play.
-//   - One Shot (from InteractableBase): tick to play it only the first time.
+//   - One Shot (from InteractableBase): tick to play it only the first time. Give it a
+//     Unique Id too, so it stays played after loading a save. Interact mode is saved when
+//     it starts; Scene Start and Manual are saved when it ends or is skipped, so quitting
+//     half-way through an intro shows it again next time.
 //   - Activation / Max Click Distance / Required Item: used when Play On = Interact.
 //   - On Cutscene End: what happens after the cutscene.
 
@@ -96,9 +99,31 @@ public class CutsceneTrigger : InteractableBase
         Play();
     }
 
-    // Runs the On Cutscene End actions.
+    // Runs the On Cutscene End actions, then remembers a one-shot Scene Start / Manual
+    // cutscene in the save. (Interact mode is remembered by InteractableBase when it starts.)
     private void RaiseEnd()
     {
         onCutsceneEnd?.Invoke();
+
+        if (SavesWhenItEnds(OneShot, playOn == PlayMode.Interact))
+        {
+            MarkUsed();
+        }
+    }
+
+    // Already played in a loaded save: never play it again. The save system calls this
+    // before OnStarted, so a Scene Start cutscene is stopped before it begins.
+    protected override void OnRestoredAsUsed()
+    {
+        hasPlayed = true;
+        base.OnRestoredAsUsed();
+    }
+
+    // True when this cutscene must be written to the save by itself when it ends.
+    // Interact mode does not need it: InteractableBase.Interact saves every One Shot use.
+    // Public and static so it can be tested without a scene.
+    public static bool SavesWhenItEnds(bool oneShot, bool playsOnInteract)
+    {
+        return oneShot && !playsOnInteract;
     }
 }
