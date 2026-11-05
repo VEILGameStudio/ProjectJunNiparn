@@ -26,5 +26,7 @@ Rules:
   - chest, door, switch, anything clicked or touched → `add-interactable`
   - puzzle, mini game, QTE → `add-puzzle`
   - new room, corridor, camera zone → `setup-area` · sprite, prop, model, normal map → `import-sprite-art`
+  - cutscene, intro, video, Timeline → `add-cutscene` · menu, panel, popup, HUD, button → `add-ui-screen`
+  - music, sound effect, ambience → `add-audio`
   - bug → `fix-bug`
 - One request at a time. If the message holds several, list them and triage each separately.
