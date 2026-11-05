@@ -18,8 +18,9 @@ Inspector setup, not new code.**
   - `Interact` — click it, or walk in with Activation = Touch (before collecting the puzzle gem)
   - `Manual` — a button's OnClick calls `Play()` (start game)
   - **On Cutscene End** (UnityEvent) runs after the end *or* a skip — give the gem, open the door here.
-  - **One Shot** + a Unique Id: plays only the first time. **Only Play On = Interact saves it** as
-    `<scene>/<id>`; Scene Start and Manual remember it only until the scene reloads (see §6).
+  - **One Shot** + a Unique Id: plays only the first time and is saved as `<scene>/<id>`. Interact mode is
+    saved when it starts; Scene Start and Manual when it ends or is skipped (quit half-way through an intro
+    and it shows again next time).
 
 Gameplay code never locks input or sets the game state itself — `CutsceneManager` does both (§8 hard stop).
 
@@ -36,7 +37,7 @@ Gameplay code never locks input or sets the game state itself — `CutsceneManag
 | | Timeline | Video |
 |---|---|---|
 | Use for | scenes played with the game's own characters and sets | painted storybook pages, pre-rendered movies |
-| Pause (menu / inventory) | stops by itself: `PlayableDirector` in **Game Time** follows `timeScale` | **does not stop** — `VideoPlayer` ignores `timeScale` (see §6) |
+| Pause (menu / inventory) | stops by itself: `PlayableDirector` in **Game Time** follows `timeScale` | `CutsceneManager` pauses it and resumes it (a `VideoPlayer` ignores `timeScale`) |
 | Language | dialogue inside it is a dialogue asset, so it is translated | text burned into a video is not; one clip per language, or no words in the video |
 | Size | small | large; keep clips short |
 
@@ -61,7 +62,7 @@ Timeline settings: Update Method **Game Time**, Play On Awake **off** (the trigg
   the Timeline half-way. Test the skip, not only the full play.
 - **One cutscene at a time.** `CutsceneManager` ignores a second `Play` while one is playing; do not chain
   two triggers to fire in the same frame — start the second from the first one's On Cutscene End.
-- **Restore.** An Interact one-shot cutscene that already played does not play again after loading a save, and its
+- **Restore.** A one-shot cutscene that already played does not play again after loading a save, and its
   On Cutscene End does not re-run — so anything it opened must be saved by what it opened (a one-shot door,
   a puzzle's restore), not only by the cutscene. Check this with a reload.
 
@@ -78,19 +79,12 @@ Timeline settings: Update Method **Game Time**, Play On Awake **off** (the trigg
 6. Wire On Cutscene End.
 
 ## 6. Known gaps — report, do not patch in gameplay code
-- **A one-shot cutscene on Scene Start or Manual plays again after a reload.** `CutsceneTrigger.Play()`
-  only sets a local `hasPlayed`; the save is written by `InteractableBase.Interact` → `MarkUsed()`, which
-  only the Interact mode goes through. The fix belongs in `CutsceneTrigger` [Oak]. Until then say so in the
-  handback for any Scene Start / Manual cutscene that must play once.
-- **A video keeps playing while the game is paused.** Nothing pauses the `VideoPlayer` when the menu opens.
-  The fix belongs in `CutsceneManager` [Oak] (or blocking the pause menu during `GameState.Cutscene`).
-  Until then, say so in the handback for any video cutscene.
 - The Skip button has no confirm and no "hold to skip". Changing that is a core UI change → Oak.
 
 ## 7. Hand back (Thai, CLAUDE.md §10) — manual checklist
 - [ ] plays at the right moment; input is locked while it plays; movement returns after it
 - [ ] Skip works, and after skipping the world is in the same state as after watching it fully
-- [ ] open the menu mid-cutscene: Timeline stops; (video: note the known gap)
+- [ ] open the menu mid-cutscene: Timeline or video stops, and carries on when the menu closes
 - [ ] One Shot: reload the save — it does not play again, and what it opened is still open
 - [ ] Thai and English: every line in it changes with the language setting
 - [ ] the camera never changed angle or projection during it
