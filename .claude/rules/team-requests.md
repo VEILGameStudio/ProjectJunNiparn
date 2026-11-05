@@ -57,10 +57,10 @@ game* (not what code they asked for). If it can be read two ways, ask which one 
 
 | Type | Example | Goes to |
 |---|---|---|
-| A. Content | new item, new line of dialogue, new chest contents | `add-item`, `add-dialogue` |
+| A. Content | new item, new line of dialogue, new chest contents, a cutscene, a sound | `add-item`, `add-dialogue`, `add-cutscene`, `add-audio` |
 | B. Configuration | wire a door to a puzzle, change a sound, tune a duration | Inspector steps, no code |
 | C. New gameplay logic | a new puzzle mechanic, a new mini game | `add-puzzle`, `add-interactable` |
-| D. New area / art | a new room, corridor, sprite, prop | `setup-area`, `import-sprite-art` |
+| D. New area / art | a new room, corridor, sprite, prop, menu or UI screen | `setup-area`, `import-sprite-art`, `add-ui-screen` |
 | E. Bug | "it doesn't work", "it worked yesterday" | `fix-bug` |
 | F. Core change | needs a field, event or signature in an `[Oak]` file | **stop → Oak** |
 | G. Design change | touches anything in §2 above | **stop → `design-change-proposal`** |
