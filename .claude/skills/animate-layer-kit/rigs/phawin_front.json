@@ -1,0 +1,45 @@
+{
+  "name": "Phawin front",
+  "canvas": [1078, 1460],
+  "kit_alpha": 253,
+  "layers": ["torso", "leg_R", "leg_L", "foot_R", "foot_L", "sleeve_R", "sleeve_L", "arm_R", "arm_L", "bag_strap",
+             "bag", "pendant", "hair_back", "hair_front", "face_neck", "mouth", "eye_R", "eye_L"],
+  "fixes": [
+    {"from": "arm_R", "to": "leg_R", "pick": "bluish_dark", "why": "trousers showing between thumb and hand"},
+    {"from": "bag", "to": "leg_L", "pick": "bluish_dark", "why": "trousers showing beside the bag"},
+    {"from": "pendant", "to": "torso", "pick": "light_neutral", "why": "shirt showing inside the cord's V"}
+  ],
+  "splits": [
+    {"layer": "face_neck", "at_y": 449, "above": "face", "below": "neck", "why": "below the chin line is body, not head"}
+  ],
+  "parts": {
+    "foot_R": ["foot_R"], "foot_L": ["foot_L"], "leg_R": ["leg_R"], "leg_L": ["leg_L"],
+    "body": ["torso", "neck"], "pendant": ["pendant"],
+    "arm_L": ["arm_L", "sleeve_L", "bag_strap", "bag"],
+    "arm_R": ["arm_R", "sleeve_R"],
+    "head": ["face", "hair_back", "hair_front", "mouth"],
+    "eye_R": ["eye_R"], "eye_L": ["eye_L"]
+  },
+  "order": ["foot_R", "foot_L", "leg_R", "leg_L", "body", "pendant", "arm_L", "arm_R", "head", "eye_R", "eye_L"],
+  "skin_layer": "face",
+  "reach": {"default": 26, "pendant": 40},
+  "rig": {
+    "body":    {"role": "body"},
+    "pendant": {"role": "swing", "pivot": [552, 470], "bend_from_y": 480, "bend_to_y": 600},
+    "arm_R":   {"role": "arm", "pivot": [682, 535], "bend_from_y": 505, "bend_to_y": 625},
+    "arm_L":   {"role": "arm", "pivot": [410, 535], "bend_from_y": 505, "bend_to_y": 625},
+    "head":    {"role": "head", "pivot": [552, 449], "hair_centre": [552, 330], "hair_radius": [230, 200]},
+    "eye_R":   {"role": "eye", "outer": "right"},
+    "eye_L":   {"role": "eye", "outer": "left"},
+    "leg_R":   {"role": "leg", "side": "R"},
+    "leg_L":   {"role": "leg", "side": "L"},
+    "foot_R":  {"role": "foot", "side": "R"},
+    "foot_L":  {"role": "foot", "side": "L"}
+  },
+  "lines": {"chest_y": 470, "waist_y": 760, "leg_top_y": 750, "leg_bottom_y": 1300,
+            "bunch_from_y": 900, "bunch_to_y": 1180, "ground_y": 1408, "centre_x": 545, "shadow_rx": 215},
+  "walk": {"frames": 16, "ms": 65, "loops": 2, "lift": 30, "bob": 4, "sway": 4, "head": 1.2, "pendant": 3.0,
+           "hair_lag": 0.08, "arms": {"arm_R": 3.0, "arm_L": -2.2}},
+  "idle": {"frames": 24, "ms": 85, "breath": 2.6, "head": 0.6, "pendant": 0.8, "arms": {"arm_R": -0.7, "arm_L": 0.7}},
+  "gif_scale": 0.5
+}
