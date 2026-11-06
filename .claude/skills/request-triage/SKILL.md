@@ -26,6 +26,7 @@ Rules:
   - chest, door, switch, anything clicked or touched → `add-interactable`
   - puzzle, mini game, QTE → `add-puzzle`
   - new room, corridor, camera zone → `setup-area` · sprite, prop, model, normal map → `import-sprite-art`
+  - animate a character from a layered kit (walk / idle / blink GIF, rig PSB) → `animate-layer-kit`
   - cutscene, intro, video, Timeline → `add-cutscene` · menu, panel, popup, HUD, button → `add-ui-screen`
   - music, sound effect, ambience → `add-audio`
   - bug → `fix-bug`
