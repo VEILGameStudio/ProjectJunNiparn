@@ -1,0 +1,22 @@
+{
+  "level": "L1 บ้านคุณยาย (P1-P2, tutorial)",
+  "nodes": [
+    {"id": "start", "type": "start", "label": "มาถึงบ้านยาย"},
+    {"id": "living", "type": "area", "label": "โซนรับแขก", "requires": ["start"]},
+    {"id": "talk_grandma", "type": "clue", "label": "ยาย: กุญแจน่าจะอยู่ห้องพระ", "in_area": "living", "opens": ["p1_padlock"]},
+    {"id": "bedroom_locked", "type": "clue", "label": "ประตูห้องนอนล็อก (เห็น lock ก่อน)", "in_area": "living", "opens": ["bedroom_door"]},
+    {"id": "shrine", "type": "area", "label": "ห้องพระ", "requires": ["start"]},
+    {"id": "clue_frame", "type": "clue", "label": "กรอบรูป ดอกไม้=1", "in_area": "shrine", "opens": ["p1_padlock"]},
+    {"id": "clue_calendar", "type": "clue", "label": "ปฏิทิน ดอกบัว=2", "in_area": "shrine", "opens": ["p1_padlock"]},
+    {"id": "clue_drawer", "type": "clue", "label": "ลิ้นชัก ดาว=3", "in_area": "shrine", "opens": ["p1_padlock"]},
+    {"id": "clue_clock", "type": "clue", "label": "นาฬิกา เมฆ=4", "in_area": "shrine", "opens": ["p1_padlock"]},
+    {"id": "p1_padlock", "type": "puzzle", "size": "large", "label": "P1 แม่กุญแจรหัส 4 สัญลักษณ์", "in_area": "shrine",
+     "requires": ["clue_frame", "clue_calendar", "clue_drawer", "clue_clock"]},
+    {"id": "cookie_box", "type": "item", "label": "กล่องคุกกี้แดงพันเทป", "requires": ["p1_padlock"]},
+    {"id": "scissors", "type": "item", "label": "กรรไกร (ตู้ของมีคม)", "in_area": "living"},
+    {"id": "p2_tape", "type": "puzzle", "size": "small", "label": "P2 ตัดเทปกล่อง", "requires": ["cookie_box", "scissors"], "consumes": ["scissors"]},
+    {"id": "bedroom_key", "type": "item", "label": "กุญแจห้องนอน", "requires": ["p2_tape"]},
+    {"id": "bedroom_door", "type": "door", "label": "ประตูห้องนอนภวิน", "requires": ["bedroom_key"]},
+    {"id": "goal", "type": "goal", "label": "เข้านอน → เหตุการณ์ถัดไป", "requires": ["bedroom_door"]}
+  ]
+}

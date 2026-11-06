@@ -30,4 +30,9 @@ Rules:
   - cutscene, intro, video, Timeline → `add-cutscene` · menu, panel, popup, HUD, button → `add-ui-screen`
   - music, sound effect, ambience → `add-audio`
   - bug → `fix-bug`
+- Design thinking before anything is built (no files change; ends in a card or brief, and a new puzzle
+  or new story content goes to Oak before it is built):
+  - think up / improve / critique a puzzle, monster or trap → `puzzle-design`
+  - plan or review a level's layout, or a level-layout question → `level-design-qa`
+  - players get lost, miss clues, can't tell what is clickable → `level-readability`
 - One request at a time. If the message holds several, list them and triage each separately.
