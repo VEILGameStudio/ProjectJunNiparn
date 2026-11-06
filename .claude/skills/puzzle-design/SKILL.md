@@ -11,6 +11,10 @@ skill นี้คือ **การคิด** ไม่ใช่การเ�
 แหล่งความจริง: เนื้อเรื่อง/ตัวละคร/puzzle 7 อันที่ออกแบบแล้ว = GDD (สรุปใน `references/01-puzzle-types.md`),
 ระบบและสเกล = `CLAUDE.md` (§8 `PuzzleBase`, `MiniGameBase`, `HeldItemCheck`, `QuickTimeEvent`)
 
+**เกมต้นแบบด้านความคิด (Oak เลือก):** Portal 2 = สอนกลไกด้วยฉาก หนึ่งห้องหนึ่งความคิดใหม่ ภาษาภาพที่ไม่โกหก;
+ตระกูล Rusty Lake = puzzle ที่เล่าเรื่อง ห้องเล็กแน่น สัญลักษณ์ที่วนกลับมา — อ่าน `references/05-portal2-rusty-lake.md`
+ทุกครั้งที่คิด puzzle ใหม่ (เอาแค่หลักคิด ห้ามลอกเนื้อหา)
+
 > **ใครตัดสิน:** puzzle 1–7 ใน GDD อนุมัติแล้ว ปรับรายละเอียดได้
 > puzzle ใหม่ที่ไม่มีใน GDD หรือแก้เนื้อเรื่อง = งานออกแบบเกม **Oak ตัดสิน** → ทำการ์ดให้ครบแล้วส่งให้ Oak ก่อนสร้าง
 
@@ -49,9 +53,10 @@ skill นี้คือ **การคิด** ไม่ใช่การเ�
 8. **จับคู่กับระบบที่มี** (ขั้นบันไดของ `add-puzzle`): Inspector อย่างเดียว? `HeldItemCheck`? `QuickTimeEvent`?
    หรือต้อง subclass `MiniGameBase`/`PuzzleBase` ใหม่ (Intern A)? ถ้าต้องการ Journal, combine ไอเทม,
    monster AI, pathfinding หรือแก้ core → เขียนลงการ์ดว่า "ติด hard stop" แล้วส่ง Oak
-9. **กรอกการ์ด** `templates/puzzle-card.md` (ภาษาไทย) แล้ว **ทดสอบบนกระดาษ** — อธิบายให้คนที่ไม่รู้คำตอบฟังแค่สิ่งที่อยู่ในฉาก
+9. **ถาม 7 ข้อเร็ว** ใน `references/05-portal2-rusty-lake.md` §D
+10. **กรอกการ์ด** `templates/puzzle-card.md` (ภาษาไทย) แล้ว **ทดสอบบนกระดาษ** — อธิบายให้คนที่ไม่รู้คำตอบฟังแค่สิ่งที่อยู่ในฉาก
    ถ้าเขาแก้ได้ในเวลาที่ตั้งไว้ และพูด "อ๋อ" ออกมา = ผ่าน
-10. ส่งการ์ด → (Oak ถ้าเป็น puzzle ใหม่) → `add-puzzle`
+11. ส่งการ์ด → (Oak ถ้าเป็น puzzle ใหม่) → `add-puzzle`
 
 ## Workflow: "puzzle นี้ไม่สนุก / ผู้เล่นงง ช่วยดูหน่อย"
 
@@ -72,6 +77,7 @@ skill นี้คือ **การคิด** ไม่ใช่การเ�
 - `references/02-dependency-chart.md` — ผังพึ่งพาแบบ Ron Gilbert, รูปแบบ JSON, ตัวอย่างด่านบ้านยาย
 - `references/03-fairness-and-hints.md` — checklist ความยุติธรรม, บันไดคำใบ้, ความยาก
 - `references/04-monsters-and-traps.md` — ทำศัตรู/กับดักให้เป็น puzzle โดยไม่ชนกับ hard stop
+- `references/05-portal2-rusty-lake.md` — บทเรียนจาก Portal 2 และ Rusty Lake + สิ่งที่ไม่เอามา + คำถาม 7 ข้อ
 - `scripts/check_puzzle_chart.py` — ตรวจผัง: วนลูป, ไปไม่ถึง, clue อยู่หลัง lock ตัวเอง, ของหมดก่อนใช้ครบ, ทางเดียวยาวเกิน + พิมพ์ Mermaid
 - `templates/puzzle-card.md` — การ์ด puzzle ภาษาไทย
 - `examples/level1-grandma-house.json` — ผังของบ้านยาย (P1–P2) ใช้เป็นตัวอย่าง
