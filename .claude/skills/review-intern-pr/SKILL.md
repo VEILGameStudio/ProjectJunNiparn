@@ -18,6 +18,9 @@ Spec: CLAUDE.md (all of it), `.claude/rules/team-requests.md` §1–§2.
 
 Never review from the PR description alone. Read the code.
 
+The `unity-reviewer` agent runs this same procedure on its own. Use it for a fast first pass
+(`gh pr diff <n>`), then read its findings against the diff yourself before reporting to Oak.
+
 ## 2. Ownership (team-requests.md §1, CLAUDE.md §5)
 - Any edit to a file in an `[Oak]` folder (`Core/`, `Player/`, `Interaction/`, `Items/`, `Dialogue/`,
   `Save/`, `Settings/`, `Camera/`, `Environment/`, `UI/`, `Cutscene/`) or to `Assets/Inventory/ItemData.cs`
@@ -47,6 +50,11 @@ Never review from the PR description alone. Read the code.
 | Packages / asmdef | `Packages/manifest.json` changed, a new `.asmdef` under `Assets/_Project` | §4.12, §11 |
 | DOTween | tween without `.SetLink(gameObject)`, stored tween not killed in `OnDisable`, tween started in `Update`, UI tween without `.SetUpdate(true)`, gameplay tween with it | §11 |
 | Sound in events | an `AudioSource.Play` / `PlaySfx` dragged into a UnityEvent that restore re-fires | §7 Save |
+
+## 3b. Unity code quality
+After the locked rules, run the review list in `unity-code-standards` §7 (allocations in `Update`,
+`Find*`, `?.` on Unity objects, Unity 6 API names). These usually go under "ควรแก้", not Blocker,
+unless they break a locked rule. Shader or material changes: check against `unity-urp-shader` §1.
 
 ## 4. Design checks (read, not grep)
 - **Climbed the ladder?** A new class where a field or a `UnityEvent` would do (CLAUDE.md §8). Before
