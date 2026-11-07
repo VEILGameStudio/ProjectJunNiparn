@@ -68,6 +68,9 @@ when the screen must show live game state.
 - Every screen is usable with a gamepad: set the first selected button when it opens, check Navigation
   (Visualize in the Inspector) so focus cannot get lost, and Back / Cancel closes it.
 
+## 6b. Slow screens, lists, focus
+Canvas rebuilds, Raycast Target, pooled lists, returning focus after a popup: `references/ugui-performance.md`.
+
 ## 7. Ownership and stops
 - `Scripts/UI/`, `Scripts/Settings/` and the `PersistentCanvas` prefab are core [Oak]. Intern B builds
   panels and wiring in scenes and prefabs they own; adding a panel *inside* `PersistentCanvas` is a change to

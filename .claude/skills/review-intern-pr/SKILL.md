@@ -48,6 +48,11 @@ Never review from the PR description alone. Read the code.
 | DOTween | tween without `.SetLink(gameObject)`, stored tween not killed in `OnDisable`, tween started in `Update`, UI tween without `.SetUpdate(true)`, gameplay tween with it | §11 |
 | Sound in events | an `AudioSource.Play` / `PlaySfx` dragged into a UnityEvent that restore re-fires | §7 Save |
 
+## 3b. Unity code quality
+After the locked rules, run the review list in `unity-code-standards` §7 (allocations in `Update`,
+`Find*`, `?.` on Unity objects, Unity 6 API names). These usually go under "ควรแก้", not Blocker,
+unless they break a locked rule. Shader or material changes: check against `unity-urp-shader` §1.
+
 ## 4. Design checks (read, not grep)
 - **Climbed the ladder?** A new class where a field or a `UnityEvent` would do (CLAUDE.md §8). Before
   the sixth subclass of anything, the PR must say why fields and an event cannot do it.
