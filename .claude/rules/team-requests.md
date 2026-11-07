@@ -82,17 +82,38 @@ below it was not enough.
 **Step 5 — Check ownership.** List every file the change touches with its owner from CLAUDE.md §5. If
 one belongs to someone else, or is a scene its owner has not handed over, stop and say so.
 
-**Step 6 — Show the plan, then do it.** Post the plan in Thai (type, rung, files, owner). For type A–E
+**Step 5b — Ask the advisor agent (types C, D, E, and any request that changes C#, shaders or UI).**
+Call the matching agent in `.claude/agents/` with the restated request, the type, and the files from
+steps 4–5:
+
+| Request touches | Agent |
+|---|---|
+| C# logic, gameplay, interactables, puzzles, bugs | `unity-specialist` |
+| shader, Shader Graph, material, Volume, draw calls | `unity-shader-specialist` |
+| menu, panel, popup, HUD, button, settings screen | `unity-ui-specialist` |
+
+If the agent answers **STOP**, treat the request as type F/G. Otherwise use its plan, and copy its
+"คำแนะนำสำหรับน้อง" into the step 6 post so the teammate sees the advice. Types A and B (content and
+Inspector-only) skip this step.
+
+**Step 6 — Show the plan, then do it.** Post the plan in Thai (type, rung, files, owner, and the
+advisor's advice when step 5b ran). For type A–E
 continue straight away unless something in it is unclear. Keep the change to that one request; do not
 "tidy up" anything else in the same pass.
 
 **Step 7 — Test.** Follow CLAUDE.md §9 (`write-tests` skill). Report only results you observed.
+
+**Step 7b — Independent review.** Before handing back or opening a pull request, call the
+`unity-reviewer` agent on the change. Fix every **Blocker** and every **ควรแก้** that is inside this
+request, then run it again until the result is "ผ่าน". If it says "ส่งกลับให้ Oak", stop and hand the
+finding to Oak instead of working around it. Never skip this step because the change looks small.
 
 **Step 8 — Hand back** in Thai, using CLAUDE.md §10:
 1. Files created or changed, full paths.
 2. Inspector steps for someone who does not code.
 3. Test results: passed / failed counts and what each failure means.
 4. A short manual checklist for what tests cannot cover.
+5. The reviewer's result ("ผลตรวจ: ผ่าน") and what was fixed because of it.
 
 ## 4. Red flags — slow down when you hear these
 

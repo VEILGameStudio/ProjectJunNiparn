@@ -30,6 +30,11 @@ Rules:
   - cutscene, intro, video, Timeline → `add-cutscene` · menu, panel, popup, HUD, button → `add-ui-screen`
   - music, sound effect, ambience → `add-audio`
   - bug → `fix-bug`
+  - shader, material, post-processing, draw calls → `unity-urp-shader`
+- Whenever C# is written for any of the above, also follow `unity-code-standards`.
+- Types C, D, E (and any C#, shader or UI change): before editing, ask the advisor agent from
+  team-requests.md step 5b (`unity-specialist`, `unity-shader-specialist`, `unity-ui-specialist`).
+  Before handing back, run the `unity-reviewer` agent (step 7b).
 - Design thinking before anything is built (no files change; ends in a card or brief, and a new puzzle
   or new story content goes to Oak before it is built):
   - think up / improve / critique a puzzle, monster or trap → `puzzle-design`
