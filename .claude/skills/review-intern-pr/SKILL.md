@@ -18,6 +18,9 @@ Spec: CLAUDE.md (all of it), `.claude/rules/team-requests.md` §1–§2.
 
 Never review from the PR description alone. Read the code.
 
+The `unity-reviewer` agent runs this same procedure on its own. Use it for a fast first pass
+(`gh pr diff <n>`), then read its findings against the diff yourself before reporting to Oak.
+
 ## 2. Ownership (team-requests.md §1, CLAUDE.md §5)
 - Any edit to a file in an `[Oak]` folder (`Core/`, `Player/`, `Interaction/`, `Items/`, `Dialogue/`,
   `Save/`, `Settings/`, `Camera/`, `Environment/`, `UI/`, `Cutscene/`) or to `Assets/Inventory/ItemData.cs`
