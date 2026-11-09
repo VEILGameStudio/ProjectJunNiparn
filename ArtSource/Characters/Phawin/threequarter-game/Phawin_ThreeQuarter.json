@@ -1,0 +1,44 @@
+{
+  "idle_source": "phawin_8dir_idle_original.png",
+  "walk_source": "phawin_8dir_walk_original.png",
+  "haze_alpha": 32,
+  "stretch": 1.155,
+  "stretched": true,
+  "cell": [
+    110,
+    232
+  ],
+  "columns": 6,
+  "column_0": "idle",
+  "walk_frames": 5,
+  "rows_in_order": [
+    "Down",
+    "DownRight",
+    "Right",
+    "UpRight",
+    "Up",
+    "UpLeft",
+    "Left",
+    "DownLeft"
+  ],
+  "fps": 10,
+  "pivot_px_from_bottom_left": [
+    53,
+    8
+  ],
+  "pivot_normalized": [
+    0.4818,
+    0.0345
+  ],
+  "idle_height_px_stretched": {
+    "min": 211,
+    "median": 213,
+    "max": 213
+  },
+  "walk_height_px_stretched": {
+    "min": 207,
+    "max": 216
+  },
+  "world_height": 1.625,
+  "ppu": 131.1
+}

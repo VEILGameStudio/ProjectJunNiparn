@@ -1,0 +1,1260 @@
+fileFormatVersion: 2
+guid: 2851e66bd9988ef6ebb8ab502dbb7659
+TextureImporter:
+  internalIDToNameTable: []
+  externalObjects: {}
+  serializedVersion: 13
+  mipmaps:
+    mipMapMode: 0
+    enableMipMap: 0
+    sRGBTexture: 1
+    linearTexture: 0
+    fadeOut: 0
+    borderMipMap: 0
+    mipMapsPreserveCoverage: 0
+    alphaTestReferenceValue: 0.5
+    mipMapFadeDistanceStart: 1
+    mipMapFadeDistanceEnd: 3
+  bumpmap:
+    convertToNormalMap: 0
+    externalNormalMap: 0
+    heightScale: 0.25
+    normalMapFilter: 0
+    flipGreenChannel: 0
+  isReadable: 0
+  streamingMipmaps: 0
+  streamingMipmapsPriority: 0
+  vTOnly: 0
+  ignoreMipmapLimit: 0
+  grayScaleToAlpha: 0
+  generateCubemap: 6
+  cubemapConvolution: 0
+  seamlessCubemap: 0
+  textureFormat: 1
+  maxTextureSize: 2048
+  textureSettings:
+    serializedVersion: 2
+    filterMode: 1
+    aniso: 1
+    mipBias: 0
+    wrapU: 1
+    wrapV: 1
+    wrapW: 1
+  nPOTScale: 0
+  lightmap: 0
+  compressionQuality: 50
+  spriteMode: 2
+  spriteExtrude: 1
+  spriteMeshType: 0
+  alignment: 9
+  spritePivot: {x: 0.4818, y: 0.0345}
+  spritePixelsToUnits: 131.1
+  spriteBorder: {x: 0, y: 0, z: 0, w: 0}
+  spriteGenerateFallbackPhysicsShape: 0
+  alphaUsage: 1
+  alphaIsTransparency: 1
+  spriteTessellationDetail: -1
+  textureType: 8
+  textureShape: 1
+  singleChannelComponent: 0
+  flipbookRows: 1
+  flipbookColumns: 1
+  maxTextureSizeSet: 0
+  compressionQualitySet: 0
+  textureFormatSet: 0
+  ignorePngGamma: 0
+  applyGammaDecoding: 0
+  swizzle: 50462976
+  cookieLightType: 0
+  platformSettings:
+  - serializedVersion: 4
+    buildTarget: DefaultTexturePlatform
+    maxTextureSize: 4096
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 0
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: Standalone
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: Android
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: WebGL
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: WindowsStoreApps
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  spriteSheet:
+    serializedVersion: 2
+    sprites:
+    - serializedVersion: 2
+      name: Phawin_ThreeQuarter_Down_0
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 1624
+        width: 110
+        height: 232
+      alignment: 9
+      pivot: {x: 0.4818, y: 0.0345}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: c16b18b4c898653530ab25d20a68b207
+      internalID: -273545375
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Phawin_ThreeQuarter_Down_1
+      rect:
+        serializedVersion: 2
+        x: 110
+        y: 1624
+        width: 110
+        height: 232
+      alignment: 9
+      pivot: {x: 0.4818, y: 0.0345}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 6f799e08e09fca4595641239f534fa34
+      internalID: 2037421709
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Phawin_ThreeQuarter_Down_2
+      rect:
+        serializedVersion: 2
+        x: 220
+        y: 1624
+        width: 110
+        height: 232
+      alignment: 9
+      pivot: {x: 0.4818, y: 0.0345}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 85ddeb7759c044ecf8217cd9806b1e82
+      internalID: 1025361696
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Phawin_ThreeQuarter_Down_3
+      rect:
+        serializedVersion: 2
+        x: 330
+        y: 1624
+        width: 110
+        height: 232
+      alignment: 9
+      pivot: {x: 0.4818, y: 0.0345}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 094c129a2662356e40feed5fa0bcf818
+      internalID: 321671719
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Phawin_ThreeQuarter_Down_4
+      rect:
+        serializedVersion: 2
+        x: 440
+        y: 1624
+        width: 110
+        height: 232
+      alignment: 9
+      pivot: {x: 0.4818, y: 0.0345}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 591b8de6c6dab97f0b0d323ebe9da1b2
+      internalID: -2101924979
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Phawin_ThreeQuarter_Down_5
+      rect:
+        serializedVersion: 2
+        x: 550
+        y: 1624
+        width: 110
+        height: 232
+      alignment: 9
+      pivot: {x: 0.4818, y: 0.0345}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: fbc77aa484257d7880fd7c52a9391580
+      internalID: 1699778713
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Phawin_ThreeQuarter_DownRight_0
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 1392
+        width: 110
+        height: 232
+      alignment: 9
+      pivot: {x: 0.4818, y: 0.0345}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: a1275362f05006b753af2ba1d8d30b3f
+      internalID: 2085153744
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Phawin_ThreeQuarter_DownRight_1
+      rect:
+        serializedVersion: 2
+        x: 110
+        y: 1392
+        width: 110
+        height: 232
+      alignment: 9
+      pivot: {x: 0.4818, y: 0.0345}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 61298db1da98e50d59358486dd980541
+      internalID: -1657739816
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Phawin_ThreeQuarter_DownRight_2
+      rect:
+        serializedVersion: 2
+        x: 220
+        y: 1392
+        width: 110
+        height: 232
+      alignment: 9
+      pivot: {x: 0.4818, y: 0.0345}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: d24e32794ff810b3cb1117445cc610a4
+      internalID: 947994202
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Phawin_ThreeQuarter_DownRight_3
+      rect:
+        serializedVersion: 2
+        x: 330
+        y: 1392
+        width: 110
+        height: 232
+      alignment: 9
+      pivot: {x: 0.4818, y: 0.0345}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: a4b10a7dae20c3fc507b440ac0ee88ab
+      internalID: -2138671354
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Phawin_ThreeQuarter_DownRight_4
+      rect:
+        serializedVersion: 2
+        x: 440
+        y: 1392
+        width: 110
+        height: 232
+      alignment: 9
+      pivot: {x: 0.4818, y: 0.0345}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: c5e341974d33e79cc2de39b701a9dbe1
+      internalID: -876144955
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Phawin_ThreeQuarter_DownRight_5
+      rect:
+        serializedVersion: 2
+        x: 550
+        y: 1392
+        width: 110
+        height: 232
+      alignment: 9
+      pivot: {x: 0.4818, y: 0.0345}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 9b974b501afd1d78cdcf0f65a28d1f35
+      internalID: 609097432
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Phawin_ThreeQuarter_Right_0
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 1160
+        width: 110
+        height: 232
+      alignment: 9
+      pivot: {x: 0.4818, y: 0.0345}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: bbe22b53fd9cc14dcceb488186cda954
+      internalID: -1287438323
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Phawin_ThreeQuarter_Right_1
+      rect:
+        serializedVersion: 2
+        x: 110
+        y: 1160
+        width: 110
+        height: 232
+      alignment: 9
+      pivot: {x: 0.4818, y: 0.0345}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 862b0cff86447dc87f142536c935a5d0
+      internalID: -1441222744
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Phawin_ThreeQuarter_Right_2
+      rect:
+        serializedVersion: 2
+        x: 220
+        y: 1160
+        width: 110
+        height: 232
+      alignment: 9
+      pivot: {x: 0.4818, y: 0.0345}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 283030dc652d9648e56366b5c632cae0
+      internalID: -853454367
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Phawin_ThreeQuarter_Right_3
+      rect:
+        serializedVersion: 2
+        x: 330
+        y: 1160
+        width: 110
+        height: 232
+      alignment: 9
+      pivot: {x: 0.4818, y: 0.0345}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 1b29ac77faf6955a3a625afcf45f0243
+      internalID: -2126422821
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Phawin_ThreeQuarter_Right_4
+      rect:
+        serializedVersion: 2
+        x: 440
+        y: 1160
+        width: 110
+        height: 232
+      alignment: 9
+      pivot: {x: 0.4818, y: 0.0345}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 196a13d153ee6d1e7308def5066d20ee
+      internalID: -564650403
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Phawin_ThreeQuarter_Right_5
+      rect:
+        serializedVersion: 2
+        x: 550
+        y: 1160
+        width: 110
+        height: 232
+      alignment: 9
+      pivot: {x: 0.4818, y: 0.0345}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: bedd2816969548ff9e9b723a6d682e43
+      internalID: 409453047
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Phawin_ThreeQuarter_UpRight_0
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 928
+        width: 110
+        height: 232
+      alignment: 9
+      pivot: {x: 0.4818, y: 0.0345}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: f0a3e1959d57c86e9b851f7066a8f12c
+      internalID: -1453267553
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Phawin_ThreeQuarter_UpRight_1
+      rect:
+        serializedVersion: 2
+        x: 110
+        y: 928
+        width: 110
+        height: 232
+      alignment: 9
+      pivot: {x: 0.4818, y: 0.0345}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 6eccffed72487968ddf365b8b9136fca
+      internalID: 1066137474
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Phawin_ThreeQuarter_UpRight_2
+      rect:
+        serializedVersion: 2
+        x: 220
+        y: 928
+        width: 110
+        height: 232
+      alignment: 9
+      pivot: {x: 0.4818, y: 0.0345}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: d1a357b0ec97c09e04aa6ecc56d81c85
+      internalID: -624039083
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Phawin_ThreeQuarter_UpRight_3
+      rect:
+        serializedVersion: 2
+        x: 330
+        y: 928
+        width: 110
+        height: 232
+      alignment: 9
+      pivot: {x: 0.4818, y: 0.0345}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: b80ac3e41f4e675fdb798819ee254558
+      internalID: 2041112134
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Phawin_ThreeQuarter_UpRight_4
+      rect:
+        serializedVersion: 2
+        x: 440
+        y: 928
+        width: 110
+        height: 232
+      alignment: 9
+      pivot: {x: 0.4818, y: 0.0345}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: cad80c3068321af663f9659a58dc712e
+      internalID: 245765575
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Phawin_ThreeQuarter_UpRight_5
+      rect:
+        serializedVersion: 2
+        x: 550
+        y: 928
+        width: 110
+        height: 232
+      alignment: 9
+      pivot: {x: 0.4818, y: 0.0345}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 3f3f7a5b9f7e7c20057a74400243971a
+      internalID: 852193926
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Phawin_ThreeQuarter_Up_0
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 696
+        width: 110
+        height: 232
+      alignment: 9
+      pivot: {x: 0.4818, y: 0.0345}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 9255cc83870fb2b22764114a4a693b10
+      internalID: 396921611
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Phawin_ThreeQuarter_Up_1
+      rect:
+        serializedVersion: 2
+        x: 110
+        y: 696
+        width: 110
+        height: 232
+      alignment: 9
+      pivot: {x: 0.4818, y: 0.0345}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: b7bb2cd79c3e30a0ab6d1fbd368178bb
+      internalID: 2044173578
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Phawin_ThreeQuarter_Up_2
+      rect:
+        serializedVersion: 2
+        x: 220
+        y: 696
+        width: 110
+        height: 232
+      alignment: 9
+      pivot: {x: 0.4818, y: 0.0345}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 8d87b3e4408bb4981157a5d1c1deced9
+      internalID: -663775381
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Phawin_ThreeQuarter_Up_3
+      rect:
+        serializedVersion: 2
+        x: 330
+        y: 696
+        width: 110
+        height: 232
+      alignment: 9
+      pivot: {x: 0.4818, y: 0.0345}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 1278cf4bb45f1b078615e6f3d59f6fff
+      internalID: -1976341759
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Phawin_ThreeQuarter_Up_4
+      rect:
+        serializedVersion: 2
+        x: 440
+        y: 696
+        width: 110
+        height: 232
+      alignment: 9
+      pivot: {x: 0.4818, y: 0.0345}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: ba09adfff3d74e0fdf71e93a6530b43e
+      internalID: 750729188
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Phawin_ThreeQuarter_Up_5
+      rect:
+        serializedVersion: 2
+        x: 550
+        y: 696
+        width: 110
+        height: 232
+      alignment: 9
+      pivot: {x: 0.4818, y: 0.0345}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 2b6e77afa813b6989371f923cf2eeebc
+      internalID: -1588650930
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Phawin_ThreeQuarter_UpLeft_0
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 464
+        width: 110
+        height: 232
+      alignment: 9
+      pivot: {x: 0.4818, y: 0.0345}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: dedea9000da4d923f9d32738a7821a53
+      internalID: 644087454
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Phawin_ThreeQuarter_UpLeft_1
+      rect:
+        serializedVersion: 2
+        x: 110
+        y: 464
+        width: 110
+        height: 232
+      alignment: 9
+      pivot: {x: 0.4818, y: 0.0345}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 1a0e7b38bb15471c4458cd29753d355d
+      internalID: -1560761278
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Phawin_ThreeQuarter_UpLeft_2
+      rect:
+        serializedVersion: 2
+        x: 220
+        y: 464
+        width: 110
+        height: 232
+      alignment: 9
+      pivot: {x: 0.4818, y: 0.0345}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: d53dd05621a96e2981f9a4a7a7ad5e47
+      internalID: -38600626
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Phawin_ThreeQuarter_UpLeft_3
+      rect:
+        serializedVersion: 2
+        x: 330
+        y: 464
+        width: 110
+        height: 232
+      alignment: 9
+      pivot: {x: 0.4818, y: 0.0345}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: e486e7f53355e8a4d4182a2068783438
+      internalID: 1463836211
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Phawin_ThreeQuarter_UpLeft_4
+      rect:
+        serializedVersion: 2
+        x: 440
+        y: 464
+        width: 110
+        height: 232
+      alignment: 9
+      pivot: {x: 0.4818, y: 0.0345}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 43b027fb856b65ed39fa1a94644e492f
+      internalID: -1233241338
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Phawin_ThreeQuarter_UpLeft_5
+      rect:
+        serializedVersion: 2
+        x: 550
+        y: 464
+        width: 110
+        height: 232
+      alignment: 9
+      pivot: {x: 0.4818, y: 0.0345}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 821b9b6b941b9919ba3733ec09cf25c3
+      internalID: -2016244274
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Phawin_ThreeQuarter_Left_0
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 232
+        width: 110
+        height: 232
+      alignment: 9
+      pivot: {x: 0.4818, y: 0.0345}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: c27ee6ec64d9c8f10236ae4cc4c1b0b7
+      internalID: 1518225698
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Phawin_ThreeQuarter_Left_1
+      rect:
+        serializedVersion: 2
+        x: 110
+        y: 232
+        width: 110
+        height: 232
+      alignment: 9
+      pivot: {x: 0.4818, y: 0.0345}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: a7dcbbcca742bca78537d551a800c71e
+      internalID: -249561232
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Phawin_ThreeQuarter_Left_2
+      rect:
+        serializedVersion: 2
+        x: 220
+        y: 232
+        width: 110
+        height: 232
+      alignment: 9
+      pivot: {x: 0.4818, y: 0.0345}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 560f55ceb032774348ddadf3e791f9c1
+      internalID: -997433640
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Phawin_ThreeQuarter_Left_3
+      rect:
+        serializedVersion: 2
+        x: 330
+        y: 232
+        width: 110
+        height: 232
+      alignment: 9
+      pivot: {x: 0.4818, y: 0.0345}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: a905d3220c1b10c90489aadd75eea0ba
+      internalID: 99251032
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Phawin_ThreeQuarter_Left_4
+      rect:
+        serializedVersion: 2
+        x: 440
+        y: 232
+        width: 110
+        height: 232
+      alignment: 9
+      pivot: {x: 0.4818, y: 0.0345}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: d23c9042736fd14272a1e2559703c53e
+      internalID: 1370784958
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Phawin_ThreeQuarter_Left_5
+      rect:
+        serializedVersion: 2
+        x: 550
+        y: 232
+        width: 110
+        height: 232
+      alignment: 9
+      pivot: {x: 0.4818, y: 0.0345}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 9cea212546c6fbb03c5ba4cd504a51b0
+      internalID: 558667233
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Phawin_ThreeQuarter_DownLeft_0
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 0
+        width: 110
+        height: 232
+      alignment: 9
+      pivot: {x: 0.4818, y: 0.0345}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 252a00d7bd12983f57b553d5d8905b81
+      internalID: -942095541
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Phawin_ThreeQuarter_DownLeft_1
+      rect:
+        serializedVersion: 2
+        x: 110
+        y: 0
+        width: 110
+        height: 232
+      alignment: 9
+      pivot: {x: 0.4818, y: 0.0345}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 4fbf62c0405e2592e7cbd894c7d4c544
+      internalID: -2068496358
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Phawin_ThreeQuarter_DownLeft_2
+      rect:
+        serializedVersion: 2
+        x: 220
+        y: 0
+        width: 110
+        height: 232
+      alignment: 9
+      pivot: {x: 0.4818, y: 0.0345}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: a9b83e7ab78aacc5eb76fd49e230c918
+      internalID: 1476857477
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Phawin_ThreeQuarter_DownLeft_3
+      rect:
+        serializedVersion: 2
+        x: 330
+        y: 0
+        width: 110
+        height: 232
+      alignment: 9
+      pivot: {x: 0.4818, y: 0.0345}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 27651fa6cb4983bd7a0a945ced70dfe4
+      internalID: -399450164
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Phawin_ThreeQuarter_DownLeft_4
+      rect:
+        serializedVersion: 2
+        x: 440
+        y: 0
+        width: 110
+        height: 232
+      alignment: 9
+      pivot: {x: 0.4818, y: 0.0345}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 416c7b8cd401e6c8d8365e1de0bdf5ce
+      internalID: 1491669832
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Phawin_ThreeQuarter_DownLeft_5
+      rect:
+        serializedVersion: 2
+        x: 550
+        y: 0
+        width: 110
+        height: 232
+      alignment: 9
+      pivot: {x: 0.4818, y: 0.0345}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 37c30395abf6f459d409787d4425b060
+      internalID: -1208421287
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    outline: []
+    customData: 
+    physicsShape: []
+    bones: []
+    spriteID: 9b15c2b57470227c430f46b3ce93626b
+    internalID: 0
+    vertices: []
+    indices: 
+    edges: []
+    weights: []
+    secondaryTextures: []
+    spriteCustomMetadata:
+      entries: []
+    nameFileIdTable:
+      Phawin_ThreeQuarter_DownLeft_0: -942095541
+      Phawin_ThreeQuarter_DownLeft_1: -2068496358
+      Phawin_ThreeQuarter_DownLeft_2: 1476857477
+      Phawin_ThreeQuarter_DownLeft_3: -399450164
+      Phawin_ThreeQuarter_DownLeft_4: 1491669832
+      Phawin_ThreeQuarter_DownLeft_5: -1208421287
+      Phawin_ThreeQuarter_DownRight_0: 2085153744
+      Phawin_ThreeQuarter_DownRight_1: -1657739816
+      Phawin_ThreeQuarter_DownRight_2: 947994202
+      Phawin_ThreeQuarter_DownRight_3: -2138671354
+      Phawin_ThreeQuarter_DownRight_4: -876144955
+      Phawin_ThreeQuarter_DownRight_5: 609097432
+      Phawin_ThreeQuarter_Down_0: -273545375
+      Phawin_ThreeQuarter_Down_1: 2037421709
+      Phawin_ThreeQuarter_Down_2: 1025361696
+      Phawin_ThreeQuarter_Down_3: 321671719
+      Phawin_ThreeQuarter_Down_4: -2101924979
+      Phawin_ThreeQuarter_Down_5: 1699778713
+      Phawin_ThreeQuarter_Left_0: 1518225698
+      Phawin_ThreeQuarter_Left_1: -249561232
+      Phawin_ThreeQuarter_Left_2: -997433640
+      Phawin_ThreeQuarter_Left_3: 99251032
+      Phawin_ThreeQuarter_Left_4: 1370784958
+      Phawin_ThreeQuarter_Left_5: 558667233
+      Phawin_ThreeQuarter_Right_0: -1287438323
+      Phawin_ThreeQuarter_Right_1: -1441222744
+      Phawin_ThreeQuarter_Right_2: -853454367
+      Phawin_ThreeQuarter_Right_3: -2126422821
+      Phawin_ThreeQuarter_Right_4: -564650403
+      Phawin_ThreeQuarter_Right_5: 409453047
+      Phawin_ThreeQuarter_UpLeft_0: 644087454
+      Phawin_ThreeQuarter_UpLeft_1: -1560761278
+      Phawin_ThreeQuarter_UpLeft_2: -38600626
+      Phawin_ThreeQuarter_UpLeft_3: 1463836211
+      Phawin_ThreeQuarter_UpLeft_4: -1233241338
+      Phawin_ThreeQuarter_UpLeft_5: -2016244274
+      Phawin_ThreeQuarter_UpRight_0: -1453267553
+      Phawin_ThreeQuarter_UpRight_1: 1066137474
+      Phawin_ThreeQuarter_UpRight_2: -624039083
+      Phawin_ThreeQuarter_UpRight_3: 2041112134
+      Phawin_ThreeQuarter_UpRight_4: 245765575
+      Phawin_ThreeQuarter_UpRight_5: 852193926
+      Phawin_ThreeQuarter_Up_0: 396921611
+      Phawin_ThreeQuarter_Up_1: 2044173578
+      Phawin_ThreeQuarter_Up_2: -663775381
+      Phawin_ThreeQuarter_Up_3: -1976341759
+      Phawin_ThreeQuarter_Up_4: 750729188
+      Phawin_ThreeQuarter_Up_5: -1588650930
+  mipmapLimitGroupName: 
+  pSDRemoveMatte: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
