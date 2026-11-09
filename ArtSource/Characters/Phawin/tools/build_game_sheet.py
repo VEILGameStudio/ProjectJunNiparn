@@ -1,16 +1,16 @@
-# build_game_sheet_threequarter.py
-# Builds the in-game ThreeQuarter sheet for Phawin from two AI-drawn sources:
-#   - an idle sheet: one standing figure per facing in its first row (8 columns = facings)
-#   - a walk sheet:  8 columns = facings, N rows = walk frames
+# build_game_sheet.py
+# Builds an in-game sheet for Phawin (ThreeQuarter 8 facings, or SideView 6 facings) from two AI-drawn sources:
+#   - an idle sheet: one standing figure per facing in its first row (one column per facing)
+#   - a walk sheet:  one column per facing, N rows = walk frames
 # Layout is the same as Placeholder_Mannequin_ThreeQuarter.png: one row per facing in the template's
 # order, column 0 = idle, the columns after it = walk frames.
 # Every figure is scaled to one height, put on one ground line, lined up on the head and chest, and
-# stretched vertically by 1 / cos(30) as the LAST step (CLAUDE.md section 7). Width is never stretched.
+# stretched vertically (x1.155 ThreeQuarter, x1.015 SideView) as the LAST step (CLAUDE.md section 7). Width is never stretched.
 #
 # usage (from the repo root):
-#   python3 build_game_sheet_threequarter.py <idle.png> <idle_rows> <walk.png> <walk_rows> \
+#   python3 build_game_sheet.py <idle.png> <idle_rows> <walk.png> <walk_rows> \
 #       <source_column_names> <template_rows> <out_dir> <prefix> <stretch> <world_height> <fps> <haze_alpha>
-#   source_column_names : comma list naming the 8 source columns left to right (same in both sources)
+#   source_column_names : comma list naming the source columns (8 or 6) left to right (same in both sources)
 #   template_rows       : comma list of facings in the template's row order (top row first)
 # requires: Python 3, numpy, Pillow, opencv-python (pip install numpy pillow opencv-python-headless)
 import sys, os, json
@@ -27,7 +27,7 @@ idle_rows, walk_rows = int(idle_rows), int(walk_rows)
 stretch, world_height, fps, haze_alpha = float(stretch), float(world_height), int(fps), int(haze_alpha)
 column_names = column_names.split(',')
 template_rows = template_rows.split(',')
-assert len(column_names) == 8, f'expected 8 column names, got {len(column_names)}'
+facing_count = len(column_names)  # 8 for ThreeQuarter, 6 for SideView
 assert sorted(column_names) == sorted(template_rows), 'column names and template rows must hold the same facings'
 os.makedirs(out, exist_ok=True)
 
@@ -85,8 +85,8 @@ def scale_and_stretch(crop, scale):
     return result, anchor
 
 
-idle_grid = cut_figures(idle_path, idle_rows, 8)
-walk_grid = cut_figures(walk_path, walk_rows, 8)
+idle_grid = cut_figures(idle_path, idle_rows, facing_count)
+walk_grid = cut_figures(walk_path, walk_rows, facing_count)
 
 # The walk source draws each frame row a little smaller than the one above it, so every walk row is
 # scaled to the median row height. The idle figures are scaled to that same height.
