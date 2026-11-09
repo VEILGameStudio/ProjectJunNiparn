@@ -1,36 +1,35 @@
 {
-  "source": "phawin_profile_left_walk_original.png",
+  "source": "phawin_profile_leftright_walk_original.png",
   "stretch": 1.015,
   "stretched": true,
   "cell": [
-    266,
-    452
+    242,
+    437
   ],
-  "columns": 8,
+  "columns": 6,
   "rows_in_order": [
     "Right",
     "Left"
   ],
-  "missing_rows": [
-    "Right"
-  ],
+  "missing_rows": [],
   "frames_per_facing": {
-    "Left": 8
+    "Left": 6,
+    "Right": 6
   },
   "fps": 10,
   "pivot_px_from_bottom_left": [
-    135,
+    118,
     8
   ],
   "pivot_normalized": [
-    0.5075,
-    0.0177
+    0.4876,
+    0.0183
   ],
   "figure_height_px_stretched": {
-    "min": 428,
-    "median": 431,
-    "max": 436
+    "min": 412,
+    "median": 417,
+    "max": 421
   },
   "template_world_height": 1.617,
-  "suggested_ppu": 266.5
+  "suggested_ppu": 257.9
 }
