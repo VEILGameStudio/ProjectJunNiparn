@@ -9,10 +9,16 @@
 #
 # usage:
 #   python3 build_template_sheet.py <src.png> <src_rows> <src_cols> <src_row_names> \
-#       <out_dir> <prefix> <stretch> <template_rows> <template_world_height> <fps>
+#       <out_dir> <prefix> <stretch> <template_rows> <template_world_height> <fps> \
+#       [haze_alpha] [facings_are] [row_scale]
 #   src_row_names : comma list, one name per source row; give ONE name to read the whole
 #                   source sheet row by row as a single facing
 #   template_rows : comma list of facings in the template's row order
+#   haze_alpha    : optional, alpha at or below this is background haze (default 8)
+#   facings_are   : optional, 'rows' (default) or 'cols' - 'cols' means one source COLUMN per facing,
+#                   frames running down; src_row_names then names the columns left to right
+#   row_scale     : optional, 'normalize' scales every source row to the same median figure height,
+#                   for sheets where the generator drew each row a little smaller than the last
 # requires: Python 3, numpy, Pillow, opencv-python (pip install numpy pillow opencv-python-headless)
 import sys, os, json
 import numpy as np
@@ -23,13 +29,21 @@ import cv2
  template_rows, world_height, fps) = sys.argv[1:11]
 src_rows, src_cols, stretch = int(src_rows), int(src_cols), float(stretch)
 world_height, fps = float(world_height), int(fps)
+haze_alpha = int(sys.argv[11]) if len(sys.argv) > 11 else 8
+facings_are = sys.argv[12] if len(sys.argv) > 12 else 'rows'
+row_scale = sys.argv[13] if len(sys.argv) > 13 else 'keep'
+assert facings_are in ('rows', 'cols'), f"facings_are must be 'rows' or 'cols', got '{facings_are}'"
+assert row_scale in ('keep', 'normalize'), f"row_scale must be 'keep' or 'normalize', got '{row_scale}'"
 src_names = src_names.split(',')
 template_rows = template_rows.split(',')
+if len(src_names) > 1:
+    expected = src_cols if (len(sys.argv) > 12 and sys.argv[12] == 'cols') else src_rows
+    assert len(src_names) == expected, f'expected {expected} facing names, got {len(src_names)}'
 os.makedirs(out, exist_ok=True)
 
-# 1. Find the figures. Haze below alpha 9 is background, not character.
+# 1. Find the figures. Haze at or below haze_alpha is background, not character.
 img = np.array(Image.open(src).convert('RGBA'))
-img[img[..., 3] <= 8] = 0
+img[img[..., 3] <= haze_alpha] = 0
 mask = (img[..., 3] > 0).astype(np.uint8)
 count, labels, stats, centres = cv2.connectedComponentsWithStats(mask, 8)
 figures = [i for i in range(1, count) if stats[i, 4] > 2000]
@@ -52,15 +66,28 @@ for i in range(1, count):
             best, best_distance = f, distance
     owner[i] = best if best_distance < 12 else 0
 
-# 2. Cut each figure out and stretch it vertically (width unchanged).
+# Optional: one uniform scale per source row so every row has the same median figure height.
+scales = [1.0] * len(figures)
+if row_scale == 'normalize':
+    row_medians = [float(np.median([stats[f, 3] for f in figures[r * src_cols:(r + 1) * src_cols]]))
+                   for r in range(src_rows)]
+    target = float(np.median(row_medians))
+    for n in range(len(figures)):
+        scales[n] = target / row_medians[n // src_cols]
+    print('row medians', row_medians, 'target', target)
+
+# 2. Cut each figure out, scale it if asked, then stretch it vertically (width unchanged).
 frames = []
-for f in figures:
+for n, f in enumerate(figures):
     selected = np.isin(labels, np.nonzero(owner == f)[0])
     ys, xs = np.nonzero(selected)
     y0, y1, x0, x1 = ys.min(), ys.max() + 1, xs.min(), xs.max() + 1
     crop = img[y0:y1, x0:x1].copy()
     crop[~selected[y0:y1, x0:x1]] = 0
     piece = Image.fromarray(crop)
+    if scales[n] != 1.0:
+        piece = piece.resize((int(round(piece.width * scales[n])), int(round(piece.height * scales[n]))),
+                             Image.LANCZOS)
     piece = piece.resize((piece.width, int(round(piece.height * stretch))), Image.LANCZOS)
     crop = np.array(piece)
     # Horizontal anchor: alpha-weighted centre of head + chest (top 40%), steadier than the bbox.
@@ -88,6 +115,9 @@ for crop, anchor in frames:
 by_facing = {}
 if len(src_names) == 1:
     by_facing[src_names[0]] = cells
+elif facings_are == 'cols':
+    for c, name in enumerate(src_names):
+        by_facing[name] = [cells[r * src_cols + c] for r in range(src_rows)]
 else:
     for r, name in enumerate(src_names):
         by_facing[name] = cells[r * src_cols:(r + 1) * src_cols]
@@ -126,6 +156,8 @@ heights = sorted(c.shape[0] for c, a in frames)
 median_height = heights[len(heights) // 2]
 meta = {
     'source': os.path.basename(src),
+    'haze_alpha': haze_alpha,
+    'row_scale': row_scale,
     'stretch': stretch,
     'stretched': True,
     'cell': [cell_w, cell_h],
