@@ -49,6 +49,25 @@ jobs:
           fetch-depth: 1
           lfs: true    # Claude needs real art files (PNG etc.) to crop/stretch sprites; uses LFS bandwidth
 
+      - name: Pick model (--Opusmodel uses Opus, otherwise Sonnet)
+        id: model
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          ISSUE_TEXT: ${{ format('{0} {1}', github.event.issue.title, github.event.issue.body) }}
+          COMMENT_TEXT: ${{ github.event.comment.body }}
+          REVIEW_TEXT: ${{ github.event.review.body }}
+        run: |
+          case "$EVENT_NAME" in
+            issues) text="$ISSUE_TEXT" ;;
+            pull_request_review) text="$REVIEW_TEXT" ;;
+            *) text="$COMMENT_TEXT" ;;
+          esac
+          if printf '%s' "$text" | grep -qi -- '--opusmodel'; then
+            echo "model=opus" >> "$GITHUB_OUTPUT"
+          else
+            echo "model=sonnet" >> "$GITHUB_OUTPUT"
+          fi
+
       - name: Run Claude
         uses: anthropics/claude-code-action@v1
         with:
@@ -61,6 +80,10 @@ jobs:
           # which ignores the @claude mention and never replies on the issue.
           # Oak approved (2026-11-03): let Claude run shell commands (Python/PIL, pip, git, etc.)
           # so it can process art and scripts like a local session. Unity itself still cannot run here.
+          # Oak asked (2026-11-07): Task/Agent let Claude call the advisor and reviewer agents in .claude/agents/.
+          # Model: Sonnet by default; Opus only when the triggering text contains --Opusmodel
+          # (Oak asked 2026-11-09). Opus uses Oak's plan quota much faster.
           claude_args: |
-            --allowedTools "Bash,Read,Edit,MultiEdit,Write,Glob,Grep,LS,WebFetch,WebSearch,TodoWrite"
-            --append-system-prompt "You are working on Project Juniparn (Unity). Before doing anything: read CLAUDE.md (the spec) and follow .claude/rules/team-requests.md exactly, including its fixed order of steps and the locked rules; use the matching skill in .claude/skills/ for the request type. Reply to teammates in simple Thai; code, comments and file names stay in English. If the request would change design, a locked rule, or Oak-only core code, do not implement it: write a design-change proposal (design-change-proposal skill) as your reply and tag @oak-kittanai. Unity cannot run here, so say clearly what the teammate must check in the Editor. Open pull requests against dev, never main."
+            --model ${{ steps.model.outputs.model }}
+            --allowedTools "Bash,Read,Edit,MultiEdit,Write,Glob,Grep,LS,WebFetch,WebSearch,TodoWrite,Task,Agent"
+            --append-system-prompt "You are working on Project Juniparn (Unity). Before doing anything: read CLAUDE.md (the spec) and follow .claude/rules/team-requests.md exactly, including its fixed order of steps and the locked rules; use the matching skill in .claude/skills/ for the request type. Before editing (types C, D, E) ask the matching advisor agent in .claude/agents/ and show its advice to the teammate; before handing back or opening a pull request, run the unity-reviewer agent and fix its blockers. When someone asks you to check or review a pull request, run the unity-reviewer agent on it and post its result. Reply to teammates in simple Thai; code, comments and file names stay in English. If the request would change design, a locked rule, or Oak-only core code, do not implement it: write a design-change proposal (design-change-proposal skill) as your reply and tag @oak-kittanai. Unity cannot run here, so say clearly what the teammate must check in the Editor. Open pull requests against dev, never main."
