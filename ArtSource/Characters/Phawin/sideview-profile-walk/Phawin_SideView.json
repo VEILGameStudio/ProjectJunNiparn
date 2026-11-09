@@ -1,0 +1,36 @@
+{
+  "source": "phawin_profile_left_walk_original.png",
+  "stretch": 1.015,
+  "stretched": true,
+  "cell": [
+    266,
+    452
+  ],
+  "columns": 8,
+  "rows_in_order": [
+    "Right",
+    "Left"
+  ],
+  "missing_rows": [
+    "Right"
+  ],
+  "frames_per_facing": {
+    "Left": 8
+  },
+  "fps": 10,
+  "pivot_px_from_bottom_left": [
+    135,
+    8
+  ],
+  "pivot_normalized": [
+    0.5075,
+    0.0177
+  ],
+  "figure_height_px_stretched": {
+    "min": 428,
+    "median": 431,
+    "max": 436
+  },
+  "template_world_height": 1.617,
+  "suggested_ppu": 266.5
+}
