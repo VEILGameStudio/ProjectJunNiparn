@@ -1,10 +1,11 @@
 # write_unity_assets.py
 # Writes Phawin's Unity files from the finished sheets, using the Player_Mannequin template as the model:
 #   - the two sheets with sprite-sliced .meta files (importer settings copied from the mannequin sheets)
-#   - one AnimationClip per facing and state, 10 fps
+#   - one AnimationClip per facing and state, at the fps in each sheet's json
 #   - ThreeQuarter: an Animator Override Controller on Mannequin_ThreeQuarter.controller
-#   - SideView: a controller with Idle and Walk blend trees over the 6 SideView facings (CLAUDE.md section 7),
-#     built from Mannequin_ThreeQuarter.controller with the 8 children replaced by 6
+#   - SideView: a controller with Idle and Walk blend trees, built from Mannequin_ThreeQuarter.controller
+#     with the 8 children replaced by the 6 directions PlayerAnimator.SnapToSixFacings sends. The art has
+#     4 rows (Front, Back, Right, Left = Right mirrored in the sheet); each diagonal uses its side row
 #   - Player_Phawin.prefab, a variant of Player_Mannequin.prefab that only swaps the art
 # GUIDs and sprite ids are derived from names, so running it twice writes the same files.
 # This writes YAML by hand because Unity cannot run here. Open the project afterwards and let Unity
@@ -27,7 +28,6 @@ MANNEQUIN_ANIMATOR_ID = 7216985310307924571
 MANNEQUIN_PLAYER_ANIMATOR_ID = 3492714405758422594
 MANNEQUIN_SPRITE_RENDERER_ID = 4606241631460804535
 MANNEQUIN_ROOT_ID = 5552632073984095805
-FPS = 10
 TQ_ORDER = ['Down', 'DownRight', 'Right', 'UpRight', 'Up', 'UpLeft', 'Left', 'DownLeft']
 # Mannequin_ThreeQuarter_<state>_<facing>.anim GUIDs, read from the controller's blend trees.
 MANNEQUIN_TQ_CLIPS = {
@@ -41,9 +41,10 @@ MANNEQUIN_TQ_CLIPS = {
              'c48a43e2dff33de4eb0778485802529f', 'b61411406af927f48b2d3c7bc44e69a5'],
 }
 # Blend-tree positions in Mannequin_ThreeQuarter.controller, in the same order as above.
-# SideView facings in sheet row order, and the FaceX/FaceY that PlayerAnimator.SnapToSixFacings sends for each.
-SV_ORDER = ['Front', 'Back', 'FrontLeft', 'FrontRight', 'BackLeft', 'BackRight']
-SV_POSITIONS = [(0, -1), (0, 1), (-1, -1), (1, -1), (-1, 1), (1, 1)]
+# SideView sheet rows. Left is Right mirrored when the sheet is built (Oak's call), so nothing flips at runtime.
+SV_ORDER = ['Front', 'Back', 'Right', 'Left']
+# The FaceX/FaceY that PlayerAnimator.SnapToSixFacings sends, and the row each one shows.
+SV_CHILDREN = [('Front', (0, -1)), ('Back', (0, 1)), ('Left', (-1, -1)), ('Right', (1, -1)), ('Left', (-1, 1)), ('Right', (1, 1))]
 TQ_POSITIONS = [(0, -1), (0.707, -0.707), (1, 0), (0.707, 0.707), (0, 1), (-0.707, 0.707), (-1, 0), (-0.707, -0.707)]
 
 
@@ -112,6 +113,9 @@ def import_sheet(sheet_png, info, template_meta, folder, prefix, rows, columns):
     meta = re.sub(r'^  spritePixelsToUnits: .*$', f'  spritePixelsToUnits: {ppu}', meta, count=1, flags=re.M)
     # The sheet's own sprite id (4-space indent) must not be the mannequin's.
     meta = re.sub(r'^    spriteID: \w+$', f'    spriteID: {guid("sheet:" + target)}', meta, count=1, flags=re.M)
+    if cell_w * columns > 2048 or sheet_h > 2048:  # the mannequin default is 2048; a bigger sheet would be shrunk
+        assert cell_w * columns <= 4096 and sheet_h <= 4096, 'sheet is larger than 4096, make the cells smaller'
+        meta = meta.replace('maxTextureSize: 2048', 'maxTextureSize: 4096')
     start = meta.index('    sprites:\n') + len('    sprites:\n')
     end = meta.index('\n    outline: []\n', start) + 1
     meta = meta[:start] + ''.join(sprites) + meta[end:]
@@ -122,9 +126,9 @@ def import_sheet(sheet_png, info, template_meta, folder, prefix, rows, columns):
     return ids, texture_guid
 
 
-# Writes a sprite AnimationClip that shows the given sprites at FPS, looping.
-def write_clip(path, name, sprite_ids, texture_guid):
-    keys = ''.join(f'    - time: {round(i / FPS, 4)}\n      value: {{fileID: {s}, guid: {texture_guid}, type: 3}}\n'
+# Writes a sprite AnimationClip that shows the given sprites at fps, looping.
+def write_clip(path, name, sprite_ids, texture_guid, fps):
+    keys = ''.join(f'    - time: {round(i / fps, 4)}\n      value: {{fileID: {s}, guid: {texture_guid}, type: 3}}\n'
                    for i, s in enumerate(sprite_ids))
     mapping = ''.join(f'    - {{fileID: {s}, guid: {texture_guid}, type: 3}}\n' for s in sprite_ids)
     write(path, f'''%YAML 1.1
@@ -154,7 +158,7 @@ AnimationClip:
     classID: 212
     script: {{fileID: 0}}
     flags: 2
-  m_SampleRate: {FPS}
+  m_SampleRate: {fps}
   m_WrapMode: 0
   m_Bounds:
     m_Center: {{x: 0, y: 0, z: 0}}
@@ -177,7 +181,7 @@ AnimationClip:
     m_AdditiveReferencePoseClip: {{fileID: 0}}
     m_AdditiveReferencePoseTime: 0
     m_StartTime: 0
-    m_StopTime: {round(len(sprite_ids) / FPS, 4)}
+    m_StopTime: {round(len(sprite_ids) / fps, 4)}
     m_OrientationOffsetY: 0
     m_Level: 0
     m_CycleOffset: 0
@@ -228,17 +232,17 @@ def transition_yaml(transition_id, conditions, destination_id):
 
 
 # SideView controller: the mannequin ThreeQuarter controller (Idle and Walk blend trees on FaceX/FaceY,
-# IsMoving switches between them) with each blend tree's children replaced by the 6 SideView facings.
+# IsMoving switches between them) with each blend tree's children replaced by the 6 SideView directions.
 # Local file ids inside a controller only need to be unique within that file, so the template's are kept.
 def write_sideview_controller(path, clip_guids):
     with open(MANNEQUIN_TQ_CONTROLLER) as handle:
         text = handle.read()
     for state in ('Idle', 'Walk'):
         children = ''
-        for i, (facing, (x, y)) in enumerate(zip(SV_ORDER, SV_POSITIONS)):
+        for i, (facing, (x, y)) in enumerate(SV_CHILDREN):
             children += (f'  - serializedVersion: 2\n'
                          f'    m_Motion: {{fileID: 7400000, guid: {clip_guids[f"{state}_{facing}"]}, type: 2}}\n'
-                         f'    m_Threshold: {round(i / (len(SV_ORDER) - 1), 4)}\n    m_Position: {{x: {x}, y: {y}}}\n'
+                         f'    m_Threshold: {round(i / (len(SV_CHILDREN) - 1), 4)}\n    m_Position: {{x: {x}, y: {y}}}\n'
                          '    m_TimeScale: 1\n    m_CycleOffset: 0\n    m_DirectBlendParameter: Blend\n    m_Mirror: 0\n')
         start = text.index(f'  m_Name: {state}\n  m_Childs:\n') + len(f'  m_Name: {state}\n  m_Childs:\n')
         end = text.index('  m_BlendParameter: FaceX\n', start)
@@ -296,7 +300,7 @@ def main():
             columns = [0] if state == 'Idle' else range(1, tq_info['columns'])
             clip = f'{tq_folder}/Animations/Phawin_ThreeQuarter_{state}_{facing}.anim'
             write_clip(clip, os.path.basename(clip)[:-5],
-                       [tq_ids[f'Phawin_ThreeQuarter_{facing}_{c}'] for c in columns], tq_guid)
+                       [tq_ids[f'Phawin_ThreeQuarter_{facing}_{c}'] for c in columns], tq_guid, tq_info['fps'])
             pairs.append((MANNEQUIN_TQ_CLIPS[state][i], guid(clip)))
     tq_controller = f'{tq_folder}/Phawin_ThreeQuarter.overrideController'
     write_override_controller(tq_controller, MANNEQUIN_TQ_CONTROLLER_GUID, pairs)
@@ -315,7 +319,7 @@ def main():
         for state in ('Idle', 'Walk'):
             columns = [0] if state == 'Idle' else range(1, sv_info['columns'])
             clip = f'{sv_folder}/Animations/Phawin_SideView_{state}_{facing}.anim'
-            write_clip(clip, os.path.basename(clip)[:-5], [sv_ids[f'Phawin_SideView_{facing}_{c}'] for c in columns], sv_guid)
+            write_clip(clip, os.path.basename(clip)[:-5], [sv_ids[f'Phawin_SideView_{facing}_{c}'] for c in columns], sv_guid, sv_info['fps'])
             sv_clips[f'{state}_{facing}'] = guid(clip)
     sv_controller = f'{sv_folder}/Phawin_SideView.controller'
     write_sideview_controller(sv_controller, sv_clips)
