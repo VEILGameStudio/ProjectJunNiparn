@@ -1,42 +1,59 @@
 {
-  "idle_source": "phawin_6dir_idle_row2.png",
-  "walk_source": "phawin_6dir_walk_original.png",
-  "haze_alpha": 32,
   "stretch": 1.015,
   "stretched": true,
   "cell": [
-    162,
-    317
+    248,
+    344
   ],
-  "columns": 6,
+  "columns": 9,
   "column_0": "idle",
-  "walk_frames": 5,
+  "walk_frames": 8,
   "rows_in_order": [
     "Front",
     "Back",
-    "FrontLeft",
-    "FrontRight",
-    "BackLeft",
-    "BackRight"
+    "Right",
+    "Left"
   ],
+  "rows": {
+    "Front": {
+      "from": "Down",
+      "mirror": false,
+      "source_walk_height_px": 427.5
+    },
+    "Back": {
+      "from": "Up",
+      "mirror": false,
+      "source_walk_height_px": 419.5
+    },
+    "Right": {
+      "from": "Right",
+      "mirror": false,
+      "source_walk_height_px": 429.5
+    },
+    "Left": {
+      "from": "Right",
+      "mirror": true,
+      "source_walk_height_px": 429.5
+    }
+  },
   "fps": 10,
   "pivot_px_from_bottom_left": [
-    80,
+    124,
     8
   ],
   "pivot_normalized": [
-    0.4938,
-    0.0252
+    0.5,
+    0.0233
   ],
   "idle_height_px_stretched": {
-    "min": 294,
-    "median": 298,
-    "max": 299
+    "min": 325,
+    "median": 325,
+    "max": 325
   },
   "walk_height_px_stretched": {
-    "min": 295,
-    "max": 301
+    "min": 322,
+    "max": 328
   },
   "world_height": 1.617,
-  "ppu": 184.3
+  "ppu": 201.0
 }
