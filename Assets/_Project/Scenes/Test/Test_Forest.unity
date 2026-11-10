@@ -14540,6 +14540,22 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 7216985310307924571, guid: 79a3c0301066cb24db61d7dd6a03c761, type: 3}
+      propertyPath: m_Controller
+      value: 
+      objectReference: {fileID: 22100000, guid: 31ed63492f9450d283a8083819b13926, type: 2}
+    - target: {fileID: 3492714405758422594, guid: 79a3c0301066cb24db61d7dd6a03c761, type: 3}
+      propertyPath: threeQuarterController
+      value: 
+      objectReference: {fileID: 22100000, guid: 31ed63492f9450d283a8083819b13926, type: 2}
+    - target: {fileID: 3492714405758422594, guid: 79a3c0301066cb24db61d7dd6a03c761, type: 3}
+      propertyPath: sideViewController
+      value: 
+      objectReference: {fileID: 9100000, guid: fc73fb0a1a7e29bc6649b2b7ee5b24f0, type: 2}
+    - target: {fileID: 4606241631460804535, guid: 79a3c0301066cb24db61d7dd6a03c761, type: 3}
+      propertyPath: m_Sprite
+      value: 
+      objectReference: {fileID: -273545375, guid: 2851e66bd9988ef6ebb8ab502dbb7659, type: 3}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
