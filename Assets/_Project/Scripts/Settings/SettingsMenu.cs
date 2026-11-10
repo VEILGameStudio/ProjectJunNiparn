@@ -25,7 +25,7 @@ public class SettingsMenu : MonoBehaviour
     [SerializeField] private Slider soundSlider;
 
     [Header("Brightness")]
-    [Tooltip("Slider for screen brightness. Its range is set from the BrightnessController.")]
+    [Tooltip("Slider for screen brightness. Its range is set from the BrightnessController on the Managers object.")]
     [SerializeField] private Slider brightnessSlider;
 
     [Header("Language")]
@@ -34,6 +34,10 @@ public class SettingsMenu : MonoBehaviour
 
     // True while we set the controls from saved values, so change events are ignored.
     private bool isInitializing;
+
+    // The brightness and language systems on the Managers object (null if missing).
+    private BrightnessController Brightness => GameManager.Instance != null ? GameManager.Instance.Brightness : null;
+    private LocalizationManager Localization => GameManager.Instance != null ? GameManager.Instance.Localization : null;
 
     private void Awake()
     {
@@ -72,9 +76,7 @@ public class SettingsMenu : MonoBehaviour
         if (brightnessSlider != null)
         {
             brightnessSlider.minValue = BrightnessController.SliderMinimum;
-            brightnessSlider.maxValue = BrightnessController.Instance != null
-                ? BrightnessController.Instance.SliderMaximum
-                : 60f;
+            brightnessSlider.maxValue = Brightness != null ? Brightness.SliderMaximum : 60f;
             brightnessSlider.onValueChanged.AddListener(OnBrightnessChanged);
         }
         if (languageDropdown != null)
@@ -154,9 +156,9 @@ public class SettingsMenu : MonoBehaviour
             return;
         }
 
-        if (BrightnessController.Instance != null)
+        if (Brightness != null)
         {
-            BrightnessController.Instance.ApplyBrightness(value);
+            Brightness.ApplyBrightness(value);
         }
         SaveManager.Instance.Settings.brightness = value;
     }
@@ -170,9 +172,9 @@ public class SettingsMenu : MonoBehaviour
         }
 
         Language language = (Language)index;
-        if (LocalizationManager.Instance != null)
+        if (Localization != null)
         {
-            LocalizationManager.Instance.SetLanguage(language);
+            Localization.SetLanguage(language);
         }
         SaveManager.Instance.Settings.language = language;
     }

@@ -3,8 +3,9 @@
 // something: a short "mini dialogue", or a reason an item cannot be taken yet.
 // It shows a line of text for a few seconds, then hides itself. It uses real
 // (unscaled) time so it still counts down even when the game is frozen.
-// The full conversation system (with speaker names and choices) comes later; this
-// is only for one short line at a time.
+// This is only for one short line at a time; full conversations use the
+// DialogueManager.
+// Other scripts reach it with: UIManager.Instance.MiniDialogue
 //
 // Put this on: a "MiniDialogue" GameObject on your main (persistent) Canvas.
 // Assign in Inspector:
@@ -16,7 +17,7 @@ using System.Collections;
 using TMPro;
 using UnityEngine;
 
-public class MiniDialogueUI : Singleton<MiniDialogueUI>
+public class MiniDialogueUI : MonoBehaviour
 {
     [Header("Parts")]
     [Tooltip("The popup GameObject that is shown and hidden.")]
@@ -61,9 +62,16 @@ public class MiniDialogueUI : Singleton<MiniDialogueUI>
     // Shows a message from a LocalizedString in the player's current language.
     public void ShowLocalized(LocalizedString message, float seconds = -1f)
     {
-        string text = LocalizationManager.Instance != null
-            ? LocalizationManager.Instance.Get(message)
-            : message.english;
+        if (message == null)
+        {
+            return;
+        }
+
+        string text = message.english;
+        if (GameManager.Instance != null && GameManager.Instance.Localization != null)
+        {
+            text = GameManager.Instance.Localization.Get(message);
+        }
 
         Show(text, seconds);
     }

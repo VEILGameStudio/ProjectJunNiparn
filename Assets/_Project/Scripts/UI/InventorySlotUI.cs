@@ -1,7 +1,7 @@
 // InventorySlotUI
-// One clickable square in the inventory grid. It shows an item's icon and, if
-// there is more than one, the count. Clicking it tells the InventoryUI which item
-// was selected so it can show the name and description.
+// One clickable square of the inventory screen: a cell of the bag, or the hand slot.
+// It shows an item's icon and, if there is more than one, the count. Clicking it
+// tells the InventoryUI which item was clicked. A cell can also be shown empty.
 //
 // Put this on: the Inventory Slot prefab (a UI Button).
 // Assign in Inspector:
@@ -59,9 +59,30 @@ public class InventorySlotUI : MonoBehaviour
         }
     }
 
+    // Shows this cell with nothing in it. Clicking an empty cell does nothing.
+    public void ShowEmpty()
+    {
+        item = null;
+        onClicked = null;
+
+        if (iconImage != null)
+        {
+            iconImage.sprite = null;
+            iconImage.enabled = false;
+        }
+
+        if (countText != null)
+        {
+            countText.text = string.Empty;
+        }
+    }
+
     // Tells the InventoryUI which item was clicked.
     private void HandleClick()
     {
-        onClicked?.Invoke(item);
+        if (item != null)
+        {
+            onClicked?.Invoke(item);
+        }
     }
 }

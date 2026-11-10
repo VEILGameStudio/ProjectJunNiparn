@@ -1,18 +1,25 @@
 // Inventory
 // Holds everything the player is carrying. It can add items, remove items, and
 // count them, and items stack up to each item's Max Stack. Whenever anything
-// changes it fires OnInventoryChanged so the UI can refresh itself. The UI reads
-// the inventory but never changes it directly - it calls Add/Remove here.
+// changes it raises GameEvents.OnInventoryChanged so the UI can refresh itself.
+// The UI never changes the inventory directly - only Add/Remove here do.
 // The inventory survives scene changes and is saved with the game.
+// Other scripts reach it with: GameManager.Instance.Inventory
+// (inside an interactable, use player.Inventory instead).
 //
-// Put this on: the "Managers" GameObject (so it lives for the whole game).
+// Holding: the player can hold ONE item in the hand. Holding does not take the item
+// out of the bag (Count stays the same), and the hand empties itself when the last
+// of that item is gone. A puzzle asks "is the player holding the right thing?" with:
+//   if (player.Inventory.IsHolding(keyItem)) { ... }
+// Every change raises GameEvents.OnHeldItemChanged.
+//
+// Put this on: the "Managers" GameObject (next to the GameManager).
 // Assign in Inspector: Item Database (used to rebuild items when loading a save).
 
-using System;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class Inventory : Singleton<Inventory>, ISaveParticipant
+public class Inventory : MonoBehaviour, ISaveParticipant
 {
     [Header("Data")]
     [Tooltip("The database of all items, used to rebuild the inventory when loading a save.")]
@@ -21,11 +28,14 @@ public class Inventory : Singleton<Inventory>, ISaveParticipant
     // The slots the player currently owns.
     private readonly List<InventorySlot> slots = new List<InventorySlot>();
 
-    // The UI reads this to draw the slots. It cannot change the list.
+    // The item in the player's hand. Null while the hand is empty.
+    private ItemData heldItem;
+
+    // The current slots, read only.
     public IReadOnlyList<InventorySlot> Slots => slots;
 
-    // Fired whenever items are added or removed. The UI listens to this.
-    public event Action OnInventoryChanged;
+    // The item in the player's hand, or null while the hand is empty.
+    public ItemData HeldItem => heldItem;
 
     private void Start()
     {
@@ -39,9 +49,8 @@ public class Inventory : Singleton<Inventory>, ISaveParticipant
         }
     }
 
-    protected override void OnDestroy()
+    private void OnDestroy()
     {
-        base.OnDestroy();
         if (SaveManager.Instance != null)
         {
             SaveManager.Instance.Unregister(this);
@@ -58,7 +67,7 @@ public class Inventory : Singleton<Inventory>, ISaveParticipant
         }
 
         AddInternal(item, amount);
-        OnInventoryChanged?.Invoke();
+        GameEvents.RaiseInventoryChanged(slots);
         return true;
     }
 
@@ -89,7 +98,13 @@ public class Inventory : Singleton<Inventory>, ISaveParticipant
             }
         }
 
-        OnInventoryChanged?.Invoke();
+        // The last one is gone, so it cannot stay in the hand.
+        if (heldItem != null && !Has(heldItem))
+        {
+            SetHeldItem(null);
+        }
+
+        GameEvents.RaiseInventoryChanged(slots);
         return true;
     }
 
@@ -113,7 +128,44 @@ public class Inventory : Singleton<Inventory>, ISaveParticipant
         return Count(item) >= amount;
     }
 
-    // Shared add logic without firing the change event (used by Add and by loading).
+    // Takes an item from the bag into the hand. Only one item is held at a time, so this
+    // replaces whatever was held. Returns false if the player does not have the item.
+    public bool Hold(ItemData item)
+    {
+        if (item == null || !Has(item))
+        {
+            return false;
+        }
+
+        SetHeldItem(item);
+        return true;
+    }
+
+    // Empties the hand. The item stays in the bag.
+    public void StopHolding()
+    {
+        SetHeldItem(null);
+    }
+
+    // True if this item is in the player's hand right now.
+    public bool IsHolding(ItemData item)
+    {
+        return item != null && heldItem == item;
+    }
+
+    // Changes the held item and announces it, but only when it really changed.
+    private void SetHeldItem(ItemData item)
+    {
+        if (heldItem == item)
+        {
+            return;
+        }
+
+        heldItem = item;
+        GameEvents.RaiseHeldItemChanged(heldItem);
+    }
+
+    // Shared add logic without raising the change event (used by Add and by loading).
     private void AddInternal(ItemData item, int amount)
     {
         int remaining = amount;
@@ -155,12 +207,15 @@ public class Inventory : Singleton<Inventory>, ISaveParticipant
         {
             data.inventoryEntries.Add(new InventoryEntry { itemId = slot.Item.Id, count = slot.Count });
         }
+
+        data.heldItemId = heldItem != null ? heldItem.Id : string.Empty;
     }
 
-    // Rebuilds the inventory from the save data.
+    // Rebuilds the inventory, and what was in the hand, from the save data.
     public void RestoreState(GameSaveData data)
     {
         slots.Clear();
+        ItemData savedHeldItem = null;
 
         if (itemDatabase != null)
         {
@@ -172,8 +227,21 @@ public class Inventory : Singleton<Inventory>, ISaveParticipant
                     AddInternal(item, entry.count);
                 }
             }
+
+            // A save made before holding existed has no id here: the hand is simply empty.
+            if (!string.IsNullOrEmpty(data.heldItemId))
+            {
+                savedHeldItem = itemDatabase.GetById(data.heldItemId);
+            }
         }
 
-        OnInventoryChanged?.Invoke();
+        // Only something that is really in the bag can be held.
+        if (savedHeldItem != null && !Has(savedHeldItem))
+        {
+            savedHeldItem = null;
+        }
+
+        GameEvents.RaiseInventoryChanged(slots);
+        SetHeldItem(savedHeldItem);
     }
 }

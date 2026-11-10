@@ -47,12 +47,12 @@ public class FullDialogueUI : MonoBehaviour
 
     private void OnEnable()
     {
-        GameEvents.LanguageChanged += RefreshCurrentLine;
+        GameEvents.OnLanguageChanged += RefreshCurrentLine;
     }
 
     private void OnDisable()
     {
-        GameEvents.LanguageChanged -= RefreshCurrentLine;
+        GameEvents.OnLanguageChanged -= RefreshCurrentLine;
     }
 
     private void Start()
@@ -134,8 +134,11 @@ public class FullDialogueUI : MonoBehaviour
     // Turns a LocalizedString into text in the current language.
     private string Localize(LocalizedString value)
     {
-        return LocalizationManager.Instance != null
-            ? LocalizationManager.Instance.Get(value)
-            : value.english;
+        if (GameManager.Instance == null || GameManager.Instance.Localization == null)
+        {
+            return value.english;
+        }
+
+        return GameManager.Instance.Localization.Get(value);
     }
 }

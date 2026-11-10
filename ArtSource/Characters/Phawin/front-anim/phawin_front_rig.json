@@ -1,0 +1,150 @@
+{
+ "canvas": [
+  1078,
+  1460
+ ],
+ "draw_order_bottom_to_top": [
+  "foot_R",
+  "foot_L",
+  "leg_R",
+  "leg_L",
+  "body",
+  "pendant",
+  "arm_L",
+  "arm_R",
+  "head",
+  "eye_R",
+  "eye_L"
+ ],
+ "parts": {
+  "foot_R": [
+   "foot_R"
+  ],
+  "foot_L": [
+   "foot_L"
+  ],
+  "leg_R": [
+   "leg_R"
+  ],
+  "leg_L": [
+   "leg_L"
+  ],
+  "body": [
+   "torso",
+   "neck"
+  ],
+  "pendant": [
+   "pendant"
+  ],
+  "arm_L": [
+   "arm_L",
+   "sleeve_L",
+   "bag_strap",
+   "bag"
+  ],
+  "arm_R": [
+   "arm_R",
+   "sleeve_R"
+  ],
+  "head": [
+   "face",
+   "hair_back",
+   "hair_front",
+   "mouth"
+  ],
+  "eye_R": [
+   "eye_R"
+  ],
+  "eye_L": [
+   "eye_L"
+  ]
+ },
+ "rig": {
+  "body": {
+   "role": "body"
+  },
+  "pendant": {
+   "role": "swing",
+   "pivot": [
+    552,
+    470
+   ],
+   "bend_from_y": 480,
+   "bend_to_y": 600
+  },
+  "arm_R": {
+   "role": "arm",
+   "pivot": [
+    682,
+    535
+   ],
+   "bend_from_y": 505,
+   "bend_to_y": 625
+  },
+  "arm_L": {
+   "role": "arm",
+   "pivot": [
+    410,
+    535
+   ],
+   "bend_from_y": 505,
+   "bend_to_y": 625
+  },
+  "head": {
+   "role": "head",
+   "pivot": [
+    552,
+    449
+   ],
+   "hair_centre": [
+    552,
+    330
+   ],
+   "hair_radius": [
+    230,
+    200
+   ]
+  },
+  "eye_R": {
+   "role": "eye",
+   "outer": "right"
+  },
+  "eye_L": {
+   "role": "eye",
+   "outer": "left"
+  },
+  "leg_R": {
+   "role": "leg",
+   "side": "R"
+  },
+  "leg_L": {
+   "role": "leg",
+   "side": "L"
+  },
+  "foot_R": {
+   "role": "foot",
+   "side": "R"
+  },
+  "foot_L": {
+   "role": "foot",
+   "side": "L"
+  }
+ },
+ "lines": {
+  "chest_y": 470,
+  "waist_y": 760,
+  "leg_top_y": 750,
+  "leg_bottom_y": 1300,
+  "bunch_from_y": 900,
+  "bunch_to_y": 1180,
+  "ground_y": 1408,
+  "centre_x": 545,
+  "shadow_rx": 215
+ },
+ "eye_states": [
+  "open",
+  "half",
+  "closed"
+ ],
+ "note": "pivots in canvas px (y down). Not stretched: CLAUDE.md stretch x1.015 SideView / x1.155 ThreeQuarter is applied when the sprite is imported (import-sprite-art)."
+}

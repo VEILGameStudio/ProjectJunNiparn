@@ -1,0 +1,33 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3b77da5a71e66e742915af4f2bb86a21, type: 3}
+  m_Name: Cutter_Item
+  m_EditorClassIdentifier: Assembly-CSharp::ItemData
+  id: cutter
+  category: 0
+  displayName:
+    english: Cutter
+    thai: "\u0E04\u0E31\u0E15\u0E40\u0E15\u0E2D\u0E23\u0E4C"
+  description:
+    english: A sharp cutter. It can cut tape.
+    thai: "\u0E04\u0E31\u0E15\u0E40\u0E15\u0E2D\u0E23\u0E4C\u0E04\u0E21\u0E46 \u0E43\u0E0A\u0E49\u0E15\u0E31\u0E14\u0E40\u0E17\u0E1B\u0E44\u0E14\u0E49"
+  icon: {fileID: 1323278541, guid: a9ef2fa171cc9b74bbaeb6668ccfb06c, type: 3}
+  maxStack: 1
+  healAmount: 0
+  staminaAmount: 0
+  secretTitle:
+    english: 
+    thai: 
+  secretBody:
+    english: 
+    thai: 
+  secretImage: {fileID: 0}
