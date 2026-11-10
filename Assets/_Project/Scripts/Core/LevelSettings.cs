@@ -57,7 +57,7 @@ public class LevelSettings : MonoBehaviour
     [SerializeField] private float orthographicSize = 5f;
 
     [Tooltip("Side View areas only. How wide the camera sees, in degrees. Bigger = sees more, but things shrink faster with distance. Only used when Override Preset Values is ticked.")]
-    [SerializeField] private float fieldOfView = 8f;
+    [SerializeField] private float fieldOfView = 9f;
 
     [Tooltip("How far back from the player the camera sits. Only used when Override Preset Values is ticked.")]
     [SerializeField] private float cameraDistance = 20f;
