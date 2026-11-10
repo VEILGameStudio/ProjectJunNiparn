@@ -99,11 +99,11 @@ perspective *is*. A layer at distance *D* moves at 20/*D* of the play plane's ra
 speed, 100 gives a fifth, 200 gives a tenth. Pick the distance that gives the speed; there is nothing
 to code. Two consequences the art has to know, at 1080p:
 
-- The visible height at distance *D* is 0.112 × *D* world units (2 × tan 3.2°, from FOV 6.4), so
-  **PPU = 1080 ÷ (0.112 × D)**. A backdrop 100 units out is drawn at PPU 97 against the foreground's
-  483. Export it at the character PPU and it comes out five times too small.
-- The width has to cover the screen *plus* the camera's whole travel: 0.112 × *D* × aspect, which at
-  21:9 and *D* = 100 is 26 units before travel is added. Far layers are large. The 36-unit back wall is
+- The visible height at distance *D* is 0.196 × *D* world units (2 × tan 5.6°, from FOV 11.2), so
+  **PPU = 1080 ÷ (0.196 × D)**. A backdrop 100 units out is drawn at PPU 55 against the foreground's
+  275. Export it at the character PPU and it comes out five times too small.
+- The width has to cover the screen *plus* the camera's whole travel: 0.196 × *D* × aspect, which at
+  21:9 and *D* = 100 is 46 units before travel is added. Far layers are large. The 36-unit back wall is
   a near-plane number and does not apply to them.
 
 **`ThreeQuarter` cannot have parallax at all.** It is orthographic, and an orthographic projection has
@@ -537,20 +537,20 @@ and framing come from the area's preset:
 |---|---|---|
 | Projection | Orthographic | Perspective |
 | Pitch / Yaw | 30 / 45 | 10 / 0 |
-| Size / FOV | Orthographic Size 5 | Field of View 6.4 |
+| Size / FOV | Orthographic Size 5 | Field of View 11.2 |
 | Camera distance | 20 | 20 |
-| Target Offset | 0, 1.25, 0 | 0, 0.93, 0 |
+| Target Offset | 0, 1.25, 0 | 0, 1.63, 0 |
 | Damping X / Y / Z | 1 / 1 / 1 | 1 / 1 / 1 |
 
 **Every value in this table is written by code from the preset. None of them is adjusted by hand on a
 camera in a scene.** A camera whose values disagree with its preset has been edited by mistake and is
 put back, not accommodated: the spec is the source, the scene is not.
 
-These numbers are **locked**. The `SideView` field of view was changed by Oak on 2026-11-11 from 19 to 6.4
-(and Target Offset Y from 2 to 0.93) to match a closer reference framing: the character now stands
-about 760 px tall on a 1080-high screen, 70% of the frame, with the feet near the bottom ninth. The
-screen shows about 2.2 units high and 4.0 wide (16:9) at the player. `SideView` character art needs
-about PPU 480 to stay sharp at this size; art exported at PPU ~170 is shown almost three times its
+These numbers are **locked**. The `SideView` field of view was changed by Oak on 2026-11-11 from 19 to 11.2
+(and Target Offset Y from 2 to 1.63) to match a closer reference framing: the character now stands
+about 430 px tall on a 1080-high screen, 40% of the frame, with the feet near the bottom ninth. The
+screen shows about 3.9 units high and 7.0 wide (16:9) at the player. `SideView` character art needs
+about PPU 275 to stay sharp at this size; art exported at PPU ~170 is shown about 1.6 times its
 size and looks soft. Changing the FOV again moves every `SideView` sprite's apparent size.
 
 **Damping is the same on all three axes.** The Position Composer damps along the camera's own axes, so
