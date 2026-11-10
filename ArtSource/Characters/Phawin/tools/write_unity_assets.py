@@ -1,9 +1,11 @@
 # write_unity_assets.py
 # Writes Phawin's Unity files from the finished sheets, using the Player_Mannequin template as the model:
 #   - the two sheets with sprite-sliced .meta files (importer settings copied from the mannequin sheets)
-#   - one AnimationClip per facing and state, 10 fps
+#   - one AnimationClip per facing and state, at the fps in each sheet's json
 #   - ThreeQuarter: an Animator Override Controller on Mannequin_ThreeQuarter.controller
-#   - SideView: a small controller with Idle/Walk x Right/Left (the art has no front/back profile)
+#   - SideView: a controller with Idle and Walk blend trees, built from Mannequin_ThreeQuarter.controller
+#     with the 8 children replaced by the 6 directions PlayerAnimator.SnapToSixFacings sends. The art has
+#     4 rows (Front, Back, Right, Left = Right mirrored in the sheet); each diagonal uses its side row
 #   - Player_Phawin.prefab, a variant of Player_Mannequin.prefab that only swaps the art
 # GUIDs and sprite ids are derived from names, so running it twice writes the same files.
 # This writes YAML by hand because Unity cannot run here. Open the project afterwards and let Unity
@@ -18,6 +20,7 @@ SPRITES = 'Assets/_Project/Art/Sprites'
 MANNEQUIN_TQ_META = f'{SPRITES}/ThreeQuarter/Placeholder/Placeholder_Mannequin_ThreeQuarter.png.meta'
 MANNEQUIN_SV_META = f'{SPRITES}/SideView/Placeholder/Placeholder_Mannequin_SideView.png.meta'
 MANNEQUIN_TQ_CONTROLLER_GUID = '310f72fcf6eaa0744b6b9c45d2c95eeb'
+MANNEQUIN_TQ_CONTROLLER = f'{SPRITES}/ThreeQuarter/Placeholder/Mannequin_ThreeQuarter.controller'
 MANNEQUIN_PREFAB_GUID = '79a3c0301066cb24db61d7dd6a03c761'
 # Ids inside Player_Mannequin.prefab (see that file): its Animator, its PlayerAnimator, and the Visual's
 # SpriteRenderer, whose id in the variant is (instance id XOR source id) & 0x7FFFFFFFFFFFFFFF.
@@ -25,7 +28,6 @@ MANNEQUIN_ANIMATOR_ID = 7216985310307924571
 MANNEQUIN_PLAYER_ANIMATOR_ID = 3492714405758422594
 MANNEQUIN_SPRITE_RENDERER_ID = 4606241631460804535
 MANNEQUIN_ROOT_ID = 5552632073984095805
-FPS = 10
 TQ_ORDER = ['Down', 'DownRight', 'Right', 'UpRight', 'Up', 'UpLeft', 'Left', 'DownLeft']
 # Mannequin_ThreeQuarter_<state>_<facing>.anim GUIDs, read from the controller's blend trees.
 MANNEQUIN_TQ_CLIPS = {
@@ -39,6 +41,10 @@ MANNEQUIN_TQ_CLIPS = {
              'c48a43e2dff33de4eb0778485802529f', 'b61411406af927f48b2d3c7bc44e69a5'],
 }
 # Blend-tree positions in Mannequin_ThreeQuarter.controller, in the same order as above.
+# SideView sheet rows. Left is Right mirrored when the sheet is built (Oak's call), so nothing flips at runtime.
+SV_ORDER = ['Front', 'Back', 'Right', 'Left']
+# The FaceX/FaceY that PlayerAnimator.SnapToSixFacings sends, and the row each one shows.
+SV_CHILDREN = [('Front', (0, -1)), ('Back', (0, 1)), ('Left', (-1, -1)), ('Right', (1, -1)), ('Left', (-1, 1)), ('Right', (1, 1))]
 TQ_POSITIONS = [(0, -1), (0.707, -0.707), (1, 0), (0.707, 0.707), (0, 1), (-0.707, 0.707), (-1, 0), (-0.707, -0.707)]
 
 
@@ -107,6 +113,9 @@ def import_sheet(sheet_png, info, template_meta, folder, prefix, rows, columns):
     meta = re.sub(r'^  spritePixelsToUnits: .*$', f'  spritePixelsToUnits: {ppu}', meta, count=1, flags=re.M)
     # The sheet's own sprite id (4-space indent) must not be the mannequin's.
     meta = re.sub(r'^    spriteID: \w+$', f'    spriteID: {guid("sheet:" + target)}', meta, count=1, flags=re.M)
+    if cell_w * columns > 2048 or sheet_h > 2048:  # the mannequin default is 2048; a bigger sheet would be shrunk
+        assert cell_w * columns <= 4096 and sheet_h <= 4096, 'sheet is larger than 4096, make the cells smaller'
+        meta = meta.replace('maxTextureSize: 2048', 'maxTextureSize: 4096')
     start = meta.index('    sprites:\n') + len('    sprites:\n')
     end = meta.index('\n    outline: []\n', start) + 1
     meta = meta[:start] + ''.join(sprites) + meta[end:]
@@ -117,9 +126,9 @@ def import_sheet(sheet_png, info, template_meta, folder, prefix, rows, columns):
     return ids, texture_guid
 
 
-# Writes a sprite AnimationClip that shows the given sprites at FPS, looping.
-def write_clip(path, name, sprite_ids, texture_guid):
-    keys = ''.join(f'    - time: {round(i / FPS, 4)}\n      value: {{fileID: {s}, guid: {texture_guid}, type: 3}}\n'
+# Writes a sprite AnimationClip that shows the given sprites at fps, looping.
+def write_clip(path, name, sprite_ids, texture_guid, fps):
+    keys = ''.join(f'    - time: {round(i / fps, 4)}\n      value: {{fileID: {s}, guid: {texture_guid}, type: 3}}\n'
                    for i, s in enumerate(sprite_ids))
     mapping = ''.join(f'    - {{fileID: {s}, guid: {texture_guid}, type: 3}}\n' for s in sprite_ids)
     write(path, f'''%YAML 1.1
@@ -149,7 +158,7 @@ AnimationClip:
     classID: 212
     script: {{fileID: 0}}
     flags: 2
-  m_SampleRate: {FPS}
+  m_SampleRate: {fps}
   m_WrapMode: 0
   m_Bounds:
     m_Center: {{x: 0, y: 0, z: 0}}
@@ -172,7 +181,7 @@ AnimationClip:
     m_AdditiveReferencePoseClip: {{fileID: 0}}
     m_AdditiveReferencePoseTime: 0
     m_StartTime: 0
-    m_StopTime: {round(len(sprite_ids) / FPS, 4)}
+    m_StopTime: {round(len(sprite_ids) / fps, 4)}
     m_OrientationOffsetY: 0
     m_Level: 0
     m_CycleOffset: 0
@@ -222,49 +231,26 @@ def transition_yaml(transition_id, conditions, destination_id):
             '  m_InterruptionSource: 0\n  m_OrderedInterruption: 1\n  m_CanTransitionToSelf: 0\n')
 
 
-# SideView controller: Idle/Walk x Right/Left. FaceX picks the side; FaceX 0 (front or back) keeps it.
+# SideView controller: the mannequin ThreeQuarter controller (Idle and Walk blend trees on FaceX/FaceY,
+# IsMoving switches between them) with each blend tree's children replaced by the 6 SideView directions.
+# Local file ids inside a controller only need to be unique within that file, so the template's are kept.
 def write_sideview_controller(path, clip_guids):
-    state = {key: big_id(path + key) for key in clip_guids}
-    moving, still = (1, 'IsMoving', 0), (2, 'IsMoving', 0)
-    to_left, to_right = (4, 'FaceX', -0.5), (3, 'FaceX', 0.5)
-    # Listed in priority order: the change of side AND state comes first, so starting to walk the
-    # other way never shows one frame facing the old side.
-    links = {  # from: [(conditions, to)]
-        'Idle_Right': [([moving, to_left], 'Walk_Left'), ([moving], 'Walk_Right'), ([to_left], 'Idle_Left')],
-        'Idle_Left': [([moving, to_right], 'Walk_Right'), ([moving], 'Walk_Left'), ([to_right], 'Idle_Right')],
-        'Walk_Right': [([still, to_left], 'Idle_Left'), ([still], 'Idle_Right'), ([to_left], 'Walk_Left')],
-        'Walk_Left': [([still, to_right], 'Idle_Right'), ([still], 'Idle_Left'), ([to_right], 'Walk_Right')],
-    }
-    positions = {'Idle_Right': (300, 0), 'Idle_Left': (300, 120), 'Walk_Right': (560, 0), 'Walk_Left': (560, 120)}
-    machine_id = big_id(path + 'machine')
-    body = ''
-    for key, out_links in links.items():
-        ids = [big_id(f'{path}{key}->{to}') for _, to in out_links]
-        body += state_yaml(state[key], key, clip_guids[key], ids, *positions[key])
-        for transition_id, (conditions, to) in zip(ids, out_links):
-            body += transition_yaml(transition_id, conditions, state[to])
-    children = ''.join(f'  - serializedVersion: 1\n    m_State: {{fileID: {state[k]}}}\n'
-                       f'    m_Position: {{x: {positions[k][0]}, y: {positions[k][1]}, z: 0}}\n' for k in links)
-    parameters = ''
-    for name, kind, default in [('FaceX', 1, 0), ('FaceY', 1, -1), ('IsMoving', 4, 0)]:
-        parameters += (f'  - m_Name: {name}\n    m_Type: {kind}\n    m_DefaultFloat: {default}\n'
-                       '    m_DefaultInt: 0\n    m_DefaultBool: 0\n    m_Controller: {fileID: 9100000}\n')
+    with open(MANNEQUIN_TQ_CONTROLLER) as handle:
+        text = handle.read()
+    for state in ('Idle', 'Walk'):
+        children = ''
+        for i, (facing, (x, y)) in enumerate(SV_CHILDREN):
+            children += (f'  - serializedVersion: 2\n'
+                         f'    m_Motion: {{fileID: 7400000, guid: {clip_guids[f"{state}_{facing}"]}, type: 2}}\n'
+                         f'    m_Threshold: {round(i / (len(SV_CHILDREN) - 1), 4)}\n    m_Position: {{x: {x}, y: {y}}}\n'
+                         '    m_TimeScale: 1\n    m_CycleOffset: 0\n    m_DirectBlendParameter: Blend\n    m_Mirror: 0\n')
+        start = text.index(f'  m_Name: {state}\n  m_Childs:\n') + len(f'  m_Name: {state}\n  m_Childs:\n')
+        end = text.index('  m_BlendParameter: FaceX\n', start)
+        text = text[:start] + children + text[end:]
     name = os.path.splitext(os.path.basename(path))[0]
-    write(path, HEADER + body +
-          f'--- !u!1107 &{machine_id}\nAnimatorStateMachine:\n  serializedVersion: 7\n{OBJECT}'
-          f'  m_Name: Base Layer\n  m_ChildStates:\n{children}  m_ChildStateMachines: []\n'
-          '  m_AnyStateTransitions: []\n  m_EntryTransitions: []\n  m_StateMachineTransitions: {}\n'
-          '  m_StateMachineBehaviours: []\n  m_AnyStatePosition: {x: 50, y: 20, z: 0}\n'
-          '  m_EntryPosition: {x: 50, y: 120, z: 0}\n  m_ExitPosition: {x: 800, y: 120, z: 0}\n'
-          f'  m_ParentStateMachinePosition: {{x: 800, y: 20, z: 0}}\n  m_DefaultState: {{fileID: {state["Idle_Right"]}}}\n'
-          '--- !u!91 &9100000\nAnimatorController:\n  m_ObjectHideFlags: 0\n'
-          '  m_CorrespondingSourceObject: {fileID: 0}\n  m_PrefabInstance: {fileID: 0}\n  m_PrefabAsset: {fileID: 0}\n'
-          f'  m_Name: {name}\n  serializedVersion: 6\n  m_AnimatorParameters:\n{parameters}'
-          '  m_AnimatorLayers:\n  - serializedVersion: 5\n    m_Name: Base Layer\n'
-          f'    m_StateMachine: {{fileID: {machine_id}}}\n    m_Mask: {{fileID: 0}}\n    m_Motions: []\n'
-          '    m_Behaviours: []\n    m_BlendingMode: 0\n    m_SyncedLayerIndex: -1\n    m_DefaultWeight: 0\n'
-          '    m_IKPass: 0\n    m_SyncedLayerAffectsTiming: 0\n    m_Controller: {fileID: 9100000}\n'
-          '  m_EvaluateTransitionsOnStart: 1\n')
+    text = text.replace('  m_Name: Mannequin_ThreeQuarter\n', f'  m_Name: {name}\n', 1)
+    assert 'guid: ' in text and text.count('m_Position: {x: 0.707') == 0
+    write(path, text)
     native_meta(path, 9100000)
 
 
@@ -314,25 +300,26 @@ def main():
             columns = [0] if state == 'Idle' else range(1, tq_info['columns'])
             clip = f'{tq_folder}/Animations/Phawin_ThreeQuarter_{state}_{facing}.anim'
             write_clip(clip, os.path.basename(clip)[:-5],
-                       [tq_ids[f'Phawin_ThreeQuarter_{facing}_{c}'] for c in columns], tq_guid)
+                       [tq_ids[f'Phawin_ThreeQuarter_{facing}_{c}'] for c in columns], tq_guid, tq_info['fps'])
             pairs.append((MANNEQUIN_TQ_CLIPS[state][i], guid(clip)))
     tq_controller = f'{tq_folder}/Phawin_ThreeQuarter.overrideController'
     write_override_controller(tq_controller, MANNEQUIN_TQ_CONTROLLER_GUID, pairs)
 
     # SideView
     sv_folder = f'{SPRITES}/SideView/Characters/Phawin'
-    sv_info = json.load(open(f'{ART}/sideview-profile-walk/Phawin_SideView.json'))
-    sv_info['ppu'] = sv_info['suggested_ppu']
-    sv_rows = sv_info['rows_in_order']
-    sv_ids, sv_guid = import_sheet(f'{ART}/sideview-profile-walk/Phawin_SideView.png', sv_info, MANNEQUIN_SV_META,
-                                   sv_folder, 'Phawin_SideView', sv_rows, sv_info['columns'])
-    sv_idle_frame = 5  # legs closest together; there is no SideView standing drawing yet
+    if os.path.isdir(f'{sv_folder}/Animations'):  # clips from an older layout (e.g. Right/Left) must not linger
+        for old in os.listdir(f'{sv_folder}/Animations'):
+            os.remove(f'{sv_folder}/Animations/{old}')
+    sv_info = json.load(open(f'{ART}/sideview-game/Phawin_SideView.json'))
+    assert sv_info['rows_in_order'] == SV_ORDER, sv_info['rows_in_order']
+    sv_ids, sv_guid = import_sheet(f'{ART}/sideview-game/Phawin_SideView.png', sv_info, MANNEQUIN_SV_META,
+                                   sv_folder, 'Phawin_SideView', SV_ORDER, sv_info['columns'])
     sv_clips = {}
-    for facing in sv_rows:
+    for facing in SV_ORDER:
         for state in ('Idle', 'Walk'):
-            columns = [sv_idle_frame] if state == 'Idle' else range(sv_info['columns'])
+            columns = [0] if state == 'Idle' else range(1, sv_info['columns'])
             clip = f'{sv_folder}/Animations/Phawin_SideView_{state}_{facing}.anim'
-            write_clip(clip, os.path.basename(clip)[:-5], [sv_ids[f'Phawin_SideView_{facing}_{c}'] for c in columns], sv_guid)
+            write_clip(clip, os.path.basename(clip)[:-5], [sv_ids[f'Phawin_SideView_{facing}_{c}'] for c in columns], sv_guid, sv_info['fps'])
             sv_clips[f'{state}_{facing}'] = guid(clip)
     sv_controller = f'{sv_folder}/Phawin_SideView.controller'
     write_sideview_controller(sv_controller, sv_clips)

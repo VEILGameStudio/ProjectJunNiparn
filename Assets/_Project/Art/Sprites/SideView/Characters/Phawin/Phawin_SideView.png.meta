@@ -31,7 +31,7 @@ TextureImporter:
   cubemapConvolution: 0
   seamlessCubemap: 0
   textureFormat: 1
-  maxTextureSize: 2048
+  maxTextureSize: 4096
   textureSettings:
     serializedVersion: 2
     filterMode: 1
@@ -47,8 +47,8 @@ TextureImporter:
   spriteExtrude: 1
   spriteMeshType: 0
   alignment: 9
-  spritePivot: {x: 0.4876, y: 0.0183}
-  spritePixelsToUnits: 257.9
+  spritePivot: {x: 0.5, y: 0.0233}
+  spritePixelsToUnits: 201.0
   spriteBorder: {x: 0, y: 0, z: 0, w: 0}
   spriteGenerateFallbackPhysicsShape: 0
   alphaUsage: 1
@@ -82,7 +82,7 @@ TextureImporter:
     forceMaximumCompressionQuality_BC6H_BC7: 0
   - serializedVersion: 4
     buildTarget: Standalone
-    maxTextureSize: 2048
+    maxTextureSize: 4096
     resizeAlgorithm: 0
     textureFormat: -1
     textureCompression: 1
@@ -95,7 +95,7 @@ TextureImporter:
     forceMaximumCompressionQuality_BC6H_BC7: 0
   - serializedVersion: 4
     buildTarget: Android
-    maxTextureSize: 2048
+    maxTextureSize: 4096
     resizeAlgorithm: 0
     textureFormat: -1
     textureCompression: 1
@@ -108,7 +108,7 @@ TextureImporter:
     forceMaximumCompressionQuality_BC6H_BC7: 0
   - serializedVersion: 4
     buildTarget: WebGL
-    maxTextureSize: 2048
+    maxTextureSize: 4096
     resizeAlgorithm: 0
     textureFormat: -1
     textureCompression: 1
@@ -121,7 +121,7 @@ TextureImporter:
     forceMaximumCompressionQuality_BC6H_BC7: 0
   - serializedVersion: 4
     buildTarget: WindowsStoreApps
-    maxTextureSize: 2048
+    maxTextureSize: 4096
     resizeAlgorithm: 0
     textureFormat: -1
     textureCompression: 1
@@ -136,15 +136,411 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
+      name: Phawin_SideView_Front_0
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 1032
+        width: 248
+        height: 344
+      alignment: 9
+      pivot: {x: 0.5, y: 0.0233}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: f8202cc356f19c5710b159f0f0bc9b14
+      internalID: -2003296179
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Phawin_SideView_Front_1
+      rect:
+        serializedVersion: 2
+        x: 248
+        y: 1032
+        width: 248
+        height: 344
+      alignment: 9
+      pivot: {x: 0.5, y: 0.0233}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 4e0852a0fd36814fcaa0d0a8a0b8e5d2
+      internalID: -1442316936
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Phawin_SideView_Front_2
+      rect:
+        serializedVersion: 2
+        x: 496
+        y: 1032
+        width: 248
+        height: 344
+      alignment: 9
+      pivot: {x: 0.5, y: 0.0233}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: ffc9303d7bd76d04481ce455e327899b
+      internalID: 1203535636
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Phawin_SideView_Front_3
+      rect:
+        serializedVersion: 2
+        x: 744
+        y: 1032
+        width: 248
+        height: 344
+      alignment: 9
+      pivot: {x: 0.5, y: 0.0233}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 544da6882d5458bf73bfb5cb9a3b07cd
+      internalID: -671707696
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Phawin_SideView_Front_4
+      rect:
+        serializedVersion: 2
+        x: 992
+        y: 1032
+        width: 248
+        height: 344
+      alignment: 9
+      pivot: {x: 0.5, y: 0.0233}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: f21639c73ac0323ee65a3d2c64d4fed7
+      internalID: 669884628
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Phawin_SideView_Front_5
+      rect:
+        serializedVersion: 2
+        x: 1240
+        y: 1032
+        width: 248
+        height: 344
+      alignment: 9
+      pivot: {x: 0.5, y: 0.0233}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 2837d45a596a158780959edd1005ab55
+      internalID: 1189226131
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Phawin_SideView_Front_6
+      rect:
+        serializedVersion: 2
+        x: 1488
+        y: 1032
+        width: 248
+        height: 344
+      alignment: 9
+      pivot: {x: 0.5, y: 0.0233}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 58a425b9bebb6948444a7b9508e41b98
+      internalID: -657619504
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Phawin_SideView_Front_7
+      rect:
+        serializedVersion: 2
+        x: 1736
+        y: 1032
+        width: 248
+        height: 344
+      alignment: 9
+      pivot: {x: 0.5, y: 0.0233}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 9a89f40ecff60f2bbd88cbcd34b5a5f2
+      internalID: 164233218
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Phawin_SideView_Front_8
+      rect:
+        serializedVersion: 2
+        x: 1984
+        y: 1032
+        width: 248
+        height: 344
+      alignment: 9
+      pivot: {x: 0.5, y: 0.0233}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 5e7571fa08f3ee38ffd7919d946b3400
+      internalID: -1212085969
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Phawin_SideView_Back_0
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 688
+        width: 248
+        height: 344
+      alignment: 9
+      pivot: {x: 0.5, y: 0.0233}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 93656273f28c9a8ce82e05eb158adea8
+      internalID: -263405181
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Phawin_SideView_Back_1
+      rect:
+        serializedVersion: 2
+        x: 248
+        y: 688
+        width: 248
+        height: 344
+      alignment: 9
+      pivot: {x: 0.5, y: 0.0233}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: d30a16e0586beee169f6036d9c656a7a
+      internalID: -1599681667
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Phawin_SideView_Back_2
+      rect:
+        serializedVersion: 2
+        x: 496
+        y: 688
+        width: 248
+        height: 344
+      alignment: 9
+      pivot: {x: 0.5, y: 0.0233}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: ca2e3fffa4f597fe9d3e25ffe64a770c
+      internalID: -186792647
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Phawin_SideView_Back_3
+      rect:
+        serializedVersion: 2
+        x: 744
+        y: 688
+        width: 248
+        height: 344
+      alignment: 9
+      pivot: {x: 0.5, y: 0.0233}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: b1bf7f0398e19778e6649d047bfbb537
+      internalID: -385012942
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Phawin_SideView_Back_4
+      rect:
+        serializedVersion: 2
+        x: 992
+        y: 688
+        width: 248
+        height: 344
+      alignment: 9
+      pivot: {x: 0.5, y: 0.0233}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 4db9acbafa2404501a8c41c184f20aa6
+      internalID: 542698170
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Phawin_SideView_Back_5
+      rect:
+        serializedVersion: 2
+        x: 1240
+        y: 688
+        width: 248
+        height: 344
+      alignment: 9
+      pivot: {x: 0.5, y: 0.0233}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 84d1c2f9e631f04398e8b50b5552abd8
+      internalID: -2141544004
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Phawin_SideView_Back_6
+      rect:
+        serializedVersion: 2
+        x: 1488
+        y: 688
+        width: 248
+        height: 344
+      alignment: 9
+      pivot: {x: 0.5, y: 0.0233}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 6c5d7f59f17b4cdb49beb13c7826eb1c
+      internalID: -2039955457
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Phawin_SideView_Back_7
+      rect:
+        serializedVersion: 2
+        x: 1736
+        y: 688
+        width: 248
+        height: 344
+      alignment: 9
+      pivot: {x: 0.5, y: 0.0233}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 2d698d7d9bdfca885b4eec131c07cf8f
+      internalID: 2085027815
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Phawin_SideView_Back_8
+      rect:
+        serializedVersion: 2
+        x: 1984
+        y: 688
+        width: 248
+        height: 344
+      alignment: 9
+      pivot: {x: 0.5, y: 0.0233}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 5548542c0ad8538e02e70cb6599c58c7
+      internalID: 958772692
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
       name: Phawin_SideView_Right_0
       rect:
         serializedVersion: 2
         x: 0
-        y: 437
-        width: 242
-        height: 437
+        y: 344
+        width: 248
+        height: 344
       alignment: 9
-      pivot: {x: 0.4876, y: 0.0183}
+      pivot: {x: 0.5, y: 0.0233}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -161,12 +557,12 @@ TextureImporter:
       name: Phawin_SideView_Right_1
       rect:
         serializedVersion: 2
-        x: 242
-        y: 437
-        width: 242
-        height: 437
+        x: 248
+        y: 344
+        width: 248
+        height: 344
       alignment: 9
-      pivot: {x: 0.4876, y: 0.0183}
+      pivot: {x: 0.5, y: 0.0233}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -183,12 +579,12 @@ TextureImporter:
       name: Phawin_SideView_Right_2
       rect:
         serializedVersion: 2
-        x: 484
-        y: 437
-        width: 242
-        height: 437
+        x: 496
+        y: 344
+        width: 248
+        height: 344
       alignment: 9
-      pivot: {x: 0.4876, y: 0.0183}
+      pivot: {x: 0.5, y: 0.0233}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -205,12 +601,12 @@ TextureImporter:
       name: Phawin_SideView_Right_3
       rect:
         serializedVersion: 2
-        x: 726
-        y: 437
-        width: 242
-        height: 437
+        x: 744
+        y: 344
+        width: 248
+        height: 344
       alignment: 9
-      pivot: {x: 0.4876, y: 0.0183}
+      pivot: {x: 0.5, y: 0.0233}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -227,12 +623,12 @@ TextureImporter:
       name: Phawin_SideView_Right_4
       rect:
         serializedVersion: 2
-        x: 968
-        y: 437
-        width: 242
-        height: 437
+        x: 992
+        y: 344
+        width: 248
+        height: 344
       alignment: 9
-      pivot: {x: 0.4876, y: 0.0183}
+      pivot: {x: 0.5, y: 0.0233}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -249,12 +645,12 @@ TextureImporter:
       name: Phawin_SideView_Right_5
       rect:
         serializedVersion: 2
-        x: 1210
-        y: 437
-        width: 242
-        height: 437
+        x: 1240
+        y: 344
+        width: 248
+        height: 344
       alignment: 9
-      pivot: {x: 0.4876, y: 0.0183}
+      pivot: {x: 0.5, y: 0.0233}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -268,15 +664,81 @@ TextureImporter:
       edges: []
       weights: []
     - serializedVersion: 2
+      name: Phawin_SideView_Right_6
+      rect:
+        serializedVersion: 2
+        x: 1488
+        y: 344
+        width: 248
+        height: 344
+      alignment: 9
+      pivot: {x: 0.5, y: 0.0233}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 71f939b8a5bc68c3e1d93034b721a735
+      internalID: 820952374
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Phawin_SideView_Right_7
+      rect:
+        serializedVersion: 2
+        x: 1736
+        y: 344
+        width: 248
+        height: 344
+      alignment: 9
+      pivot: {x: 0.5, y: 0.0233}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 6d5489f975057fb59b8b488075f3df52
+      internalID: 1962949191
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Phawin_SideView_Right_8
+      rect:
+        serializedVersion: 2
+        x: 1984
+        y: 344
+        width: 248
+        height: 344
+      alignment: 9
+      pivot: {x: 0.5, y: 0.0233}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 905d50336c78a4418a0a1d2a128e1ef3
+      internalID: 178560881
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
       name: Phawin_SideView_Left_0
       rect:
         serializedVersion: 2
         x: 0
         y: 0
-        width: 242
-        height: 437
+        width: 248
+        height: 344
       alignment: 9
-      pivot: {x: 0.4876, y: 0.0183}
+      pivot: {x: 0.5, y: 0.0233}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -293,12 +755,12 @@ TextureImporter:
       name: Phawin_SideView_Left_1
       rect:
         serializedVersion: 2
-        x: 242
+        x: 248
         y: 0
-        width: 242
-        height: 437
+        width: 248
+        height: 344
       alignment: 9
-      pivot: {x: 0.4876, y: 0.0183}
+      pivot: {x: 0.5, y: 0.0233}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -315,12 +777,12 @@ TextureImporter:
       name: Phawin_SideView_Left_2
       rect:
         serializedVersion: 2
-        x: 484
+        x: 496
         y: 0
-        width: 242
-        height: 437
+        width: 248
+        height: 344
       alignment: 9
-      pivot: {x: 0.4876, y: 0.0183}
+      pivot: {x: 0.5, y: 0.0233}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -337,12 +799,12 @@ TextureImporter:
       name: Phawin_SideView_Left_3
       rect:
         serializedVersion: 2
-        x: 726
+        x: 744
         y: 0
-        width: 242
-        height: 437
+        width: 248
+        height: 344
       alignment: 9
-      pivot: {x: 0.4876, y: 0.0183}
+      pivot: {x: 0.5, y: 0.0233}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -359,12 +821,12 @@ TextureImporter:
       name: Phawin_SideView_Left_4
       rect:
         serializedVersion: 2
-        x: 968
+        x: 992
         y: 0
-        width: 242
-        height: 437
+        width: 248
+        height: 344
       alignment: 9
-      pivot: {x: 0.4876, y: 0.0183}
+      pivot: {x: 0.5, y: 0.0233}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -381,12 +843,12 @@ TextureImporter:
       name: Phawin_SideView_Left_5
       rect:
         serializedVersion: 2
-        x: 1210
+        x: 1240
         y: 0
-        width: 242
-        height: 437
+        width: 248
+        height: 344
       alignment: 9
-      pivot: {x: 0.4876, y: 0.0183}
+      pivot: {x: 0.5, y: 0.0233}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -395,6 +857,72 @@ TextureImporter:
       bones: []
       spriteID: c97edfadde97bd021bce2c9208e09dd8
       internalID: 1647578146
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Phawin_SideView_Left_6
+      rect:
+        serializedVersion: 2
+        x: 1488
+        y: 0
+        width: 248
+        height: 344
+      alignment: 9
+      pivot: {x: 0.5, y: 0.0233}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: b9e770c2194554efafb0723784559528
+      internalID: -1196680997
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Phawin_SideView_Left_7
+      rect:
+        serializedVersion: 2
+        x: 1736
+        y: 0
+        width: 248
+        height: 344
+      alignment: 9
+      pivot: {x: 0.5, y: 0.0233}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 97a883e8d62881b7fa26ac57b8c35bed
+      internalID: -876599256
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Phawin_SideView_Left_8
+      rect:
+        serializedVersion: 2
+        x: 1984
+        y: 0
+        width: 248
+        height: 344
+      alignment: 9
+      pivot: {x: 0.5, y: 0.0233}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 5a787359444fbd12f1729b3488196676
+      internalID: -1741070899
       vertices: []
       indices: 
       edges: []
@@ -413,18 +941,42 @@ TextureImporter:
     spriteCustomMetadata:
       entries: []
     nameFileIdTable:
+      Phawin_SideView_Back_0: -263405181
+      Phawin_SideView_Back_1: -1599681667
+      Phawin_SideView_Back_2: -186792647
+      Phawin_SideView_Back_3: -385012942
+      Phawin_SideView_Back_4: 542698170
+      Phawin_SideView_Back_5: -2141544004
+      Phawin_SideView_Back_6: -2039955457
+      Phawin_SideView_Back_7: 2085027815
+      Phawin_SideView_Back_8: 958772692
+      Phawin_SideView_Front_0: -2003296179
+      Phawin_SideView_Front_1: -1442316936
+      Phawin_SideView_Front_2: 1203535636
+      Phawin_SideView_Front_3: -671707696
+      Phawin_SideView_Front_4: 669884628
+      Phawin_SideView_Front_5: 1189226131
+      Phawin_SideView_Front_6: -657619504
+      Phawin_SideView_Front_7: 164233218
+      Phawin_SideView_Front_8: -1212085969
       Phawin_SideView_Left_0: 591229020
       Phawin_SideView_Left_1: 438079386
       Phawin_SideView_Left_2: -1387282283
       Phawin_SideView_Left_3: 2046724336
       Phawin_SideView_Left_4: -811712302
       Phawin_SideView_Left_5: 1647578146
+      Phawin_SideView_Left_6: -1196680997
+      Phawin_SideView_Left_7: -876599256
+      Phawin_SideView_Left_8: -1741070899
       Phawin_SideView_Right_0: 1169602167
       Phawin_SideView_Right_1: -1328128159
       Phawin_SideView_Right_2: -598218102
       Phawin_SideView_Right_3: 1965494958
       Phawin_SideView_Right_4: 577331551
       Phawin_SideView_Right_5: -1036494
+      Phawin_SideView_Right_6: 820952374
+      Phawin_SideView_Right_7: 1962949191
+      Phawin_SideView_Right_8: 178560881
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

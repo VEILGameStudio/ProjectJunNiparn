@@ -339,8 +339,12 @@ most common bug in this kind of game: the character appears to walk diagonally w
 swapped when the camera zone changes. It takes the facing from the move direction **after that
 direction has been converted into screen space** — the same camera-relative conversion the movement
 uses. `ThreeQuarter` snaps the screen-space direction to 8 compass directions; `SideView` snaps to 6 facings
-(front, back, front-left, front-right, back-left, back-right), each drawn separately and never mirrored
-(Oak approved this change on issue #17). Snapping in world axes instead puts every character
+(front, back, front-left, front-right, back-left, back-right) (Oak approved this change on issue #17).
+
+`SideView` art has **4 rows: front, back, right, left**. The left row is the right row mirrored, and the
+mirror is baked into the sheet when it is exported, so nothing flips at runtime and there is no `flipX`
+in code. The `SideView` controller sends front-left and back-left to the left row, and front-right and
+back-right to the right row (Oak's choice, 2026-11-10). Snapping in world axes instead puts every character
 45° out in `ThreeQuarter` areas, which looks like bad art rather than a bug. The snapping itself is a
 `public static` method so it can be tested without a scene.
 
