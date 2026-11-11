@@ -1,0 +1,89 @@
+{
+  "camera": {
+    "pitch_degrees": 10.0,
+    "yaw_degrees": 0.0,
+    "field_of_view_degrees": 11.2,
+    "camera_distance": 20.0,
+    "target_offset_y": 1.63
+  },
+  "camera_position_world": [
+    0.0,
+    5.103,
+    -19.696
+  ],
+  "camera_height_above_floor": 5.103,
+  "focal_length_pixels_at_1080": 5507.3,
+  "vanishing_point_1080p": [
+    960.0,
+    -431.1
+  ],
+  "vanishing_point_2160p": [
+    1920.0,
+    -862.2
+  ],
+  "vanishing_point_note": "pixels from the top-left of the screen; negative y = above the top edge",
+  "horizon_y_1080p": -431.1,
+  "vertical_vanishing_point_y_1080p": 31773.7,
+  "vertical_lean_at_screen_edge_degrees": 1.73,
+  "player_feet_1080p": [
+    960.0,
+    975.9
+  ],
+  "floor_z_at_screen_bottom": -1.42,
+  "floor_z_at_screen_top": 46.62,
+  "extended_canvas_1x": {
+    "size": [
+      2720,
+      1760
+    ],
+    "screen_16x9_top_left": [
+      400,
+      560
+    ],
+    "screen_21x9_top_left": [
+      100,
+      560
+    ],
+    "vanishing_point": [
+      1360.0,
+      128.9
+    ]
+  },
+  "depth_rows": [
+    {
+      "depth_from_camera": 20,
+      "floor_z": -0.29,
+      "screen_y_1080p": 995.8,
+      "parallax_speed": 1.0,
+      "ppu_1080p": 275.4
+    },
+    {
+      "depth_from_camera": 30,
+      "floor_z": 9.87,
+      "screen_y_1080p": 520.2,
+      "parallax_speed": 0.667,
+      "ppu_1080p": 183.6
+    },
+    {
+      "depth_from_camera": 40,
+      "floor_z": 20.02,
+      "screen_y_1080p": 282.3,
+      "parallax_speed": 0.5,
+      "ppu_1080p": 137.7
+    },
+    {
+      "depth_from_camera": 60,
+      "floor_z": 40.33,
+      "screen_y_1080p": 44.5,
+      "parallax_speed": 0.333,
+      "ppu_1080p": 91.8
+    },
+    {
+      "depth_from_camera": 100,
+      "floor_z": 80.95,
+      "screen_y_1080p": -145.7,
+      "parallax_speed": 0.2,
+      "ppu_1080p": 55.1
+    }
+  ]
+}
