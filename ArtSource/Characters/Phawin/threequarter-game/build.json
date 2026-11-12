@@ -1,0 +1,37 @@
+{
+  "prefix": "Phawin_ThreeQuarter",
+  "stretch": 1.155,
+  "world_height": 1.625,
+  "target_height": 240,
+  "fps": 10,
+  "haze_alpha": 32,
+  "idle": {
+    "file": "../source/idle_8dir.png",
+    "row_count": 2,
+    "row": 0,
+    "columns": ["Down", "DownLeft", "Left", "UpLeft", "Up", "UpRight", "Right", "DownRight"]
+  },
+  "walk": {
+    "grid": [4, 2],
+    "files": {
+      "Down": "../source/walk_8dir/Down.png",
+      "DownRight": "../source/walk_8dir/DownRight.png",
+      "Right": "../source/walk_8dir/Right.png",
+      "UpRight": "../source/walk_8dir/UpRight.png",
+      "Up": "../source/walk_8dir/Up.png",
+      "UpLeft": "../source/walk_8dir/UpLeft.png",
+      "Left": "../source/walk_8dir/Left.png",
+      "DownLeft": "../source/walk_8dir/DownLeft.png"
+    }
+  },
+  "rows": [
+    {"name": "Down", "from": "Down"},
+    {"name": "DownRight", "from": "DownRight"},
+    {"name": "Right", "from": "Right"},
+    {"name": "UpRight", "from": "UpRight"},
+    {"name": "Up", "from": "Up"},
+    {"name": "UpLeft", "from": "UpLeft"},
+    {"name": "Left", "from": "Left"},
+    {"name": "DownLeft", "from": "DownLeft"}
+  ]
+}

@@ -4,6 +4,8 @@
 // player input is locked in two ways: the game state is set to Cutscene, and the
 // Gameplay controls are switched off. Both are restored when the cutscene ends or
 // is skipped. The Skip button still works because it is UI.
+// A video pauses while the game is paused (menu or inventory open) and carries on after,
+// because a VideoPlayer ignores Time.timeScale. A Timeline stops by itself.
 // Other scripts reach it with: UIManager.Instance.Cutscene
 //
 // Put this on: the PersistentCanvas (next to the UIManager).
@@ -35,6 +37,9 @@ public class CutsceneManager : MonoBehaviour
     private VideoPlayer activeVideo;
     private Action onFinished;
 
+    // True while this script has paused the video because the game is paused.
+    private bool videoPausedByGame;
+
     // True while a cutscene is playing.
     public bool IsPlaying { get; private set; }
 
@@ -49,6 +54,50 @@ public class CutsceneManager : MonoBehaviour
         {
             videoScreen.SetActive(false);
         }
+    }
+
+    // Pauses the video while the game is paused and resumes it after. Update still runs
+    // while Time.timeScale is 0, so this notices both.
+    private void Update()
+    {
+        if (activeVideo == null)
+        {
+            return;
+        }
+
+        bool gamePaused = IsGamePaused();
+        if (ShouldPauseVideo(gamePaused, activeVideo.isPlaying))
+        {
+            activeVideo.Pause();
+            videoPausedByGame = true;
+        }
+        else if (ShouldResumeVideo(gamePaused, videoPausedByGame))
+        {
+            videoPausedByGame = false;
+            activeVideo.Play();
+        }
+    }
+
+    // True when a playing video must be paused because the game was paused.
+    // Public and static so it can be tested without a scene.
+    public static bool ShouldPauseVideo(bool gamePaused, bool videoPlaying)
+    {
+        return gamePaused && videoPlaying;
+    }
+
+    // True when a video this script paused must carry on because the game was resumed.
+    // A video paused for any other reason is left alone.
+    public static bool ShouldResumeVideo(bool gamePaused, bool videoPausedByGame)
+    {
+        return !gamePaused && videoPausedByGame;
+    }
+
+    // True while a menu or the inventory has the game paused.
+    private static bool IsGamePaused()
+    {
+        return GameManager.Instance != null
+            && GameManager.Instance.PauseManager != null
+            && GameManager.Instance.PauseManager.IsPaused;
     }
 
     // Stops listening to the director or video if this is switched off mid-cutscene.
@@ -157,6 +206,7 @@ public class CutsceneManager : MonoBehaviour
         StopListening();
         activeDirector = null;
         activeVideo = null;
+        videoPausedByGame = false;
 
         if (skipButton != null)
         {

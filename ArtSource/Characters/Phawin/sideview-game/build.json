@@ -1,0 +1,29 @@
+{
+  "prefix": "Phawin_SideView",
+  "stretch": 1.015,
+  "world_height": 1.617,
+  "target_height": 320,
+  "fps": 10,
+  "haze_alpha": 32,
+  "symmetric_cells": true,
+  "idle": {
+    "file": "../source/idle_8dir.png",
+    "row_count": 2,
+    "row": 0,
+    "columns": ["Down", "DownLeft", "Left", "UpLeft", "Up", "UpRight", "Right", "DownRight"]
+  },
+  "walk": {
+    "grid": [4, 2],
+    "files": {
+      "Down": "../source/walk_8dir/Down.png",
+      "Up": "../source/walk_8dir/Up.png",
+      "Right": "../source/walk_8dir/Right.png"
+    }
+  },
+  "rows": [
+    {"name": "Front", "from": "Down"},
+    {"name": "Back", "from": "Up"},
+    {"name": "Right", "from": "Right"},
+    {"name": "Left", "from": "Right", "mirror": true}
+  ]
+}

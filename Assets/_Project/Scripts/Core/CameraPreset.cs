@@ -57,9 +57,9 @@ public struct CameraPresetValues
                     Pitch = 10f,
                     Yaw = 0f,
                     Orthographic = false,
-                    FieldOfView = 19f,
+                    FieldOfView = 11.2f,
                     CameraDistance = 20f,
-                    TargetOffset = new Vector3(0f, 2f, 0f),
+                    TargetOffset = new Vector3(0f, 1.63f, 0f),
                     Damping = new Vector3(1f, 1f, 1f)
                 };
 

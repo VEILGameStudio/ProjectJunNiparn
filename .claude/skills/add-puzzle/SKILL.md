@@ -7,6 +7,9 @@ description: Use when a teammate wants a new puzzle, mini game or quick-time eve
 
 Spec: CLAUDE.md §8 (`PuzzleBase`, `MiniGameBase`, `QuickTimeEvent`, held-item checks) and §12.
 
+If the puzzle is still an idea (no clear "aha", clues or place in the level), run `puzzle-design` first and
+build from its card.
+
 ## 1. Shape of a level
 About five puzzles per level: one large, four small. Small ones may stand alone or together unlock the
 large one through `requiredPuzzleIds`.
