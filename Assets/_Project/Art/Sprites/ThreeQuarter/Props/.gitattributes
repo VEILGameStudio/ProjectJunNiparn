@@ -1,0 +1,2 @@
+# Test prop art kept in plain git: LFS pushes are blocked from the cloud sessions that made it.
+*.png -filter -diff -merge binary
