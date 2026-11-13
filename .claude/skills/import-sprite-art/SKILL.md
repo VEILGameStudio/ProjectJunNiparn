@@ -14,6 +14,7 @@ Spec: CLAUDE.md §0 rules 3, 4, 6, 7, §1 (parallax), §5 (art folders), §7 "Sp
 | animated character / NPC | billboard + normal map |
 | grass, trees, flowers | billboard + wind shader (a tree is split into Trunk / Leaves / LeavesOverlay: see the `sprite-wind-foliage` skill and CLAUDE.md §7 Wind) |
 | chest, cart, barrel, small building — reads as a solid volume | real 3D model (MagicaVoxel → `.obj`) |
+| a box-shaped prop (wardrobe, shelf, crate, table) that someone already **painted as one 3/4 picture**, for a ThreeQuarter room | bake the picture onto a 3D box: use the `add-prop-threequarter` skill |
 No sprite stacking.
 
 ## 2. Sprite checklist
