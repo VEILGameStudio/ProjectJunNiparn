@@ -21,12 +21,28 @@ body:
         - เพิ่มปริศนา (add-puzzle)
         - ตั้งค่าพื้นที่/ฉาก (setup-area)
         - นำเข้าภาพ sprite (import-sprite-art)
+        - เพิ่ม Props 3/4 (add-prop-threequarter)
         - แก้บั๊ก (fix-bug)
         - เขียนเทสต์ (write-tests)
         - ขอเปลี่ยนดีไซน์ (ส่งให้ Oak)
         - อื่นๆ / ไม่แน่ใจ
     validations:
       required: true
+  - type: checkboxes
+    id: prop34
+    attributes:
+      label: Props 3/4
+      description: |
+        ติกช่องนี้ถ้าอยากเพิ่มของทรงกล่อง (ตู้ ชั้นวาง ลัง โต๊ะ) ที่วาดเป็นรูปเดียว ลงในห้อง ThreeQuarter
+        **ต้องแนบรูปในช่อง "รูป / ไฟล์ / ลิงก์อ้างอิง"** (PNG พื้นหลังใส มองเห็นหน้าตู้ ข้างตู้ และด้านบน)
+        ถ้าติกแต่ไม่แนบรูป Claude จะไม่เริ่มงาน
+      options:
+        - label: Props 3/4 (ใส่ของด้วยเทคนิคแปะรูปลงบนกล่อง 3D)
+  - type: input
+    id: prop34_height
+    attributes:
+      label: (Props 3/4) ของชิ้นนี้สูงเท่าไหร่ในเกม
+      description: เป็นหน่วยของ Unity (1 หน่วย = 1 เมตร) เช่น ตู้เสื้อผ้า 2.1 โต๊ะ 0.8 ลัง 0.6 ถ้าไม่ใส่ Claude จะเดาให้
   - type: textarea
     id: what
     attributes:
@@ -47,7 +63,7 @@ body:
     id: refs
     attributes:
       label: รูป / ไฟล์ / ลิงก์อ้างอิง
-      description: ลากรูปหรือวิดีโอมาวางได้
+      description: ลากรูปหรือวิดีโอมาวางได้ (ถ้าติก Props 3/4 ต้องมีรูปตรงนี้)
   - type: textarea
     id: mention
     attributes:

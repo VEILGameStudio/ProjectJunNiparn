@@ -1,0 +1,22 @@
+{
+  "source": "source.png",
+  "height": 2.1,
+  "corners_px": {
+    "near_bottom": [259, 596],
+    "left_bottom": [85, 545],
+    "right_bottom": [329, 571],
+    "near_top": [259, 132]
+  },
+  "source_pitch": 0,
+  "source_yaw": 0,
+  "width_z": 0,
+  "depth_x": 0,
+  "margin": 0.15,
+  "texture_px_per_unit": 256,
+  "sprite_px_per_unit": 216,
+  "body_rows": [0, 0],
+  "upright_parts": [
+    {"name": "Statue", "box": [158, 0, 238, 106], "base": [198, 100]}
+  ],
+  "output_name": "Wardrobe_Test"
+}

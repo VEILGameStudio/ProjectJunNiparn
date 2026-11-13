@@ -1,0 +1,16 @@
+{
+  "source": "source.png",
+  "source_pitch": 19.0,
+  "source_yaw": 48.0,
+  "width_z": 1.0,
+  "depth_x": 0.45,
+  "height": 2.1,
+  "margin": 0.15,
+  "texture_px_per_unit": 256,
+  "sprite_px_per_unit": 216,
+  "body_rows": [150, 480],
+  "upright_parts": [
+    {"name": "Statue", "box": [158, 0, 238, 106], "base": [198, 100]}
+  ],
+  "output_name": "Wardrobe_Test"
+}

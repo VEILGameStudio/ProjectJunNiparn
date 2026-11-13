@@ -1,0 +1,2 @@
+# Source and output images for prop tools are kept in plain git (LFS pushes are blocked from cloud sessions).
+*.png -filter -diff -merge binary
