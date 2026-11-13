@@ -68,7 +68,32 @@ jobs:
             echo "model=sonnet" >> "$GITHUB_OUTPUT"
           fi
 
+      # Oak asked (2026-11-14): an issue that ticks "Props 3/4" must have a picture attached.
+      # Without one, reply on the issue and do not start Claude (saves quota on a job that cannot work).
+      - name: Props 3/4 needs a picture
+        id: prop34
+        env:
+          GH_TOKEN: ${{ github.token }}
+          EVENT_NAME: ${{ github.event_name }}
+          ISSUE_NUMBER: ${{ github.event.issue.number }}
+          ISSUE_BODY: ${{ github.event.issue.body }}
+          COMMENT_TEXT: ${{ github.event.comment.body }}
+        run: |
+          ok=true
+          if [ "$EVENT_NAME" = "issues" ] || [ "$EVENT_NAME" = "issue_comment" ]; then
+            if printf '%s' "$ISSUE_BODY" | grep -Eq -- '- \[[xX]\] Props 3/4'; then
+              if ! printf '%s\n%s' "$ISSUE_BODY" "$COMMENT_TEXT" | grep -Eqi 'user-attachments/assets/|githubusercontent\.com/|<img |!\[[^]]*\]\('; then
+                ok=false
+                gh issue comment "$ISSUE_NUMBER" --repo "$GITHUB_REPOSITORY" --body "งานนี้ติก **Props 3/4** แต่ยังไม่มีรูปแนบ Claude จึงยังไม่เริ่มงาน
+
+          กรุณาแนบรูปของ (PNG พื้นหลังใส เห็นหน้า ข้าง และด้านบนของของชิ้นนั้น) แล้วพิมพ์คอมเมนต์ใหม่ที่มีคำว่า \`@claude\` อีกครั้ง (แก้คอมเมนต์เก่าจะไม่ทำงาน)"
+              fi
+            fi
+          fi
+          echo "ok=$ok" >> "$GITHUB_OUTPUT"
+
       - name: Run Claude
+        if: steps.prop34.outputs.ok == 'true'
         uses: anthropics/claude-code-action@v1
         with:
           claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
@@ -86,4 +111,4 @@ jobs:
           claude_args: |
             --model ${{ steps.model.outputs.model }}
             --allowedTools "Bash,Read,Edit,MultiEdit,Write,Glob,Grep,LS,WebFetch,WebSearch,TodoWrite,Task,Agent"
-            --append-system-prompt "You are working on Project Juniparn (Unity). Before doing anything: read CLAUDE.md (the spec) and follow .claude/rules/team-requests.md exactly, including its fixed order of steps and the locked rules; use the matching skill in .claude/skills/ for the request type. Before editing (types C, D, E) ask the matching advisor agent in .claude/agents/ and show its advice to the teammate; before handing back or opening a pull request, run the unity-reviewer agent and fix its blockers. When someone asks you to check or review a pull request, run the unity-reviewer agent on it and post its result. Reply to teammates in simple Thai; code, comments and file names stay in English. If the request would change design, a locked rule, or Oak-only core code, do not implement it: write a design-change proposal (design-change-proposal skill) as your reply and tag @oak-kittanai. Unity cannot run here, so say clearly what the teammate must check in the Editor. Open pull requests against dev, never main."
+            --append-system-prompt "You are working on Project Juniparn (Unity). Before doing anything: read CLAUDE.md (the spec) and follow .claude/rules/team-requests.md exactly, including its fixed order of steps and the locked rules; use the matching skill in .claude/skills/ for the request type. If the issue ticks Props 3/4, the request is a painted box-shaped prop for a ThreeQuarter room: use the add-prop-threequarter skill and follow its steps in order. Before editing (types C, D, E) ask the matching advisor agent in .claude/agents/ and show its advice to the teammate; before handing back or opening a pull request, run the unity-reviewer agent and fix its blockers. When someone asks you to check or review a pull request, run the unity-reviewer agent on it and post its result. Reply to teammates in simple Thai; code, comments and file names stay in English. If the request would change design, a locked rule, or Oak-only core code, do not implement it: write a design-change proposal (design-change-proposal skill) as your reply and tag @oak-kittanai. Unity cannot run here, so say clearly what the teammate must check in the Editor. Open pull requests against dev, never main."
