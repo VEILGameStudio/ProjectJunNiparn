@@ -36,7 +36,7 @@ public class ChoiceInteractable : InteractableBase
         }
         if (UIManager.Instance == null || UIManager.Instance.Dialogue == null)
         {
-            Debug.LogError($"ChoiceInteractable on '{name}': no DialogueManager found. Make sure the PersistentCanvas (with a UIManager) is in the scene.", this);
+            Debug.LogError($"ChoiceInteractable on '{name}': no DialogueManager found. Make sure the GameSystems prefab (with UIRoot inside it) is in the scene.", this);
             return;
         }
 

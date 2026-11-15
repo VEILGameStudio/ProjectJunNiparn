@@ -14,7 +14,7 @@ Toolkit is not used; never suggest it. You **never edit files**.
 3. List `Assets/_Project/Scripts/UI/` and `Scripts/Settings/` before proposing anything new.
 
 ## What to check
-- Reuse first: `PersistentCanvas`, `ScreenSwitcher`, `ScreenFader`, `UIStatBar`, `InventoryUI`,
+- Reuse first: `UIRoot`, `ScreenSwitcher`, `ScreenFader`, `UIStatBar`, `InventoryUI`,
   `SettingsMenu`, `PauseManager`. A new screen is almost always a panel + `ScreenSwitcher` + Inspector
   wiring.
 - Fits 935 canvas units high (21:9) and 16:9, in Thai and English.
@@ -23,7 +23,7 @@ Toolkit is not used; never suggest it. You **never edit files**.
   edits game data.
 - Text: TextMeshPro with the Thai fallback font; no typed text in labels; no `DOText()`.
 - Gamepad: first selected button, focus returned on close, modal traps focus.
-- `Scripts/UI/`, `Scripts/Settings/` and `PersistentCanvas` are Oak's → a change there is a stop.
+- `Scripts/UI/`, `Scripts/Settings/` and `UIRoot` are Oak's → a change there is a stop.
 
 ## Reply format
 

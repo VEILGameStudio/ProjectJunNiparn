@@ -227,7 +227,7 @@ public abstract class InteractableBase : MonoBehaviour, IInteractable
     {
         if (UIManager.Instance == null || UIManager.Instance.MiniDialogue == null)
         {
-            Debug.LogWarning($"{GetType().Name} on '{name}': no MiniDialogueUI was found. Make sure the PersistentCanvas (with a UIManager) is in the scene.", this);
+            Debug.LogWarning($"{GetType().Name} on '{name}': no MiniDialogueUI was found. Make sure the GameSystems prefab (with UIRoot inside it) is in the scene.", this);
             return;
         }
 
@@ -244,7 +244,7 @@ public abstract class InteractableBase : MonoBehaviour, IInteractable
         }
         if (UIManager.Instance == null || UIManager.Instance.Dialogue == null)
         {
-            Debug.LogWarning($"{GetType().Name} on '{name}': no DialogueManager was found. Make sure the PersistentCanvas (with a UIManager) is in the scene.", this);
+            Debug.LogWarning($"{GetType().Name} on '{name}': no DialogueManager was found. Make sure the GameSystems prefab (with UIRoot inside it) is in the scene.", this);
             return;
         }
 

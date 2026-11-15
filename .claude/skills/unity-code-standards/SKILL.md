@@ -17,7 +17,7 @@ for this project**. Do not "fix" our code towards them.
 | General advice says | This project does | Where |
 |---|---|---|
 | Put every code folder in an `.asmdef` | **No asmdef for our code** under `Assets/_Project` | CLAUDE.md §4.12 |
-| UI Toolkit for new runtime UI; UGUI is legacy | **UGUI + TextMeshPro** (`PersistentCanvas`, `ScreenSwitcher`); UI Toolkit is not used. UGUI is not deprecated | CLAUDE.md §4.10, `add-ui-screen` |
+| UI Toolkit for new runtime UI; UGUI is legacy | **UGUI + TextMeshPro** (`UIRoot`, `ScreenSwitcher`); UI Toolkit is not used. UGUI is not deprecated | CLAUDE.md §4.10, `add-ui-screen` |
 | Addressables, never `Resources.Load` | No Addressables package; do not add one. Content lives in ScriptableObjects referenced in the Inspector | CLAUDE.md §4.8 |
 | `async/await` for loading | No `async/await`; use coroutines or events | CLAUDE.md §4.3 |
 | `record`, `init`, switch-expression tricks | Plain classes and readable code for interns | CLAUDE.md §4.3–4.4 |

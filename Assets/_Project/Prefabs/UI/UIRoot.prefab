@@ -1264,7 +1264,7 @@ GameObject:
   - component: {fileID: 3443345976052497292}
   - component: {fileID: 1918923941302391731}
   m_Layer: 5
-  m_Name: PersistentCanvas
+  m_Name: UIRoot
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
