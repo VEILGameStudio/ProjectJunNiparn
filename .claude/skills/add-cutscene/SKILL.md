@@ -10,7 +10,7 @@ so cutscenes carry it — but the system that plays them already exists. **A new
 Inspector setup, not new code.**
 
 ## 1. What already exists (re-list the folder first; this goes stale)
-- `Scripts/Cutscene/CutsceneManager.cs` [Oak] — on the `PersistentCanvas`, reached through
+- `Scripts/Cutscene/CutsceneManager.cs` [Oak] — on the `UIRoot`, reached through
   `UIManager.Instance.Cutscene`. Plays a Timeline (`PlayableDirector`) or a video (`VideoPlayer`), shows the
   Skip button, sets `GameState.Cutscene`, and switches Gameplay input off and back on.
 - `Scripts/Cutscene/CutsceneTrigger.cs` [Oak] — an `InteractableBase`. **Play On**:
@@ -67,11 +67,11 @@ Timeline settings: Update Method **Game Time**, Play On Awake **off** (the trigg
   a puzzle's restore), not only by the cutscene. Check this with a reload.
 
 ## 5. Inspector steps (write them for Intern B)
-1. Make sure the scene has the `PersistentCanvas` prefab (it carries `UIManager` + `CutsceneManager`
+1. Make sure the scene has the `UIRoot` prefab (it carries `UIManager` + `CutsceneManager`
    + the Skip button).
 2. Create an empty object, add `PlayableDirector`, make a Timeline asset in the level's folder; Update Method
    Game Time, Play On Awake off, Wrap Mode None. (Video: add `VideoPlayer`, Play On Awake off, Loop off,
-   Render Mode to the `PersistentCanvas` video screen.)
+   Render Mode to the `UIRoot` video screen.)
 3. On the object that starts it, add `CutsceneTrigger`: Play On, Cutscene Type, drag the director or video.
 4. Interact mode: the click box (`Interactable` layer, trigger) or a touch zone (`TouchZone` layer) — see
    `add-interactable` §3.

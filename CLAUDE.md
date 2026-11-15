@@ -229,6 +229,7 @@ Assets/_Project/
   Tests/           PlayMode tests
   Tests/Editor/    EditMode tests
   Prefabs, Scenes, Audio                                                    [Intern B]
+  Prefabs/UI/      UIRoot, HUD, Panels, Overlays, Widgets — see §7 UI       [Oak]
   Art/
     Sprites/
       ThreeQuarter/  drawn for pitch 30 — only for ThreeQuarter areas       [Intern B]
@@ -691,6 +692,13 @@ Clicking an item in the bag takes it into the hand; if something was already hel
 bag. Clicking the hand slot puts it away. **The UI never edits inventory data**: it calls `Hold` and
 `StopHolding` and redraws from `OnInventoryChanged` and `OnHeldItemChanged`, like every other screen
 in §3.
+
+**UI prefabs are the single source of truth.** All in-game UI lives in `Prefabs/UI/`: `UIRoot` (Canvas,
+EventSystem, `UIManager`) holds every part as a nested prefab, small differences are prefab variants,
+and `UIRoot` survives scene loads through `GameSystems` and `DontDestroyOnLoad` — there is no additive
+UI scene. **A scene never overrides a UI prefab**; `UIOverrideGuard` warns on save. Panels that open and
+close carry a `UIPanel` and go through `UIManager.Open` / `Close`. Folder map and how to add a panel:
+`.claude/skills/add-ui-screen/references/ui-prefabs.md`.
 
 **Canvas Scaler is Scale With Screen Size, 1920×1080, Match 0.5** — not Constant Pixel Size. The game
 supports wide and high-resolution monitors, and a UI that does not scale is unreadably small on them.

@@ -11,7 +11,9 @@ Spec: CLAUDE.md §1 "Aspect ratio", §3 Observer, §4.10, §7 "The inventory scr
 ## 1. What already exists (re-list `Scripts/UI/` and `Scripts/Settings/` first)
 | Thing | Use it for |
 |---|---|
-| `PersistentCanvas` prefab (`UIManager`) | the canvas that survives scene loads: dialogue, cutscene, fader, inventory, HUD |
+| `UIRoot` prefab (`Prefabs/UI/UIRoot.prefab`, `UIManager`) | the canvas that survives scene loads: dialogue, cutscene, fader, inventory, HUD. Every part is a nested prefab in `Prefabs/UI/` — see `references/ui-prefabs.md` |
+| `UIPanel` + `UIManager.Open/Close` | a panel inside `UIRoot` that opens and closes (pause, gallery, puzzle screen); Pauses Game, First Selected, open/close animations |
+| `Prefabs/UI/Widgets/` | `UI_Button`, `UI_Button_Secondary`, `UI_Panel`, `UI_Popup` — build new screens from these, as nested prefabs or variants |
 | `ScreenSwitcher` | one screen at a time (main menu ↔ settings ↔ credits, or tabs inside a panel); `Open` / `Back` / `CloseCurrent` / `QuitGame` from buttons; "open" / "close" `DOTweenAnimation` ids |
 | `ScreenFader` | fade to / from black (unscaled time) — never write a second fader |
 | `UIStatBar` | a bar driven by an event (health, stamina) |
@@ -19,11 +21,13 @@ Spec: CLAUDE.md §1 "Aspect ratio", §3 Observer, §4.10, §7 "The inventory scr
 | `SettingsMenu` + `BrightnessController` | music / sound / brightness / language |
 | `PauseManager` (`GameManager.Instance.PauseManager.Pause(this)` / `Resume(this)`) | freezing the game while a screen is open; it counts sources |
 
-A new screen is almost always a panel + `ScreenSwitcher` + buttons wired in the Inspector. New code only
+A new in-game screen is a variant of `UI_Panel` / `UI_Popup` with a `UIPanel`, placed inside `UIRoot`
+(`references/ui-prefabs.md`). A menu scene that is not a game scene uses `ScreenSwitcher`.
+**Never override a UI prefab in a scene** — `UIOverrideGuard` warns on save; change the prefab or make a variant. New code only
 when the screen must show live game state.
 
 ## 2. Canvas and size — fix before laying anything out
-- Canvas Scaler: **Scale With Screen Size, 1920 × 1080, Match 0.5** (already on `PersistentCanvas`; a new
+- Canvas Scaler: **Scale With Screen Size, 1920 × 1080, Match 0.5** (already on `UIRoot`; a new
   canvas in a menu scene must copy it). Never Constant Pixel Size.
 - **Every panel must fit in 935 canvas units of height** — that is the canvas height at 21:9. A panel built
   in a 16:9 Game view (1080 high) can be broken at 21:9 and look fine while you build it. Check in the
@@ -72,8 +76,8 @@ when the screen must show live game state.
 Canvas rebuilds, Raycast Target, pooled lists, returning focus after a popup: `references/ugui-performance.md`.
 
 ## 7. Ownership and stops
-- `Scripts/UI/`, `Scripts/Settings/` and the `PersistentCanvas` prefab are core [Oak]. Intern B builds
-  panels and wiring in scenes and prefabs they own; adding a panel *inside* `PersistentCanvas` is a change to
+- `Scripts/UI/`, `Scripts/Settings/` and the `UIRoot` prefab are core [Oak]. Intern B builds
+  panels and wiring in scenes and prefabs they own; adding a panel *inside* `UIRoot` is a change to
   an Oak prefab → ask first.
 - Stop and report if a screen needs: a new `GameEvents` event, `SaveManager` calls, brightness changed from
   outside the settings system, input locking, or `Time.timeScale`.

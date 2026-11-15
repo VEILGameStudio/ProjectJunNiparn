@@ -8,7 +8,7 @@
 // because a VideoPlayer ignores Time.timeScale. A Timeline stops by itself.
 // Other scripts reach it with: UIManager.Instance.Cutscene
 //
-// Put this on: the PersistentCanvas (next to the UIManager).
+// Put this on: the UIRoot prefab (next to the UIManager).
 // Assign in Inspector:
 //   - Input Reader: the shared MainInputReader asset (so input can be turned off).
 //   - Skip Button: a UI Button shown during cutscenes (its click skips).

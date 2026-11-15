@@ -70,7 +70,7 @@ public class CutsceneTrigger : InteractableBase
         }
         if (UIManager.Instance == null || UIManager.Instance.Cutscene == null)
         {
-            Debug.LogError($"CutsceneTrigger on '{name}': no CutsceneManager found. Make sure the PersistentCanvas (with a UIManager) is in the scene.", this);
+            Debug.LogError($"CutsceneTrigger on '{name}': no CutsceneManager found. Make sure the GameSystems prefab (with UIRoot inside it) is in the scene.", this);
             return;
         }
 

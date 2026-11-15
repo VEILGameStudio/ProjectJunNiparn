@@ -9,7 +9,7 @@
 // This screen never changes the inventory itself. It only asks the Inventory to Hold or
 // StopHolding, and redraws when GameEvents says something changed.
 //
-// Put this on: an "InventoryUI" GameObject under the PersistentCanvas that is ALWAYS
+// Put this on: an "InventoryUI" GameObject under the UIRoot prefab that is ALWAYS
 //   active. Do NOT put it on the Panel it shows and hides, or the Inventory key
 //   stops working once the panel is hidden.
 // Assign in Inspector:
