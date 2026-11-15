@@ -7,14 +7,27 @@
 # Usage counts against Oak's own plan limits.
 #
 # This file must live on the default branch (main) for issue/comment events to trigger it.
-# Work happens on `dev`: Claude reads CLAUDE.md, .claude/rules and .claude/skills from there
-# and opens its branches/PRs against dev.
+#
+# How an issue flows (Oak asked 2026-11-15):
+#   1. A teammate opens an issue with @claude. Fable 5.2 reads it first. If something is missing or
+#      clashes with a locked rule, Fable replies with questions and labels the issue `needs-info`.
+#      While `needs-info` is on, ANY reply from a person (no @claude needed) goes back to Fable,
+#      like a chat. When Fable is satisfied it labels the issue `ready` and the work starts.
+#   2. The work (Sonnet, or Opus with --Opusmodel) happens on top of `test-dev`, the staging branch
+#      for experiments before `dev`. Claude pushes a branch named claude/issue-<number>-<time>.
+#   3. When that branch has new commits, the workflow asks the requester in the issue:
+#      `/merge` = merge into test-dev, `/nomerge` = close without merging.
+#      Only the person who opened the issue, or Oak, can answer.
+#   4. `/merge` merges the branch into test-dev with Oak's git name (kittanai) as the author,
+#      closes the issue, and deletes the issue's branches. Closing an issue any other way also
+#      deletes its claude/issue-<number>-* branches.
+# PR comments and reviews skip the Fable check and work as before.
 
 name: Claude
 
 on:
   issues:
-    types: [opened, assigned]
+    types: [opened, assigned, closed]
   issue_comment:
     types: [created]
   pull_request_review_comment:
@@ -26,11 +39,23 @@ concurrency:
   group: claude-${{ github.event.issue.number || github.event.pull_request.number }}
   cancel-in-progress: false
 
+env:
+  STAGING_BRANCH: test-dev
+  # Merges done by this workflow are authored as Oak (GitHub login oak-kittanai, git name kittanai).
+  MERGE_AUTHOR_NAME: kittanai
+  MERGE_AUTHOR_EMAIL: 64689412+oak-kittanai@users.noreply.github.com
+  OAK_LOGIN: oak-kittanai
+
 jobs:
+  # ---------------------------------------------------------------- review + work
   claude:
     if: |
-      (github.event_name == 'issues' && (contains(github.event.issue.body, '@claude') || contains(github.event.issue.title, '@claude'))) ||
-      (github.event_name == 'issue_comment' && contains(github.event.comment.body, '@claude')) ||
+      (github.event_name == 'issues' && (github.event.action == 'opened' || github.event.action == 'assigned') &&
+        (contains(github.event.issue.body, '@claude') || contains(github.event.issue.title, '@claude'))) ||
+      (github.event_name == 'issue_comment' && github.event.comment.user.type != 'Bot' &&
+        !startsWith(github.event.comment.body, '/merge') && !startsWith(github.event.comment.body, '/nomerge') &&
+        (contains(github.event.comment.body, '@claude') ||
+          (!github.event.issue.pull_request && contains(github.event.issue.labels.*.name, 'needs-info')))) ||
       (github.event_name == 'pull_request_review_comment' && contains(github.event.comment.body, '@claude')) ||
       (github.event_name == 'pull_request_review' && contains(github.event.review.body, '@claude'))
     runs-on: ubuntu-latest
@@ -42,10 +67,10 @@ jobs:
       id-token: write
       actions: read
     steps:
-      - name: Checkout dev
+      - name: Checkout test-dev
         uses: actions/checkout@v4
         with:
-          ref: dev
+          ref: ${{ env.STAGING_BRANCH }}
           fetch-depth: 1
           lfs: true    # Claude needs real art files (PNG etc.) to crop/stretch sprites; uses LFS bandwidth
 
@@ -92,12 +117,130 @@ jobs:
           fi
           echo "ok=$ok" >> "$GITHUB_OUTPUT"
 
-      - name: Run Claude
+      # Decide whether Fable must read the request first: every issue that is not labelled `ready` yet.
+      # PR comments/reviews and issues already labelled `ready` go straight to the work.
+      - name: Does Fable need to review first?
+        id: gate
         if: steps.prop34.outputs.ok == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          EVENT_NAME: ${{ github.event_name }}
+          IS_PR: ${{ github.event.issue.pull_request != null }}
+          ISSUE_NUMBER: ${{ github.event.issue.number }}
+        run: |
+          review=false
+          if [ "$EVENT_NAME" = "issues" ] || { [ "$EVENT_NAME" = "issue_comment" ] && [ "$IS_PR" != "true" ]; }; then
+            gh label create needs-info --repo "$GITHUB_REPOSITORY" --color FBCA04 --description "Claude (Fable) is waiting for more information" --force >/dev/null
+            gh label create ready --repo "$GITHUB_REPOSITORY" --color 0E8A16 --description "Request checked by Fable; Claude may work on it" --force >/dev/null
+            gh label create awaiting-merge --repo "$GITHUB_REPOSITORY" --color 1D76DB --description "Waiting for /merge or /nomerge from the requester" --force >/dev/null
+            labels=$(gh issue view "$ISSUE_NUMBER" --repo "$GITHUB_REPOSITORY" --json labels --jq '.labels[].name')
+            if ! printf '%s\n' "$labels" | grep -qx ready; then
+              review=true
+              # Give Fable the whole conversation as a file (removed again before the work starts).
+              gh issue view "$ISSUE_NUMBER" --repo "$GITHUB_REPOSITORY" --comments > .issue-thread.txt
+            fi
+          fi
+          echo "review=$review" >> "$GITHUB_OUTPUT"
+
+      # Oak asked (2026-11-15): Fable 5.2 checks a request before any work starts and talks with the
+      # teammate in the issue until the request is clear. Read-only: Fable cannot edit or run anything.
+      # If this step fails (e.g. the plan has no Fable access), the work goes ahead as before.
+      - name: Fable reviews the request
+        id: review
+        if: steps.gate.outputs.review == 'true'
+        continue-on-error: true
         uses: anthropics/claude-code-action@v1
         with:
           claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
-          base_branch: dev
+          prompt: |
+            You are the request checker for Project Juniparn (a Unity HD-2D puzzle game). A teammate (usually an intern)
+            asked Claude for work in GitHub issue #${{ github.event.issue.number }}. Another Claude will do the work only
+            after you say the request is ready. You do not do the work and you do not edit anything.
+
+            Read these files:
+            - .issue-thread.txt : the issue title, body and every comment so far, oldest first. Your own earlier replies
+              are in it too (authored by github-actions). Pictures appear as user-attachments links; you cannot open
+              them, but treat them as attached.
+            - CLAUDE.md (the spec) and .claude/rules/team-requests.md (locked rules and request types).
+            - If useful, the skill in .claude/skills/ that matches the request type, to know what that skill needs.
+
+            Decide if the request is ready to start:
+            - ready = true when a worker could start without guessing anything important: what should happen in the
+              game, where (scene / area / object), which assets or items are involved, and for a bug how to make it
+              happen and what should happen instead. Small gaps a worker can sensibly assume are fine: list those
+              assumptions in your reply instead of asking.
+            - ready = false when something important is missing or unclear, or when the request breaks a locked rule
+              in team-requests.md section 2 or a CLAUDE.md hard stop. For a locked rule, explain why in one or two
+              plain sentences, offer the closest thing that is allowed, and ask which they want. If they then say they
+              still want the original sent to Oak, that is ready = true (the worker writes a proposal for Oak).
+            - If the latest comment asks you a question, answer it in your reply.
+            - Ask at most 3 questions at a time, numbered, each easy to answer. Do not repeat a question that was
+              already answered in the thread.
+
+            Write `reply` in simple, friendly Thai (code and file names stay in English). It is posted as a comment.
+            When ready = false, end by telling them to just reply in a new comment (no @claude needed).
+            When ready = true, say briefly what will be built and list any assumptions; the work starts right after.
+          claude_args: |
+            --model claude-fable-5-2
+            --allowedTools "Read,Glob,Grep"
+            --max-turns 15
+            --json-schema '{"type":"object","properties":{"ready":{"type":"boolean"},"reply":{"type":"string"}},"required":["ready","reply"]}'
+
+      - name: Post Fable's answer
+        id: verdict
+        if: steps.prop34.outputs.ok == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          EVENT_NAME: ${{ github.event_name }}
+          ISSUE_NUMBER: ${{ github.event.issue.number }}
+          NEEDS_REVIEW: ${{ steps.gate.outputs.review }}
+          REVIEW_JSON: ${{ steps.review.outputs.structured_output }}
+          ISSUE_TEXT: ${{ format('{0} {1}', github.event.issue.title, github.event.issue.body) }}
+          COMMENT_TEXT: ${{ github.event.comment.body }}
+        run: |
+          rm -f .issue-thread.txt
+          go=true
+          if [ "$NEEDS_REVIEW" = "true" ]; then
+            ready=$(printf '%s' "$REVIEW_JSON" | jq -r '.ready // empty' 2>/dev/null || true)
+            reply=$(printf '%s' "$REVIEW_JSON" | jq -r '.reply // empty' 2>/dev/null || true)
+            if [ -z "$ready" ]; then
+              echo "::warning::Fable review gave no answer (no access to the model, or it failed). Starting the work without it."
+              ready=true
+            fi
+            if [ -n "$reply" ]; then
+              printf '%s\n\n<sub>ตรวจคำขอโดย Claude Fable 5.2</sub>\n' "$reply" | gh issue comment "$ISSUE_NUMBER" --repo "$GITHUB_REPOSITORY" --body-file -
+            fi
+            if [ "$ready" = "true" ]; then
+              gh issue edit "$ISSUE_NUMBER" --repo "$GITHUB_REPOSITORY" --add-label ready --remove-label needs-info >/dev/null 2>&1 || \
+                gh issue edit "$ISSUE_NUMBER" --repo "$GITHUB_REPOSITORY" --add-label ready >/dev/null
+            else
+              gh issue edit "$ISSUE_NUMBER" --repo "$GITHUB_REPOSITORY" --add-label needs-info >/dev/null
+              go=false
+            fi
+          fi
+          # The work step only starts when its trigger phrase is in the triggering text. A teammate's answer in the
+          # Q&A has no @claude, so use the first word of that comment as the trigger phrase for this one run.
+          case "$EVENT_NAME" in
+            issues) text="$ISSUE_TEXT" ;;
+            issue_comment) text="$COMMENT_TEXT" ;;
+            *) text="@claude" ;;
+          esac
+          if printf '%s' "$text" | grep -qi '@claude'; then
+            trigger='@claude'
+          else
+            trigger=$(printf '%s' "$text" | awk 'NF { print $1; exit }')
+          fi
+          echo "go=$go" >> "$GITHUB_OUTPUT"
+          echo "trigger=$trigger" >> "$GITHUB_OUTPUT"
+
+      - name: Run Claude
+        id: claude
+        if: steps.prop34.outputs.ok == 'true' && steps.verdict.outputs.go == 'true'
+        uses: anthropics/claude-code-action@v1
+        with:
+          claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+          trigger_phrase: ${{ steps.verdict.outputs.trigger }}
+          base_branch: ${{ env.STAGING_BRANCH }}
           branch_prefix: claude/
           additional_permissions: |
             actions: read
@@ -111,4 +254,120 @@ jobs:
           claude_args: |
             --model ${{ steps.model.outputs.model }}
             --allowedTools "Bash,Read,Edit,MultiEdit,Write,Glob,Grep,LS,WebFetch,WebSearch,TodoWrite,Task,Agent"
-            --append-system-prompt "You are working on Project Juniparn (Unity). Before doing anything: read CLAUDE.md (the spec) and follow .claude/rules/team-requests.md exactly, including its fixed order of steps and the locked rules; use the matching skill in .claude/skills/ for the request type. If the issue ticks Props 3/4, the request is a painted box-shaped prop for a ThreeQuarter room: use the add-prop-threequarter skill and follow its steps in order. Before editing (types C, D, E) ask the matching advisor agent in .claude/agents/ and show its advice to the teammate; before handing back or opening a pull request, run the unity-reviewer agent and fix its blockers. When someone asks you to check or review a pull request, run the unity-reviewer agent on it and post its result. Reply to teammates in simple Thai; code, comments and file names stay in English. If the request would change design, a locked rule, or Oak-only core code, do not implement it: write a design-change proposal (design-change-proposal skill) as your reply and tag @oak-kittanai. Unity cannot run here, so say clearly what the teammate must check in the Editor. Open pull requests against dev, never main."
+            --append-system-prompt "You are working on Project Juniparn (Unity). Before doing anything: read CLAUDE.md (the spec) and follow .claude/rules/team-requests.md exactly, including its fixed order of steps and the locked rules; use the matching skill in .claude/skills/ for the request type. If the issue ticks Props 3/4, the request is a painted box-shaped prop for a ThreeQuarter room: use the add-prop-threequarter skill and follow its steps in order. On an issue, a reviewer (Claude Fable) may already have talked with the teammate in the comments to make the request clear: treat the whole thread as the request, including the teammate's answers and the assumptions the reviewer listed, and do not ask again what was already answered. If the triggering comment has no @claude, it is the teammate's last answer to the reviewer. Before editing (types C, D, E) ask the matching advisor agent in .claude/agents/ and show its advice to the teammate; before handing back, run the unity-reviewer agent and fix its blockers. When someone asks you to check or review a pull request, run the unity-reviewer agent on it and post its result. Reply to teammates in simple Thai; code, comments and file names stay in English. If the request would change design, a locked rule, or Oak-only core code, do not implement it: write a design-change proposal (design-change-proposal skill) as your reply and tag @oak-kittanai. Unity cannot run here, so say clearly what the teammate must check in the Editor. Work for issues starts from the test-dev branch (the staging branch for experiments before dev). Commit and push your branch, but do not open a pull request and do not merge for issues: after you finish, the workflow itself asks the requester whether to merge into test-dev. Never target main or dev."
+
+      # After the work: if the issue's branch has new commits, ask the requester whether to merge into test-dev.
+      - name: Ask whether to merge into test-dev
+        if: steps.claude.outputs.branch_name != '' && github.event.issue.number != '' && github.event.issue.pull_request == null
+        env:
+          GH_TOKEN: ${{ github.token }}
+          ISSUE_NUMBER: ${{ github.event.issue.number }}
+          ISSUE_AUTHOR: ${{ github.event.issue.user.login }}
+          BRANCH: ${{ steps.claude.outputs.branch_name }}
+        run: |
+          ahead=$(gh api "repos/$GITHUB_REPOSITORY/compare/$STAGING_BRANCH...$BRANCH" --jq '.ahead_by' 2>/dev/null || echo 0)
+          if [ "${ahead:-0}" -gt 0 ]; then
+            gh issue edit "$ISSUE_NUMBER" --repo "$GITHUB_REPOSITORY" --add-label awaiting-merge >/dev/null
+            gh issue comment "$ISSUE_NUMBER" --repo "$GITHUB_REPOSITORY" --body "@$ISSUE_AUTHOR งานอยู่ที่ branch \`$BRANCH\` แล้ว ($ahead commit)
+          ต้องการรวม (merge) เข้า branch **\`$STAGING_BRANCH\`** (ที่รวมของทดลองก่อนเข้า dev จริง) ไหม?
+
+          - ตอบคอมเมนต์ใหม่ว่า \`/merge\` เพื่อรวมเข้า \`$STAGING_BRANCH\` แล้วปิด issue นี้
+          - ตอบ \`/nomerge\` เพื่อปิด issue โดยไม่รวม
+          - ถ้ายังอยากให้แก้อะไรเพิ่ม พิมพ์ \`@claude\` ตามด้วยสิ่งที่อยากแก้ได้เลย
+
+          ตอนปิด issue ระบบจะลบ branch ของ issue นี้ให้อัตโนมัติ (คนที่ตอบได้: คนเปิด issue หรือ @$OAK_LOGIN)"
+          fi
+
+  # ---------------------------------------------------------------- /merge and /nomerge
+  merge:
+    if: |
+      github.event_name == 'issue_comment' && !github.event.issue.pull_request &&
+      (startsWith(github.event.comment.body, '/merge') || startsWith(github.event.comment.body, '/nomerge')) &&
+      (github.event.comment.user.login == github.event.issue.user.login || github.event.comment.user.login == 'oak-kittanai')
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      contents: write
+      issues: write
+      pull-requests: write
+    steps:
+      - name: Checkout test-dev
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ env.STAGING_BRANCH }}
+          fetch-depth: 0
+          lfs: false   # merging only moves LFS pointers; the files are already on GitHub
+          # Oak asked (2026-11-15): merges run with Oak's kittanai account, so a teammate whose own GitHub
+          # role is too low can still get work into test-dev. Put a fine-grained token of that account
+          # (Contents: read and write, this repo only) in the secret KITTANAI_TOKEN. Without the secret
+          # the workflow's own token pushes instead; the merge commit is still authored as kittanai.
+          token: ${{ secrets.KITTANAI_TOKEN || github.token }}
+
+      - name: Merge, close and clean up
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GIT_LFS_SKIP_SMUDGE: "1"
+          ISSUE_NUMBER: ${{ github.event.issue.number }}
+          ISSUE_TITLE: ${{ github.event.issue.title }}
+          COMMENT_BODY: ${{ github.event.comment.body }}
+          COMMENTER: ${{ github.event.comment.user.login }}
+        run: |
+          branches=$(git ls-remote --heads origin "claude/issue-$ISSUE_NUMBER-*" | awk '{ sub("refs/heads/", "", $2); print $2 }' | sort)
+          say() { printf '%s\n' "$1" | gh issue comment "$ISSUE_NUMBER" --repo "$GITHUB_REPOSITORY" --body-file -; }
+
+          if printf '%s' "$COMMENT_BODY" | grep -q '^/merge'; then
+            if [ -z "$branches" ]; then
+              say "ไม่เจอ branch ของ issue นี้ (\`claude/issue-$ISSUE_NUMBER-*\`) จึงไม่มีอะไรให้รวม issue ยังเปิดอยู่"
+              exit 0
+            fi
+            git config user.name "$MERGE_AUTHOR_NAME"
+            git config user.email "$MERGE_AUTHOR_EMAIL"
+            merged=""
+            for b in $branches; do
+              git fetch origin "$b"
+              if ! git merge --no-ff "origin/$b" -m "Merge $b into $STAGING_BRANCH (issue #$ISSUE_NUMBER: $ISSUE_TITLE)"; then
+                git merge --abort || true
+                say "รวม \`$b\` เข้า \`$STAGING_BRANCH\` ไม่ได้ เพราะไฟล์ชนกัน (merge conflict) ยังไม่ได้รวมอะไรเลย และ issue ยังเปิดอยู่ @$OAK_LOGIN ช่วยดูหน่อยครับ"
+                exit 1
+              fi
+              merged="$merged \`$b\`"
+            done
+            git push origin "HEAD:$STAGING_BRANCH"
+            sha=$(git rev-parse --short HEAD)
+            for b in $branches; do git push origin --delete "$b" || true; done
+            gh issue edit "$ISSUE_NUMBER" --repo "$GITHUB_REPOSITORY" --remove-label awaiting-merge >/dev/null 2>&1 || true
+            say "รวมเข้า \`$STAGING_BRANCH\` แล้ว ($sha, ในชื่อ $MERGE_AUTHOR_NAME) จาก$merged
+          ลบ branch ของ issue นี้แล้ว และปิด issue ให้เลย ขอบคุณครับ (สั่งโดย @$COMMENTER)"
+            gh issue close "$ISSUE_NUMBER" --repo "$GITHUB_REPOSITORY" --reason completed
+          else
+            for b in $branches; do git push origin --delete "$b" || true; done
+            gh issue edit "$ISSUE_NUMBER" --repo "$GITHUB_REPOSITORY" --remove-label awaiting-merge >/dev/null 2>&1 || true
+            say "ไม่รวมเข้า \`$STAGING_BRANCH\` ตามที่ขอ ลบ branch ของ issue นี้แล้ว และปิด issue ให้ครับ (สั่งโดย @$COMMENTER)"
+            gh issue close "$ISSUE_NUMBER" --repo "$GITHUB_REPOSITORY" --reason "not planned"
+          fi
+
+  # ---------------------------------------------------------------- issue closed by hand
+  # Closing an issue deletes its claude/issue-<number>-* branches. (A close made by the merge job above does not
+  # start this job, because GitHub does not trigger workflows from the workflow's own token; that job cleans up itself.)
+  cleanup:
+    if: github.event_name == 'issues' && github.event.action == 'closed'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: write
+      issues: write
+    steps:
+      - name: Delete the issue's branches
+        env:
+          GH_TOKEN: ${{ github.token }}
+          ISSUE_NUMBER: ${{ github.event.issue.number }}
+        run: |
+          deleted=""
+          for b in $(gh api "repos/$GITHUB_REPOSITORY/git/matching-refs/heads/claude/issue-$ISSUE_NUMBER-" --jq '.[].ref' | sed 's#^refs/heads/##'); do
+            if gh api -X DELETE "repos/$GITHUB_REPOSITORY/git/refs/heads/$b" >/dev/null; then
+              deleted="$deleted \`$b\`"
+            fi
+          done
+          if [ -n "$deleted" ]; then
+            gh issue comment "$ISSUE_NUMBER" --repo "$GITHUB_REPOSITORY" --body "ปิด issue แล้ว ลบ branch ของ issue นี้ให้แล้ว:$deleted"
+          fi
