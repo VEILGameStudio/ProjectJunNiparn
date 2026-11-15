@@ -16,12 +16,15 @@ public class CookieBox : InteractableBase
     [Tooltip("The item given to the player when the box opens.")]
     [SerializeField] private ItemData keyItem;
 
-    [Header("Timing")]
-    [SerializeField] private float cutToOpenDelay = 1f;
-    [SerializeField] private float lidShowDelay = 0.4f;
-    [SerializeField] private Vector3 lidSlideOffset = new Vector3(1f, 0.2f, 0f);
-    [SerializeField] private float lidSlideTime = 0.5f;
-    [SerializeField] private float keyShowTime = 1f;
+    [Header("Timing (วินาที)")]
+    [Tooltip("เวลาที่ค้างภาพ cookie ก่อนฝาเลื่อนออก")]
+    [SerializeField] private float cutToOpenDelay = 2f;
+    [SerializeField] private float lidSlideTime = 1.2f;
+    [Tooltip("เวลาที่กุญแจค้างให้เห็นก่อนเข้ากระเป๋า")]
+    [SerializeField] private float keyShowTime = 1.5f;
+
+    [Header("Lid")]
+    [SerializeField] private Vector3 lidSlideOffset = new Vector3(30f, 8f, 0f);
 
     private Vector3 lidStartPos;
     private bool lidMoved;
@@ -42,30 +45,28 @@ public class CookieBox : InteractableBase
 
     private IEnumerator OpenSequence(PlayerContext player)
     {
-        // เลเยอร์ 1: ตัดเทป -> cookie ทับ และเศษเทปโผล่
+        // 1) ตัดเทป: เปลี่ยนเป็นภาพ cookie และเศษเทปโผล่ทันที
         if (cutLayer != null) cutLayer.SetActive(true);
         SetScraps(true);
 
+        // 2) ค้างภาพ cookie
         yield return new WaitForSeconds(cutToOpenDelay);
 
-        // เลเยอร์ 2: กล่องเปิด -> Incookie ทับ แล้วฝาโผล่
+        // 3) กล่องเปิด: Incookie, ฝา และกุญแจโผล่พร้อมกันทันที
         if (openedLayer != null) openedLayer.SetActive(true);
-
-        yield return new WaitForSeconds(lidShowDelay);
-
         if (lid != null)
         {
             lid.localPosition = lidStartPos;
             lid.gameObject.SetActive(true);
         }
-        yield return SlideLid();
-
-        // เลเยอร์ 3: กุญแจโผล่
         if (keyLayer != null) keyLayer.SetActive(true);
 
+        // ฝาเลื่อนออกไปพร้อมกัน (ไม่รอให้เลื่อนเสร็จ)
+        StartCoroutine(SlideLid());
+
+        // 4) ค้างกุญแจให้เห็น แล้วเข้ากระเป๋า
         yield return new WaitForSeconds(keyShowTime);
 
-        // กุญแจเด้งเข้ากระเป๋า
         if (player != null && player.Inventory != null && keyItem != null)
         {
             player.Inventory.Add(keyItem, 1);
@@ -83,13 +84,14 @@ public class CookieBox : InteractableBase
         float t = 0f;
         while (t < 1f)
         {
-            t += Time.deltaTime / lidSlideTime;
-            lid.localPosition = Vector3.Lerp(from, to, t);
+            t += Time.deltaTime / Mathf.Max(0.01f, lidSlideTime);
+            lid.localPosition = Vector3.Lerp(from, to, Mathf.SmoothStep(0f, 1f, Mathf.Clamp01(t)));
             yield return null;
         }
+        lid.localPosition = to;
     }
 
-    // หลังโหลดเซฟที่เปิดกล่องไปแล้ว: แสดงสภาพกล่องที่เปิดแล้ว ไม่ให้ของซ้ำ
+    // หลังโหลดเซฟที่เปิดกล่องไปแล้ว: แสดงสภาพกล่องที่เปิดแล้วทันที ไม่ให้ของซ้ำ
     protected override void OnRestoredAsUsed()
     {
         base.OnRestoredAsUsed();
