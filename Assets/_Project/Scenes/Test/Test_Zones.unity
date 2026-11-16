@@ -2428,7 +2428,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::HighlightEffect
   outlineColor: {r: 1, g: 1, b: 1, a: 0.6}
-  outlineThickness: 2
+  outlineWidth: 4
   showDistance: 3
   playerTag: Player
   useProximity: 1
@@ -2916,7 +2916,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::HighlightEffect
   outlineColor: {r: 1, g: 1, b: 1, a: 0.6}
-  outlineThickness: 2
+  outlineWidth: 4
   showDistance: 3
   playerTag: Player
   useProximity: 1
@@ -7037,7 +7037,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::HighlightEffect
   outlineColor: {r: 1, g: 1, b: 1, a: 0.6}
-  outlineThickness: 2
+  outlineWidth: 4
   showDistance: 3
   playerTag: Player
   useProximity: 1
@@ -8130,7 +8130,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::HighlightEffect
   outlineColor: {r: 1, g: 1, b: 1, a: 0.6}
-  outlineThickness: 2
+  outlineWidth: 4
   showDistance: 3
   playerTag: Player
   useProximity: 1
@@ -8992,7 +8992,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::HighlightEffect
   outlineColor: {r: 1, g: 1, b: 1, a: 0.6}
-  outlineThickness: 2
+  outlineWidth: 4
   showDistance: 3
   playerTag: Player
   useProximity: 1
@@ -10564,7 +10564,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 1102, guid: 6c4f1f91ff78485ea5415c31533427c8, type: 3}
       propertyPath: m_LocalPosition.x
-      value: 0
+      value: 4.735
       objectReference: {fileID: 0}
     - target: {fileID: 1102, guid: 6c4f1f91ff78485ea5415c31533427c8, type: 3}
       propertyPath: m_LocalPosition.y
