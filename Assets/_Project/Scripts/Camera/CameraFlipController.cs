@@ -65,30 +65,35 @@ public class CameraFlipController : MonoBehaviour, ISaveParticipant
     // Flips when the key is pressed.
     private void Update()
     {
-        if (inputReader == null || !inputReader.FlipCameraPressed)
+        if (inputReader != null && inputReader.FlipCameraPressed)
         {
-            return;
+            TryFlip();
         }
+    }
 
+    // Flips the camera if the area allows it right now. The Q key and the on-screen button both call this.
+    public void TryFlip()
+    {
         LevelSettings settings = FindAnyObjectByType<LevelSettings>();
-        if (settings == null)
+        if (settings == null || GameManager.Instance == null || GameManager.Instance.SceneLoader == null)
         {
             return;
         }
 
-        bool gameIsPlaying = GameManager.Instance == null || GameManager.Instance.IsPlaying;
-        if (GameManager.Instance == null || GameManager.Instance.SceneLoader == null)
-        {
-            return;
-        }
-
-        if (!CanFlipNow(settings.CanFlip, gameIsPlaying, GameManager.Instance.SceneLoader.IsBusy))
+        if (!CanFlipNow(settings.CanFlip, GameManager.Instance.IsPlaying, GameManager.Instance.SceneLoader.IsBusy))
         {
             return;
         }
 
         wantsFlipped = !settings.IsFlipped;
         GameManager.Instance.SceneLoader.RunBehindFade(ApplyWantedFlip);
+    }
+
+    // True when the current area allows a flip. The on-screen button reads this to show or hide itself.
+    public bool AreaAllowsFlip()
+    {
+        LevelSettings settings = FindAnyObjectByType<LevelSettings>();
+        return settings != null && settings.CanFlip;
     }
 
     // Puts the camera on the side the player wants, then turns the sprites and tells the game.
