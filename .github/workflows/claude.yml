@@ -45,6 +45,10 @@ env:
   MERGE_AUTHOR_NAME: kittanai
   MERGE_AUTHOR_EMAIL: 64689412+oak-kittanai@users.noreply.github.com
   OAK_LOGIN: oak-kittanai
+  # Oak asked (2026-11-17): requests from these logins count as approved by Oak. Anything that would
+  # normally stop and wait for Oak (design change, locked rule, Oak-only core code) goes ahead, and they
+  # may answer /merge on any issue. Separate logins with spaces.
+  APPROVER_LOGINS: oak-kittanai littelRF-dotcom
 
 jobs:
   # ---------------------------------------------------------------- review + work
@@ -117,6 +121,25 @@ jobs:
           fi
           echo "ok=$ok" >> "$GITHUB_OUTPUT"
 
+      # Is the requester (who opened the issue/PR, or who triggered this run) one of APPROVER_LOGINS?
+      - name: Is the requester pre-approved by Oak?
+        id: who
+        env:
+          OPENER: ${{ github.event.issue.user.login || github.event.pull_request.user.login }}
+          ACTOR: ${{ github.actor }}
+        run: |
+          approved=false
+          for login in $APPROVER_LOGINS; do
+            if [ "${OPENER,,}" = "${login,,}" ] || [ "${ACTOR,,}" = "${login,,}" ]; then approved=true; fi
+          done
+          if [ "$approved" = "true" ]; then
+            note="The requester ($OPENER) has Oak's standing approval (Oak, 2026-11-17): treat this request as approved by Oak. If it changes design, a locked rule, CLAUDE.md, .claude files or Oak-only core code, do it instead of writing a design-change proposal, and say clearly in your reply which locked rule or Oak-owned file it changed."
+          else
+            note="The requester is a teammate without Oak's approval: follow the locked rules strictly."
+          fi
+          echo "approved=$approved" >> "$GITHUB_OUTPUT"
+          echo "note=$note" >> "$GITHUB_OUTPUT"
+
       # Decide whether Fable must read the request first: every issue that is not labelled `ready` yet.
       # PR comments/reviews and issues already labelled `ready` go straight to the work.
       - name: Does Fable need to review first?
@@ -176,6 +199,9 @@ jobs:
             - If the latest comment asks you a question, answer it in your reply.
             - Ask at most 3 questions at a time, numbered, each easy to answer. Do not repeat a question that was
               already answered in the thread.
+
+            ${{ steps.who.outputs.note }} For such a requester, never hold the request back because of a locked
+            rule or an Oak-only file; only ask about information that is genuinely missing.
 
             Write `reply` in simple, friendly Thai (code and file names stay in English). It is posted as a comment.
             When ready = false, end by telling them to just reply in a new comment (no @claude needed).
@@ -254,7 +280,7 @@ jobs:
           claude_args: |
             --model ${{ steps.model.outputs.model }}
             --allowedTools "Bash,Read,Edit,MultiEdit,Write,Glob,Grep,LS,WebFetch,WebSearch,TodoWrite,Task,Agent"
-            --append-system-prompt "You are working on Project Juniparn (Unity). Before doing anything: read CLAUDE.md (the spec) and follow .claude/rules/team-requests.md exactly, including its fixed order of steps and the locked rules; use the matching skill in .claude/skills/ for the request type. If the issue ticks Props 3/4, the request is a painted box-shaped prop for a ThreeQuarter room: use the add-prop-threequarter skill and follow its steps in order. On an issue, a reviewer (Claude Fable) may already have talked with the teammate in the comments to make the request clear: treat the whole thread as the request, including the teammate's answers and the assumptions the reviewer listed, and do not ask again what was already answered. If the triggering comment has no @claude, it is the teammate's last answer to the reviewer. Before editing (types C, D, E) ask the matching advisor agent in .claude/agents/ and show its advice to the teammate; before handing back, run the unity-reviewer agent and fix its blockers. When someone asks you to check or review a pull request, run the unity-reviewer agent on it and post its result. Reply to teammates in simple Thai; code, comments and file names stay in English. If the request would change design, a locked rule, or Oak-only core code, do not implement it: write a design-change proposal (design-change-proposal skill) as your reply and tag @oak-kittanai. Unity cannot run here, so say clearly what the teammate must check in the Editor. Work for issues starts from the test-dev branch (the staging branch for experiments before dev). Commit and push your branch, but do not open a pull request and do not merge for issues: after you finish, the workflow itself asks the requester whether to merge into test-dev. Never target main or dev."
+            --append-system-prompt "You are working on Project Juniparn (Unity). Before doing anything: read CLAUDE.md (the spec) and follow .claude/rules/team-requests.md exactly, including its fixed order of steps and the locked rules; use the matching skill in .claude/skills/ for the request type. If the issue ticks Props 3/4, the request is a painted box-shaped prop for a ThreeQuarter room: use the add-prop-threequarter skill and follow its steps in order. On an issue, a reviewer (Claude Fable) may already have talked with the teammate in the comments to make the request clear: treat the whole thread as the request, including the teammate's answers and the assumptions the reviewer listed, and do not ask again what was already answered. If the triggering comment has no @claude, it is the teammate's last answer to the reviewer. Before editing (types C, D, E) ask the matching advisor agent in .claude/agents/ and show its advice to the teammate; before handing back, run the unity-reviewer agent and fix its blockers. When someone asks you to check or review a pull request, run the unity-reviewer agent on it and post its result. Reply to teammates in simple Thai; code, comments and file names stay in English. If the request would change design, a locked rule, or Oak-only core code, do not implement it: write a design-change proposal (design-change-proposal skill) as your reply and tag @oak-kittanai. Unity cannot run here, so say clearly what the teammate must check in the Editor. Work for issues starts from the test-dev branch (the staging branch for experiments before dev). Commit and push your branch, but do not open a pull request and do not merge for issues: after you finish, the workflow itself asks the requester whether to merge into test-dev. Never target main or dev. ${{ steps.who.outputs.note }}"
 
       # After the work: if the issue's branch has new commits, ask the requester whether to merge into test-dev.
       - name: Ask whether to merge into test-dev
@@ -275,7 +301,7 @@ jobs:
           - ตอบ \`/nomerge\` เพื่อปิด issue โดยไม่รวม
           - ถ้ายังอยากให้แก้อะไรเพิ่ม พิมพ์ \`@claude\` ตามด้วยสิ่งที่อยากแก้ได้เลย
 
-          ตอนปิด issue ระบบจะลบ branch ของ issue นี้ให้อัตโนมัติ (คนที่ตอบได้: คนเปิด issue หรือ @$OAK_LOGIN)"
+          ตอนปิด issue ระบบจะลบ branch ของ issue นี้ให้อัตโนมัติ (คนที่ตอบได้: คนเปิด issue หรือ $APPROVER_LOGINS)"
           fi
 
   # ---------------------------------------------------------------- /merge and /nomerge
@@ -283,7 +309,8 @@ jobs:
     if: |
       github.event_name == 'issue_comment' && !github.event.issue.pull_request &&
       (startsWith(github.event.comment.body, '/merge') || startsWith(github.event.comment.body, '/nomerge')) &&
-      (github.event.comment.user.login == github.event.issue.user.login || github.event.comment.user.login == 'oak-kittanai')
+      (github.event.comment.user.login == github.event.issue.user.login ||
+        contains(fromJSON('["oak-kittanai","littelrf-dotcom","littelRF-dotcom"]'), github.event.comment.user.login))
     runs-on: ubuntu-latest
     timeout-minutes: 15
     permissions:
