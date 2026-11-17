@@ -13870,6 +13870,65 @@ SpriteRenderer:
   m_WasSpriteAssigned: 1
   m_SpriteSortPoint: 0
   m_BlendShapeWeights: []
+--- !u!1 &168647064
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 168647065}
+  - component: {fileID: 168647066}
+  m_Layer: 5
+  m_Name: BoxPuzzle
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!224 &168647065
+RectTransform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 168647064}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 809836032}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_AnchorMin: {x: 0.5, y: 0.5}
+  m_AnchorMax: {x: 0.5, y: 0.5}
+  m_AnchoredPosition: {x: 0, y: 0}
+  m_SizeDelta: {x: 100, y: 100}
+  m_Pivot: {x: 0.5, y: 0.5}
+--- !u!114 &168647066
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 168647064}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 977f44f6504002c47b4b50ec599fee11, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::BoxPuzzle
+  cookieRenderer: {fileID: 0}
+  tapedCookieSprite: {fileID: 21300000, guid: 4eed321c1b66dfc42bbd66e7fcdf8b4d, type: 3}
+  cookieSprite: {fileID: 21300000, guid: 22e4096b9e666ba4eace1fda6ab64ce3, type: 3}
+  inCookieSprite: {fileID: 21300000, guid: 64d3bf5812106e54f850ad42118f77c7, type: 3}
+  tapeScraps: []
+  lid: {fileID: 0}
+  key: {fileID: 0}
+  cutter: {fileID: 0}
+  openDelay: 1
+  lidSlideOffset: {x: 2, y: 0.5, z: 0}
+  lidSlideTime: 0.5
 --- !u!1 &169121098
 GameObject:
   m_ObjectHideFlags: 0
@@ -21301,6 +21360,9 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 4314935693238719724, guid: 59be0e5fea92cb84fb3a799725708bdf, type: 3}
       insertIndex: -1
       addedObject: {fileID: 1511139711}
+    - targetCorrespondingSourceObject: {fileID: 4314935693238719724, guid: 59be0e5fea92cb84fb3a799725708bdf, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 168647065}
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 59be0e5fea92cb84fb3a799725708bdf, type: 3}
 --- !u!224 &809836032 stripped

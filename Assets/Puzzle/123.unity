@@ -208,8 +208,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 0, y: -165}
-  m_SizeDelta: {x: 160, y: 38.5337}
+  m_AnchoredPosition: {x: 0, y: -120.9988}
+  m_SizeDelta: {x: 135.2183, y: 35.336}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &147559625
 MonoBehaviour:
@@ -268,7 +268,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Image
   m_Material: {fileID: 0}
-  m_Color: {r: 1, g: 1, b: 1, a: 1}
+  m_Color: {r: 0.7607844, g: 0.7058824, b: 0.57254905, a: 1}
   m_RaycastTarget: 1
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
@@ -338,7 +338,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 95ae432cc74a74f469ce8d5a8f9d1704, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::SpriteBillboard
-  tiltTowardCamera: 0
 --- !u!212 &154664729
 SpriteRenderer:
   serializedVersion: 3
@@ -605,11 +604,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 88d0b5a51cd442e419d42e405f9e77c7, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PuzzleManager
+  boxImage: {fileID: 0}
+  boxPuzzle: {fileID: 0}
   symbolSprites:
-  - {fileID: 21300000, guid: 640486eacd1b27e418cae7c7c066f8be, type: 3}
-  - {fileID: 21300000, guid: e01602429952e85468792446ce05c171, type: 3}
-  - {fileID: 21300000, guid: 0e5be2bf6fe51834188074289c41afd2, type: 3}
-  - {fileID: 21300000, guid: 0f72a8dd8331881498edd09b9695d1f6, type: 3}
+  - {fileID: 21300000, guid: c20c6523e3da9c84b931229cb073c8cc, type: 3}
+  - {fileID: 21300000, guid: 5438c629d0f512845815b0a64bd66a71, type: 3}
+  - {fileID: 21300000, guid: 28e176232adb35e43a8956dee64d0769, type: 3}
+  - {fileID: 21300000, guid: c1bc9cff6700f8a4d9b092a3680f324e, type: 3}
   code: 02000000000000000300000001000000
   chestPuzzle: {fileID: 504205602}
   icons:
@@ -814,11 +815,13 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::LevelSettings
   cameraPreset: 0
   levelCamera: {fileID: 1717092547}
+  playArea: {fileID: 0}
   cameraBounds: {fileID: 1783381060}
   overridePresetValues: 0
   orthographicSize: 5
+  fieldOfView: 11.2
   cameraDistance: 20
-  cameraDamping: {x: 1, y: 1.3}
+  followDamping: {x: 1, y: 1, z: 1}
 --- !u!4 &272055020
 Transform:
   m_ObjectHideFlags: 0
@@ -1280,7 +1283,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::HighlightEffect
   outlineColor: {r: 1, g: 1, b: 1, a: 0.6}
-  outlineThickness: 2
+  outlineWidth: 4
   showDistance: 3
   playerTag: Player
   useProximity: 1
@@ -1297,7 +1300,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 95ae432cc74a74f469ce8d5a8f9d1704, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::SpriteBillboard
-  tiltTowardCamera: 0
 --- !u!212 &499057793
 SpriteRenderer:
   serializedVersion: 3
@@ -1434,8 +1436,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 0, y: -6}
-  m_SizeDelta: {x: 78.612, y: 72.5012}
+  m_AnchoredPosition: {x: -0.0000065565, y: 0.56215}
+  m_SizeDelta: {x: 98.2516, y: 158.04}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &525616573
 MonoBehaviour:
@@ -1457,7 +1459,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 21300000, guid: 640486eacd1b27e418cae7c7c066f8be, type: 3}
+  m_Sprite: {fileID: 21300000, guid: c20c6523e3da9c84b931229cb073c8cc, type: 3}
   m_Type: 0
   m_PreserveAspect: 0
   m_FillCenter: 1
@@ -1709,8 +1711,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 184.6, y: 41}
-  m_SizeDelta: {x: 108.0578, y: 205.1776}
+  m_AnchoredPosition: {x: 230, y: 13}
+  m_SizeDelta: {x: 111.5831, y: 176.0943}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &686929764
 MonoBehaviour:
@@ -1769,15 +1771,15 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Image
   m_Material: {fileID: 0}
-  m_Color: {r: 1, g: 1, b: 1, a: 1}
+  m_Color: {r: 1, g: 1, b: 1, a: 0}
   m_RaycastTarget: 1
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 10905, guid: 0000000000000000f000000000000000, type: 0}
-  m_Type: 1
+  m_Sprite: {fileID: 21300000, guid: c1bc9cff6700f8a4d9b092a3680f324e, type: 3}
+  m_Type: 0
   m_PreserveAspect: 0
   m_FillCenter: 1
   m_FillMethod: 4
@@ -1839,7 +1841,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 95ae432cc74a74f469ce8d5a8f9d1704, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::SpriteBillboard
-  tiltTowardCamera: 0
 --- !u!212 &730221849
 SpriteRenderer:
   serializedVersion: 3
@@ -2071,8 +2072,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 0, y: -6}
-  m_SizeDelta: {x: 78.612, y: 72.5012}
+  m_AnchoredPosition: {x: -1.8, y: 3.8}
+  m_SizeDelta: {x: 98.2516, y: 158.04}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &764131414
 MonoBehaviour:
@@ -2094,7 +2095,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 21300000, guid: 0e5be2bf6fe51834188074289c41afd2, type: 3}
+  m_Sprite: {fileID: 21300000, guid: 28e176232adb35e43a8956dee64d0769, type: 3}
   m_Type: 0
   m_PreserveAspect: 0
   m_FillCenter: 1
@@ -2111,6 +2112,81 @@ CanvasRenderer:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 764131412}
+  m_CullTransparentMesh: 1
+--- !u!1 &829415336
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 829415337}
+  - component: {fileID: 829415339}
+  - component: {fileID: 829415338}
+  m_Layer: 5
+  m_Name: BG2
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!224 &829415337
+RectTransform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 829415336}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 2079668735}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_AnchorMin: {x: 0.5, y: 0.5}
+  m_AnchorMax: {x: 0.5, y: 0.5}
+  m_AnchoredPosition: {x: 0, y: 0}
+  m_SizeDelta: {x: 873.8218, y: 415.6455}
+  m_Pivot: {x: 0.5, y: 0.5}
+--- !u!114 &829415338
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 829415336}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fe87c0e1cc204ed48ad3b37840f39efc, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Image
+  m_Material: {fileID: 0}
+  m_Color: {r: 1, g: 1, b: 1, a: 1}
+  m_RaycastTarget: 1
+  m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
+  m_Maskable: 1
+  m_OnCullStateChanged:
+    m_PersistentCalls:
+      m_Calls: []
+  m_Sprite: {fileID: 21300000, guid: cb5fda83d32065549a5a8c832d60fa09, type: 3}
+  m_Type: 0
+  m_PreserveAspect: 0
+  m_FillCenter: 1
+  m_FillMethod: 4
+  m_FillAmount: 1
+  m_FillClockwise: 1
+  m_FillOrigin: 0
+  m_UseSpriteMesh: 0
+  m_PixelsPerUnitMultiplier: 1
+--- !u!222 &829415339
+CanvasRenderer:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 829415336}
   m_CullTransparentMesh: 1
 --- !u!1 &1038367538
 GameObject:
@@ -2157,7 +2233,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 95ae432cc74a74f469ce8d5a8f9d1704, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::SpriteBillboard
-  tiltTowardCamera: 0
 --- !u!212 &1038367541
 SpriteRenderer:
   serializedVersion: 3
@@ -2426,7 +2501,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::HighlightEffect
   outlineColor: {r: 1, g: 1, b: 1, a: 0.6}
-  outlineThickness: 2
+  outlineWidth: 4
   showDistance: 3
   playerTag: Player
   useProximity: 1
@@ -2443,7 +2518,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 95ae432cc74a74f469ce8d5a8f9d1704, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::SpriteBillboard
-  tiltTowardCamera: 0
 --- !u!212 &1130307512
 SpriteRenderer:
   serializedVersion: 3
@@ -2540,8 +2614,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: -186.3, y: 41}
-  m_SizeDelta: {x: 108.0578, y: 205.1776}
+  m_AnchoredPosition: {x: -225, y: 13}
+  m_SizeDelta: {x: 111.5831, y: 176.0943}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1136550481
 MonoBehaviour:
@@ -2600,7 +2674,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Image
   m_Material: {fileID: 0}
-  m_Color: {r: 1, g: 1, b: 1, a: 1}
+  m_Color: {r: 1, g: 1, b: 1, a: 0}
   m_RaycastTarget: 1
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
@@ -2636,6 +2710,14 @@ PrefabInstance:
     - target: {fileID: 1413465227452781, guid: 8aa5828ad5874354883660e5a8179861, type: 3}
       propertyPath: m_AnchorMax.y
       value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 1047091327573170647, guid: 8aa5828ad5874354883660e5a8179861, type: 3}
+      propertyPath: m_AnchorMax.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1047091327573170647, guid: 8aa5828ad5874354883660e5a8179861, type: 3}
+      propertyPath: m_AnchorMax.y
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 2135514584512680554, guid: 8aa5828ad5874354883660e5a8179861, type: 3}
       propertyPath: m_Name
@@ -2708,6 +2790,10 @@ PrefabInstance:
     - target: {fileID: 7490156178751100843, guid: 8aa5828ad5874354883660e5a8179861, type: 3}
       propertyPath: m_AnchorMax.y
       value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 8904216070316826378, guid: 8aa5828ad5874354883660e5a8179861, type: 3}
+      propertyPath: m_SizeDelta.y
+      value: 0
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -2838,8 +2924,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 0, y: -6}
-  m_SizeDelta: {x: 78.612, y: 72.5012}
+  m_AnchoredPosition: {x: 0.000012159, y: -0.0000042915}
+  m_SizeDelta: {x: 98.2516, y: 158.04}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1241705873
 MonoBehaviour:
@@ -2861,7 +2947,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 21300000, guid: e01602429952e85468792446ce05c171, type: 3}
+  m_Sprite: {fileID: 21300000, guid: 5438c629d0f512845815b0a64bd66a71, type: 3}
   m_Type: 0
   m_PreserveAspect: 0
   m_FillCenter: 1
@@ -3367,11 +3453,14 @@ MonoBehaviour:
   activation: 0
   maxInteractDistance: 2
   oneShot: 0
+  uniqueId: 
   clickArea: {fileID: 0}
   requiredItem: {fileID: 0}
   blockedMessage:
     english: 
     thai: 
+  mustBeHeld: 0
+  notHeldMessage: {fileID: 0}
   interactSound: {fileID: 0}
   item: {fileID: 11400000, guid: 4c972315430309743ab776e1b482f8bc, type: 2}
   amount: 1
@@ -3813,8 +3902,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 62.2, y: 41}
-  m_SizeDelta: {x: 108.0578, y: 205.1776}
+  m_AnchoredPosition: {x: 76.542, y: 13}
+  m_SizeDelta: {x: 111.5831, y: 176.0943}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1797710366
 MonoBehaviour:
@@ -3873,7 +3962,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Image
   m_Material: {fileID: 0}
-  m_Color: {r: 1, g: 1, b: 1, a: 1}
+  m_Color: {r: 1, g: 1, b: 1, a: 0}
   m_RaycastTarget: 1
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
@@ -3934,8 +4023,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: -61.4, y: 41}
-  m_SizeDelta: {x: 108.0578, y: 205.1776}
+  m_AnchoredPosition: {x: -75.4, y: 13}
+  m_SizeDelta: {x: 111.5831, y: 176.0943}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1877809420
 MonoBehaviour:
@@ -3994,7 +4083,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Image
   m_Material: {fileID: 0}
-  m_Color: {r: 1, g: 1, b: 1, a: 1}
+  m_Color: {r: 1, g: 1, b: 1, a: 0}
   m_RaycastTarget: 1
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
@@ -4053,8 +4142,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 0, y: -6}
-  m_SizeDelta: {x: 78.612, y: 72.5012}
+  m_AnchoredPosition: {x: -4.5, y: -0.0000050068}
+  m_SizeDelta: {x: 98.2516, y: 158.04}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1908021218
 MonoBehaviour:
@@ -4076,7 +4165,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 21300000, guid: 0f72a8dd8331881498edd09b9695d1f6, type: 3}
+  m_Sprite: {fileID: 21300000, guid: c1bc9cff6700f8a4d9b092a3680f324e, type: 3}
   m_Type: 0
   m_PreserveAspect: 0
   m_FillCenter: 1
@@ -4345,11 +4434,14 @@ MonoBehaviour:
   activation: 2
   maxInteractDistance: 2
   oneShot: 0
+  uniqueId: 
   clickArea: {fileID: 0}
   requiredItem: {fileID: 0}
   blockedMessage:
     english: 
     thai: 
+  mustBeHeld: 0
+  notHeldMessage: {fileID: 0}
   interactSound: {fileID: 0}
 --- !u!1 &2024619279
 GameObject:
@@ -4486,7 +4578,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 95ae432cc74a74f469ce8d5a8f9d1704, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::SpriteBillboard
-  tiltTowardCamera: 0
 --- !u!212 &2067537470
 SpriteRenderer:
   serializedVersion: 3
@@ -4576,7 +4667,8 @@ RectTransform:
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
-  m_Children: []
+  m_Children:
+  - {fileID: 829415337}
   m_Father: {fileID: 504205603}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
@@ -4597,14 +4689,14 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Image
   m_Material: {fileID: 0}
-  m_Color: {r: 0.22264141, g: 0.1709718, b: 0.1709718, a: 1}
+  m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_RaycastTarget: 1
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 0}
+  m_Sprite: {fileID: 21300000, guid: 720b0b14abc9b504598479e17f1cea0d, type: 3}
   m_Type: 0
   m_PreserveAspect: 0
   m_FillCenter: 1
@@ -4671,11 +4763,14 @@ MonoBehaviour:
   activation: 1
   maxInteractDistance: 2
   oneShot: 0
+  uniqueId: 
   clickArea: {fileID: 0}
   requiredItem: {fileID: 0}
   blockedMessage:
     english: 
     thai: 
+  mustBeHeld: 0
+  notHeldMessage: {fileID: 0}
   interactSound: {fileID: 0}
   message:
     english: You stepped on the floor plate.
