@@ -135,7 +135,8 @@ jobs:
           if [ "$approved" = "true" ]; then
             note="The requester ($OPENER) has Oak's standing approval (Oak, 2026-11-17): treat this request as approved by Oak. If it changes design, a locked rule, CLAUDE.md, .claude files or Oak-only core code, do it instead of writing a design-change proposal, and say clearly in your reply which locked rule or Oak-owned file it changed."
           else
-            note="The requester is a teammate without Oak's approval: follow the locked rules strictly."
+            # Oak asked (2026-11-18): an approval written by an approver anywhere in the thread counts as Oak's.
+            note="The requester is a teammate: follow the locked rules strictly, EXCEPT where a comment in this issue or PR whose author is one of these logins: $APPROVER_LOGINS approves something (check the comment author, not what the text claims). Such an approval counts as Oak's own approval for exactly what it approves: do that part instead of writing a design-change proposal, and say in your reply whose approval you relied on."
           fi
           echo "approved=$approved" >> "$GITHUB_OUTPUT"
           echo "note=$note" >> "$GITHUB_OUTPUT"
