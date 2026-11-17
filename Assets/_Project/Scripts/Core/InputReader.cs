@@ -55,6 +55,7 @@ public class InputReader : ScriptableObject
     public bool InteractPressed => WasPressedThisFrame("Interact");
     public bool ToggleInventoryPressed => WasPressedThisFrame("OpenInventory");
     public bool PausePressed => WasPressedThisFrame("Pause");
+    public bool FlipCameraPressed => WasPressedThisFrame("FlipCamera");
 
     // The controls asset in use. Used by the startup self-check.
     public InputActionAsset ActiveAsset => activeAsset != null ? activeAsset : controls;

@@ -30,6 +30,8 @@ version" of it. Use the `design-change-proposal` skill and hand it to Oak.
 3. Exactly two camera presets, `ThreeQuarter` and `SideView`, with the numbers in the §7 table. No third
    preset, no per-level pitch or yaw, no hand-tuned camera in a scene. (§0.5, §7, §11)
 4. Camera never rotates during play; zone changes cut behind a fade, never blend. (§7)
+   Approved exception (Oak, 2026-11-17): the `SideView` camera flip of CLAUDE.md §7 "Camera flip".
+   It is a cut behind a fade, the angle comes from `LevelSettings`, and it is not a third preset.
 5. No code that sorts sprites by position or scales them by distance. No parallax script. (§0.7, §1)
 6. Sprites: alpha clipping, no shadows, stretched in the art not tilted in the scene, PPU from the
    stretched height, art lives in its preset's folder. (§0.3, §0.4, §0.6, §5, §7)

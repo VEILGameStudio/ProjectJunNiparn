@@ -12,6 +12,8 @@
 // for one area. The angle itself can never be overridden and has no field here: every
 // sprite is drawn for its preset's angle, so an area with its own angle would have every
 // sprite looking wrong.
+// A Side View area can let the player flip the camera 180 degrees (key Q, see CameraFlipController).
+// Tick "Allow Camera Flip" for the corridors where that is wanted. Three Quarter never flips.
 // Never change the camera's own numbers in the scene by hand. This script writes them
 // when the level starts.
 //
@@ -37,6 +39,10 @@ public class LevelSettings : MonoBehaviour
     [Header("Camera Preset")]
     [Tooltip("The kind of area. Three Quarter = puzzle room (orthographic, turned 45 degrees). Side View = corridor (perspective, seen from the side). Use the one Oak told you to use.")]
     [SerializeField] private CameraPreset cameraPreset = CameraPreset.ThreeQuarter;
+
+    [Header("Camera Flip")]
+    [Tooltip("Side View areas only. Tick to let the player flip the camera 180 degrees with Q to see the other side of the corridor. Three Quarter areas never flip. Ticking it on a Three Quarter area does nothing.")]
+    [SerializeField] private bool allowCameraFlip;
 
     [Header("Camera")]
     [Tooltip("This area's CinemachineCamera (the one that follows the player). It needs a CinemachinePositionComposer and a CinemachineConfiner3D.")]
@@ -68,12 +74,21 @@ public class LevelSettings : MonoBehaviour
     // The box the camera may move in. It is made while the game runs, from the Play Area.
     private BoxCollider cameraBox;
 
+    // Whether the camera is flipped right now. Not an Inspector field: the player decides, and it is saved.
+    private bool isFlipped;
+
     // The camera that shows the picture, and the screen shape the camera box was made for.
     private Camera screenCamera;
     private float appliedAspect;
 
     // Which preset this area uses. PlayerAnimator reads this to pick the right drawings.
     public CameraPreset Preset => cameraPreset;
+
+    // True when the player may flip this area's camera: Side View and Allow Camera Flip ticked.
+    public bool CanFlip => allowCameraFlip && cameraPreset == CameraPreset.SideView;
+
+    // True while the camera is turned to the other side of the corridor.
+    public bool IsFlipped => isFlipped;
 
     // How many degrees the camera looks down.
     public float CameraPitch => GetAppliedValues().Pitch;
@@ -98,6 +113,7 @@ public class LevelSettings : MonoBehaviour
 
     private void OnDisable()
     {
+        isFlipped = false; // A zone always opens on its normal side.
         if (cameraBox != null)
         {
             cameraBox.gameObject.SetActive(false);
@@ -126,6 +142,7 @@ public class LevelSettings : MonoBehaviour
     public CameraPresetValues GetAppliedValues()
     {
         CameraPresetValues values = CameraPresetValues.For(cameraPreset);
+        values.Yaw = CameraPresetValues.ApplyFlip(values.Yaw, isFlipped);
         if (overridePresetValues)
         {
             values.OrthographicSize = orthographicSize;
@@ -134,6 +151,32 @@ public class LevelSettings : MonoBehaviour
             values.Damping = followDamping;
         }
         return values;
+    }
+
+    // Turns the camera to the other side of the corridor, or back. The camera jumps straight to its
+    // new place (a cut): CameraFlipController hides that behind a fade. Does nothing when this area
+    // cannot flip. Returns true when the camera was changed.
+    public bool SetFlipped(bool flipped)
+    {
+        bool wanted = flipped && CanFlip;
+        if (wanted == isFlipped)
+        {
+            return false;
+        }
+
+        isFlipped = wanted;
+        if (levelCamera == null)
+        {
+            Debug.LogError($"LevelSettings on '{name}': Level Camera is not assigned, so the camera could not be flipped. Drag this area's CinemachineCamera here.", this);
+            return true;
+        }
+
+        // Turn the camera first, so the preset does not complain that somebody turned it by hand.
+        CameraPresetValues values = GetAppliedValues();
+        levelCamera.transform.rotation = Quaternion.Euler(values.Pitch, values.Yaw, 0f);
+        ApplyToLevelCamera();
+        levelCamera.PreviousStateIsValid = false; // No smoothing from the old side: the camera cuts.
+        return true;
     }
 
     // Sets up the Level Camera: preset, limits, and a check that the projection will really change.
@@ -252,6 +295,11 @@ public class LevelSettings : MonoBehaviour
     // Only one LevelSettings may be switched on at a time.
     private void WarnIfMoreThanOne()
     {
+        if (allowCameraFlip && cameraPreset != CameraPreset.SideView)
+        {
+            Debug.LogWarning($"LevelSettings on '{name}': Allow Camera Flip is ticked, but only Side View areas can flip. It does nothing here. Untick it.", this);
+        }
+
         LevelSettings[] all = FindObjectsByType<LevelSettings>();
         if (all.Length > 1)
         {
