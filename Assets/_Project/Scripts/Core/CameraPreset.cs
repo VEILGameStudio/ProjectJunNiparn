@@ -8,7 +8,11 @@
 //                  looks straight along the level (Yaw 0) and only 10 degrees down, so A/D
 //                  walk left/right and W/S walk a short way into and out of the screen.
 // There are exactly two presets and there will never be a third: every sprite is drawn for
-// one of them. Sprites for the two presets live in separate folders (Art/Sprites/ThreeQuarter
+// one of them. One approved exception (Oak, 2026-11-17): a Side View area that ticks "Allow
+// Camera Flip" on its LevelSettings can be turned 180 degrees by the player (key Q). That is
+// still the Side View preset, only seen from the other side of the corridor: same pitch, same
+// field of view, same sprites (they are cards that face the camera, so they just turn around).
+// Sprites for the two presets live in separate folders (Art/Sprites/ThreeQuarter
 // and Art/Sprites/SideView) and must not be mixed. Never add a preset or change these numbers
 // yourself (ask Oak first).
 //
@@ -45,6 +49,13 @@ public struct CameraPresetValues
     // Keep it this small: the camera slides from one side of the box to the other when the player
     // crosses the middle of the area, so the size of the box is the jump the player sees.
     public const float MinimumCameraBoxSize = 0.01f;
+
+    // The camera yaw once the player may have flipped the view. A flip turns the camera half a
+    // turn around the vertical axis. Public and static so tests can check it without a scene.
+    public static float ApplyFlip(float yaw, bool flipped)
+    {
+        return flipped ? Mathf.Repeat(yaw + 180f, 360f) : yaw;
+    }
 
     // Returns the numbers for a preset.
     public static CameraPresetValues For(CameraPreset preset)

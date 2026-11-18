@@ -18,6 +18,8 @@ public class GameSaveData
     public List<InventoryEntry> inventoryEntries = new List<InventoryEntry>();
     public string heldItemId;           // The item in the player's hand. Empty = nothing held.
 
+    public bool cameraFlipped;          // True if the player had flipped the corridor camera. Old saves load this as false.
+
     public bool hasTimer;               // True if a puzzle timer was saved.
     public float timerRemaining;        // Seconds left on the puzzle timer.
     public bool timerRunning;           // Whether that timer was counting down.

@@ -26,6 +26,8 @@ to break without noticing. Each is marked **CRITICAL** again where it is explain
    reworking every sprite material and possibly the art itself.
 4. **Sprites never cast shadows.** (§7) A flat card casts a flat card-shaped shadow. Use a blob shadow.
 5. **Exactly two camera presets, `ThreeQuarter` and `SideView`. Never a third.** (§7)
+   One approved exception (Oak, 2026-11-17): a `SideView` area may let the player flip the camera
+   180° with Q, see §7 Camera flip. It is the same preset seen from the other side, not a third.
    Each area picks one. Every sprite is drawn for one preset and lives in that preset's art folder;
    a sprite used in the wrong preset looks wrong and nothing warns you. Adding a third preset means
    a third set of art for everything shared — treat it as a hard stop.
@@ -77,7 +79,7 @@ What is a 2D sprite:
 A large prop the player must walk around (a big tree, a pillar, a building) may be either: a sprite
 with a 3D collider at its base, or real geometry. Decide per prop, and say which when adding one.
 
-The camera never rotates during play. Because of that, sprites never need to spin to follow it: their
+The camera never rotates during play, except the `SideView` camera flip (§7 Camera flip), which is a cut behind a fade. Because of that, sprites never need to spin to follow it: their
 rotation is set once from the area's camera angle, and re-aimed only when a camera zone changes.
 
 Shared rules:
@@ -354,7 +356,7 @@ back-right to the right row (Oak's choice, 2026-11-10). Snapping in world axes i
 Characters and sprite props stand upright on the ground and face the camera. `SpriteBillboard` sets
 the rotation from the area's camera angle:
 
-- Rotation is set once in `Start`, not every frame, because the camera never rotates during play.
+- Rotation is set once in `Start`, not every frame, because the camera never rotates during play. The `SideView` camera flip is the one other moment: it calls `SpriteBillboard.RefreshAll()` after its cut.
   This stays true under the `SideView` perspective camera. Never make billboards track the camera's
   *position*: a fixed card keeps the same width at every screen position, while a tracking one swivels
   as the player walks past it.
@@ -531,7 +533,7 @@ zone's own Volume.
 
 ### Camera
 
-One `CinemachineCamera` per area, following the player, never rotating during play. Projection, angle
+One `CinemachineCamera` per area, following the player, never rotating during play (the only exception is the `SideView` camera flip, §7 Camera flip). Projection, angle
 and framing come from the area's preset:
 
 | | `ThreeQuarter` | `SideView` |
@@ -559,6 +561,25 @@ walking into depth excites two of them at once; different values on those axes b
 and show up as the picture drifting vertically while the player runs. An earlier version of this file
 asked for 1.3 on one axis — that number came from the 2D era, when that axis meant something else, and
 it was carried forward without a reason. There is no reason now.
+
+### Camera flip (Oak approved, 2026-11-17, issue #44)
+
+A `SideView` corridor may let the player look at it from the other side. It is still the `SideView`
+preset: the same pitch 10, FOV 11.2 and values in the table above, with only the yaw turned from 0 to 180.
+
+- **Only a `LevelSettings` with `Allow Camera Flip` ticked on a `SideView` area can flip.** `ThreeQuarter`
+  never flips, and neither does a `SideView` area that did not tick it. The tick is per area, in the Inspector.
+- **Q on the keyboard (`FlipCamera` action, Right Shoulder on a gamepad) toggles it**, handled by
+  `CameraFlipController`. It does nothing while the game is not playing (menu, dialogue, cutscene) or while a fade runs.
+- **The flip is a cut behind a fade, never a blend**, through `SceneLoader.RunBehindFade`. Order after the cut:
+  the camera has its new yaw, `SpriteBillboard.RefreshAll()`, then `OnCameraZoneChanged`.
+- **`LevelSettings` stays the one place that resolves the yaw.** `GetAppliedValues` turns the preset's yaw
+  by 180 when flipped, so `Apply`, `CameraPitch`, `CameraYaw` and the camera box all agree.
+- **The flipped side is saved** in the gameplay save (`cameraFlipped`) and restored without a toggle.
+  Leaving a flippable area puts the camera back to its normal side.
+- **Art:** sprites are cards that face the camera, so they just turn around and need no new drawing.
+  The other side of the corridor needs its own back wall and background layers, wide enough at 21:9,
+  and its lighting, shadows and any text or signs drawn into 3D models must be checked from both sides.
 
 ### Camera zones
 
@@ -937,7 +958,7 @@ Rules:
 
 - One `CinemachineBrain` on the Main Camera. One `CinemachineCamera` per area follows the player.
 - The projection depends on the area's preset: **Orthographic** for `ThreeQuarter`, **Perspective** for
-  `SideView`. The camera is at a fixed angle and never rotates during play.
+  `SideView`. The camera is at a fixed angle and never rotates during play, apart from the `SideView` camera flip (§7 Camera flip).
 - **`Default Blend` on the Brain is `Cut` in any scene that has camera zones.** An orthographic and a
   perspective camera cannot be blended; a timed blend makes the picture jump part-way through instead
   of cutting cleanly. It is a per-scene Inspector value, so every such scene needs it set.
