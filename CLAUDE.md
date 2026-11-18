@@ -351,6 +351,13 @@ back-right to the right row (Oak's choice, 2026-11-10). Snapping in world axes i
 45° out in `ThreeQuarter` areas, which looks like bad art rather than a bug. The snapping itself is a
 `public static` method so it can be tested without a scene.
 
+**Facing after a camera flip (Oak approved option A, 2026-11-18, issue #44).** When a `SideView` area's camera
+flips, `PlayerAnimator` turns the facing it holds around 180° once (front <-> back, left <-> right), because the
+camera now looks from the other side. After that, facing follows the walk direction on screen as before, so
+walking looks right on both sides. It only happens when the same area's `LevelSettings.IsFlipped` changes;
+`ThreeQuarter` and areas that cannot flip never turn the facing, and neither does leaving a flipped area. Entering a flippable area that comes up on its flipped side turns it once, like a load. `FlipFacing` is a
+`public static` method so it can be tested without a scene.
+
 ### Sprites in the world
 
 Characters and sprite props stand upright on the ground and face the camera. `SpriteBillboard` sets
