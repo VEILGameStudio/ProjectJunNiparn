@@ -8,6 +8,9 @@
 // The facing comes from the direction the player walks ON THE SCREEN, not in the world.
 // So pressing W always shows the character's back, whichever way the camera is turned.
 // When the player walks into another camera zone, the controller is swapped to the new preset's.
+// When the Side View camera is flipped 180 degrees (Q), the facing it holds is turned around once
+// (front <-> back, left <-> right), because the camera now looks from the other side. After that
+// the facing follows the walk direction on the screen as before. Areas that never flip are unchanged.
 //
 // Put this on: the Player's "Visual" child (the one with the SpriteRenderer). An Animator
 //   is added automatically. PlayerMovement on the Player root stops mirroring the Visual
@@ -43,6 +46,10 @@ public class PlayerAnimator : MonoBehaviour
     private PlayerMovement movement;
     private CameraPreset currentPreset;
 
+    // Remembered so a change of the flip state in the SAME area can be noticed.
+    private LevelSettings lastSettings;
+    private bool lastFlipped;
+
     // Which way the character faces on screen. It starts facing the camera (down the screen).
     private Vector2 facing = Vector2.down;
 
@@ -77,6 +84,8 @@ public class PlayerAnimator : MonoBehaviour
             return;
         }
 
+        lastSettings = levelSettings;
+        lastFlipped = levelSettings.IsFlipped;
         UsePreset(levelSettings.Preset);
     }
 
@@ -87,6 +96,8 @@ public class PlayerAnimator : MonoBehaviour
         {
             return;
         }
+
+        TurnFacingIfCameraFlipped();
 
         Vector2 screenDirection = movement.ScreenMoveDirection;
         bool isMoving = screenDirection.sqrMagnitude > 0.0001f;
@@ -112,6 +123,7 @@ public class PlayerAnimator : MonoBehaviour
     private void UsePreset(CameraPreset preset)
     {
         currentPreset = preset;
+        RememberActiveArea();
 
         RuntimeAnimatorController controller = threeQuarterController;
         if (preset == CameraPreset.SideView)
@@ -127,6 +139,62 @@ public class PlayerAnimator : MonoBehaviour
         }
 
         animator.runtimeAnimatorController = controller;
+    }
+
+    // Remembers which area is active after a zone change, without turning the facing.
+    // Leaving a flipped area resets its flip, and that must not turn the character.
+    private void RememberActiveArea()
+    {
+        LevelSettings activeSettings = FindAnyObjectByType<LevelSettings>();
+        if (activeSettings == null)
+        {
+            return;
+        }
+
+        // Same area: a flip is handled by Update, so the old flip state must be kept.
+        if (!ShouldRememberArea(activeSettings == lastSettings))
+        {
+            return;
+        }
+
+        lastSettings = activeSettings;
+        lastFlipped = activeSettings.IsFlipped;
+    }
+
+    // True when the active area is a different one than before. Public and static so tests can check it without a scene.
+    public static bool ShouldRememberArea(bool isSameArea)
+    {
+        return !isSameArea;
+    }
+
+    // Turns the held facing around once when the flip state of the remembered area changes.
+    // Reading it here (not from an event) also covers a flip that a loaded save restores.
+    private void TurnFacingIfCameraFlipped()
+    {
+        if (lastSettings == null)
+        {
+            return;
+        }
+
+        if (ShouldTurnFacing(lastFlipped, lastSettings.IsFlipped))
+        {
+            facing = FlipFacing(facing);
+        }
+
+        lastFlipped = lastSettings.IsFlipped;
+    }
+
+    // True when the camera side changed since last time. Public and static so tests can check it without a scene.
+    public static bool ShouldTurnFacing(bool wasFlipped, bool isFlippedNow)
+    {
+        return wasFlipped != isFlippedNow;
+    }
+
+    // Turns a facing around 180 degrees on the screen: front <-> back, left <-> right.
+    // Public and static so tests can check it without a scene.
+    public static Vector2 FlipFacing(Vector2 facingOnScreen)
+    {
+        return new Vector2(-facingOnScreen.x, -facingOnScreen.y);
     }
 
     // Rounds a direction on the screen to the nearest of the 8 facings the sprites are drawn for.
