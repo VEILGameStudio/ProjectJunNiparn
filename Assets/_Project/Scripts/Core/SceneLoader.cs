@@ -32,6 +32,9 @@ public class SceneLoader : MonoBehaviour
     // True while a scene change is happening, to avoid starting two at once.
     private bool isLoading;
 
+    // True while a fade or scene change is running.
+    public bool IsBusy => isLoading;
+
     // Loads a scene and places the player at the spawn point with this id.
     public void LoadScene(string sceneName, string spawnPointId)
     {
@@ -60,6 +63,41 @@ public class SceneLoader : MonoBehaviour
         }
 
         StartCoroutine(MoveRoutine(position));
+    }
+
+    // Runs something while the screen is black: fade out, run the action, wait two frames, fade in.
+    // The camera flip uses this. Does nothing while another change is already happening.
+    public void RunBehindFade(System.Action actionInTheDark)
+    {
+        if (isLoading || actionInTheDark == null)
+        {
+            return;
+        }
+
+        StartCoroutine(FadeRoutine(actionInTheDark));
+    }
+
+    // Fade out, do the action, let the camera cut, fade in.
+    private IEnumerator FadeRoutine(System.Action actionInTheDark)
+    {
+        isLoading = true;
+
+        if (screenFader != null)
+        {
+            yield return screenFader.FadeOut();
+        }
+
+        actionInTheDark();
+
+        yield return null;
+        yield return null;
+
+        if (screenFader != null)
+        {
+            yield return screenFader.FadeIn();
+        }
+
+        isLoading = false;
     }
 
     // Handles the whole fade-out, move-player, fade-in sequence inside one scene.
