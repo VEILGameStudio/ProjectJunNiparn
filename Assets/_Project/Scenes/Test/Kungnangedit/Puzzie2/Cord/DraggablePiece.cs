@@ -1,4 +1,4 @@
-using UnityEngine;
+ using UnityEngine;
 using UnityEngine.EventSystems;
 
 public enum PieceType { Leaf, Branch, RedFruit, YellowFruit, BlueFruit }
@@ -9,41 +9,55 @@ public class DraggablePiece : MonoBehaviour,
     public PieceType type;
 
     Canvas canvas;
-    GameObject dragCopy;
-    RectTransform copyRect;
+    RectTransform rect;
+    CanvasGroup group;
+    Transform startParent;
+    int startSibling;
+    Vector2 startPos;
+    bool placed;
 
     void Awake()
     {
         canvas = GetComponentInParent<Canvas>();
+        rect = GetComponent<RectTransform>();
+        group = GetComponent<CanvasGroup>();
+        if (group == null) group = gameObject.AddComponent<CanvasGroup>();
     }
 
     public void OnBeginDrag(PointerEventData e)
     {
-        // ชิ้นส่วนหมดแล้ว ลากไม่ได้
-        if (ForestPuzzleManager.Instance.GetCount(type) <= 0) return;
+        startParent = transform.parent;
+        startSibling = transform.GetSiblingIndex();
+        startPos = rect.anchoredPosition;
 
-        // สร้างสำเนาให้ลอยตามเมาส์ ตัวจริงอยู่ที่เดิม
-        dragCopy = Instantiate(gameObject, canvas.transform);
-        Destroy(dragCopy.GetComponent<DraggablePiece>());
-
-        var cg = dragCopy.GetComponent<CanvasGroup>();
-        if (cg == null) cg = dragCopy.AddComponent<CanvasGroup>();
-        cg.blocksRaycasts = false;   // ไม่บังเมาส์ ให้ Slot รับ Drop ได้
-
-        copyRect = dragCopy.GetComponent<RectTransform>();
-        copyRect.anchorMin = copyRect.anchorMax = new Vector2(0.5f, 0.5f);
-        copyRect.sizeDelta = ((RectTransform)transform).rect.size;
-        copyRect.position = e.position;
-        copyRect.SetAsLastSibling();
+        transform.SetParent(canvas.transform);   // ลอยอยู่บนสุด
+        transform.SetAsLastSibling();
+        group.blocksRaycasts = false;            // ให้ช่องรับ Drop ได้
     }
 
     public void OnDrag(PointerEventData e)
     {
-        if (dragCopy != null) copyRect.position = e.position;
+        rect.anchoredPosition += e.delta / canvas.scaleFactor;
     }
 
     public void OnEndDrag(PointerEventData e)
     {
-        if (dragCopy != null) Destroy(dragCopy);
+        group.blocksRaycasts = true;
+
+        if (placed)
+        {
+            gameObject.SetActive(false);         // วางถูก → ชิ้นซ้ายหายไป
+        }
+        else
+        {
+            transform.SetParent(startParent);    // วางผิด → กลับที่เดิม
+            transform.SetSiblingIndex(startSibling);
+            rect.anchoredPosition = startPos;
+        }
+    }
+
+    public void MarkPlaced()
+    {
+        placed = true;
     }
 }
