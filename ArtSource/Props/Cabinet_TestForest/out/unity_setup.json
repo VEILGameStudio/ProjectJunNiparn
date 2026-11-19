@@ -1,0 +1,62 @@
+{
+  "box_size_xyz": [
+    0.51,
+    2.1,
+    0.98
+  ],
+  "margin": 0.15,
+  "quads": {
+    "Face_Front": {
+      "position": [
+        -0.257,
+        1.125,
+        0
+      ],
+      "rotation_euler": [
+        0,
+        90,
+        0
+      ],
+      "scale": [
+        1.28,
+        2.25,
+        1
+      ]
+    },
+    "Face_Side": {
+      "position": [
+        0,
+        1.125,
+        -0.492
+      ],
+      "rotation_euler": [
+        0,
+        0,
+        0
+      ],
+      "scale": [
+        0.81,
+        2.25,
+        1
+      ]
+    },
+    "Face_Top": {
+      "position": [
+        0,
+        2.102,
+        0
+      ],
+      "rotation_euler": [
+        90,
+        0,
+        0
+      ],
+      "scale": [
+        0.81,
+        1.28,
+        1
+      ]
+    }
+  },
+  "upright_parts": {}
+}
