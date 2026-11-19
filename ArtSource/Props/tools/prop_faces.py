@@ -13,6 +13,9 @@
 #   python3 prop_faces.py bake  <prop folder>   # writes the face textures, upright parts, preview
 #   python3 prop_faces.py unity <prop folder>   # writes textures, materials and the prefab into Assets/
 #
+# Other way in, when the artist already drew the faces straight-on (front.png, side.png, optional top.png):
+#   python3 prop_faces.py faces <prop folder>   # replaces grid/fit/check/bake; then run `unity` as usual
+#
 # The prop folder holds the source picture and prop.json (see ../README.md for every field).
 # Needs: Pillow, numpy, scipy.
 
@@ -281,6 +284,102 @@ def grid(folder):
     return 0
 
 
+def crop_to_body(path):
+    """Loads a picture and crops it to the bounding box of its solid pixels."""
+    pixels = np.array(Image.open(path).convert("RGBA"))
+    rows, cols = np.where(pixels[:, :, 3] > 128)
+    return pixels[rows.min():rows.max() + 1, cols.min():cols.max() + 1]
+
+
+def fit_to_texture(pixels, width_px, height_px):
+    """Resizes with premultiplied alpha (no dark halo) and makes the alpha hard for alpha clipping."""
+    premultiplied = pixels.astype(np.float32)
+    premultiplied[:, :, :3] *= premultiplied[:, :, 3:4] / 255.0
+    channels = [Image.fromarray(premultiplied[:, :, c], "F").resize((width_px, height_px), Image.Resampling.LANCZOS) for c in range(4)]
+    out = np.stack([np.array(c) for c in channels], axis=-1)
+    alpha = np.clip(out[:, :, 3], 0, 255)
+    out[:, :, :3] = out[:, :, :3] / np.maximum(alpha[:, :, None] / 255.0, 1e-3)
+    out[:, :, 3] = np.where(alpha > 128, 255, 0)
+    return np.clip(out, 0, 255).astype(np.uint8)
+
+
+def body_columns(pixels):
+    """Left and right column of the box body: the typical edge in the middle rows, ignoring cornice and feet that stick out."""
+    solid = pixels[:, :, 3] > 128
+    middle = solid[len(solid) // 5: len(solid) * 4 // 5]
+    lefts = [np.where(row)[0].min() for row in middle if row.any()]
+    rights = [np.where(row)[0].max() for row in middle if row.any()]
+    return float(np.median(lefts)), float(np.median(rights)) + 1
+
+
+def faces(folder):
+    """Builds the Front, Side and Top textures from straight-on pictures: front.png, side.png, optional top.png.
+    The picture height is the box height; width and depth come from the body of each picture. Whatever sticks out
+    past the body (cornice, feet) lands in the transparent margin, as in `bake`. No stretch is applied:
+    a straight-on picture goes on its face as drawn."""
+    path = os.path.join(folder, "prop.json")
+    cfg = json.load(open(path))
+    H, RES, M, name = cfg["height"], cfg.get("texture_px_per_unit", 256), cfg.get("margin", 0.15), cfg["output_name"]
+    pictures, spans, scales = {}, {}, {}
+    for face in ("Front", "Side"):
+        pictures[face] = crop_to_body(os.path.join(folder, cfg.get(face.lower(), face.lower() + ".png")))
+        spans[face] = body_columns(pictures[face])
+        scales[face] = H * RES / pictures[face].shape[0]          # picture pixels -> texture pixels
+    W = (spans["Front"][1] - spans["Front"][0]) * scales["Front"] / RES
+    D = (spans["Side"][1] - spans["Side"][0]) * scales["Side"] / RES
+    cfg.update(source_pitch=0, source_yaw=0, width_z=round(W, 2), depth_x=round(D, 2), margin=M,
+               texture_px_per_unit=RES, sprite_px_per_unit=cfg.get("sprite_px_per_unit", 216), upright_parts=[])
+    W, D = cfg["width_z"], cfg["depth_x"]
+
+    def face_texture(face, face_width):
+        """Picture scaled to the box height, body placed M in from the left, bottom on the floor."""
+        picture = pictures[face]
+        scale = scales[face]
+        scaled = fit_to_texture(picture, round(picture.shape[1] * scale), round(H * RES))
+        canvas = np.zeros((round((H + M) * RES), round((face_width + 2 * M) * RES), 4), np.uint8)
+        left = round(M * RES - spans[face][0] * scale)
+        for column in range(scaled.shape[1]):
+            if 0 <= left + column < canvas.shape[1]:
+                canvas[round(M * RES):, left + column] = scaled[:, column]
+        overhang = max(-left, left + scaled.shape[1] - canvas.shape[1])
+        if overhang > 0:
+            print(f"warning: {face} picture sticks out {overhang} px past the margin; raise margin in prop.json")
+        return canvas
+
+    wide, deep = round((W + 2 * M) * RES), round((D + 2 * M) * RES)
+    top = np.zeros((wide, deep, 4), np.uint8)
+    top_path = os.path.join(folder, cfg.get("top", "top.png"))
+    inside = (slice(round(M * RES), round((M + W) * RES)), slice(round(M * RES), round((M + D) * RES)))
+    if os.path.exists(top_path):
+        shape = top[inside].shape
+        top[inside] = fit_to_texture(crop_to_body(top_path), shape[1], shape[0])
+        print("top: used", top_path)
+    else:
+        # No top picture: a flat colour from the first solid rows of the front picture (the top edge of the cornice).
+        strip = pictures["Front"][:max(3, pictures["Front"].shape[0] // 100)]
+        colour = strip[strip[:, :, 3] > 128][:, :3].mean(axis=0)
+        top[inside] = [int(colour[0]), int(colour[1]), int(colour[2]), 255]
+        print("top: no top.png, filled with a flat colour", [int(v) for v in colour], "(a guess - add top.png to paint it)")
+
+    out_dir = os.path.join(folder, "out")
+    os.makedirs(out_dir, exist_ok=True)
+    for face, texels in (("Front", face_texture("Front", W)), ("Side", face_texture("Side", D)), ("Top", top)):
+        Image.fromarray(texels, "RGBA").save(os.path.join(out_dir, f"{name}_{face}.png"))
+    json.dump(cfg, open(path, "w"), indent=2, ensure_ascii=False)
+
+    report = {"box_size_xyz": [D, H, W], "margin": M,
+              "quads": {"Face_Front": {"position": [-D / 2 - 0.002, (H + M) / 2, 0], "rotation_euler": [0, 90, 0], "scale": [W + 2 * M, H + M, 1]},
+                        "Face_Side": {"position": [0, (H + M) / 2, -W / 2 - 0.002], "rotation_euler": [0, 0, 0], "scale": [D + 2 * M, H + M, 1]},
+                        "Face_Top": {"position": [0, H + 0.002, 0], "rotation_euler": [90, 0, 0], "scale": [D + 2 * M, W + 2 * M, 1]}},
+              "upright_parts": {}}
+    json.dump(report, open(os.path.join(out_dir, "unity_setup.json"), "w"), indent=2)
+    prop = object.__new__(Prop)
+    prop.cfg, prop.W, prop.D, prop.H = cfg, W, D, H
+    prop.preview(out_dir, report)
+    print(f"width_z {W}  depth_x {D}  height {H} -> wrote textures and preview in {out_dir}")
+    return 0
+
+
 # ---------------------------------------------------------------------------------------------
 # Unity output. Templates in tools/templates/ are the files of the first prop (Wardrobe_Test).
 
@@ -426,12 +525,12 @@ def unity(folder):
 
 
 def main():
-    if len(sys.argv) != 3 or sys.argv[1] not in ("grid", "fit", "check", "bake", "unity"):
-        print("usage: prop_faces.py grid|fit|check|bake|unity <prop folder>")
+    if len(sys.argv) != 3 or sys.argv[1] not in ("grid", "fit", "check", "bake", "unity", "faces"):
+        print("usage: prop_faces.py grid|fit|check|bake|faces|unity <prop folder>")
         return 1
     command, folder = sys.argv[1], sys.argv[2]
-    if command in ("grid", "fit", "unity"):
-        return {"grid": grid, "fit": fit, "unity": unity}[command](folder)
+    if command in ("grid", "fit", "unity", "faces"):
+        return {"grid": grid, "fit": fit, "unity": unity, "faces": faces}[command](folder)
     prop = Prop(folder)
     if command == "check":
         prop.check()

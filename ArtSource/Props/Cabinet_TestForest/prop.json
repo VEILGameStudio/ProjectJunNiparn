@@ -1,0 +1,14 @@
+{
+  "front": "front.png",
+  "side": "side.png",
+  "height": 2.1,
+  "output_name": "Cabinet_TestForest",
+  "source_pitch": 0,
+  "source_yaw": 0,
+  "width_z": 0.98,
+  "depth_x": 0.51,
+  "margin": 0.15,
+  "texture_px_per_unit": 256,
+  "sprite_px_per_unit": 216,
+  "upright_parts": []
+}
