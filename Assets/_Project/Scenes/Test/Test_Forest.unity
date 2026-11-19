@@ -13937,7 +13937,7 @@ MonoBehaviour:
   tapeScraps: []
   lid: {fileID: 0}
   key: {fileID: 0}
-  cutter: {fileID: 0}
+  cutter: {fileID: 168647066}
   openDelay: 1
   lidSlideOffset: {x: 2, y: 0.5, z: 0}
   lidSlideTime: 0.5
@@ -14902,6 +14902,11 @@ SpriteRenderer:
   m_WasSpriteAssigned: 1
   m_SpriteSortPoint: 0
   m_BlendShapeWeights: []
+--- !u!224 &255080257 stripped
+RectTransform:
+  m_CorrespondingSourceObject: {fileID: 8815366493775416028, guid: 59be0e5fea92cb84fb3a799725708bdf, type: 3}
+  m_PrefabInstance: {fileID: 809836031}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1 &266319270
 GameObject:
   m_ObjectHideFlags: 0
@@ -19857,9 +19862,9 @@ Camera:
     height: 1
   near clip plane: 0.1
   far clip plane: 5000
-  field of view: 19
+  field of view: 25
   orthographic: 1
-  orthographic size: 5
+  orthographic size: 6
   m_Depth: 0
   m_CullingMask:
     serializedVersion: 2
@@ -19883,8 +19888,8 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 614348457}
   serializedVersion: 2
-  m_LocalRotation: {x: 0.08715574, y: 0, z: 0, w: 0.9961947}
-  m_LocalPosition: {x: -12, y: 5.4729633, z: -19.696156}
+  m_LocalRotation: {x: 0.23911761, y: 0.36964384, z: -0.09904577, w: 0.8923991}
+  m_LocalPosition: {x: -24.24745, y: 11.25, z: -12.247449}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -20240,7 +20245,7 @@ RectTransform:
   - {fileID: 280449340}
   - {fileID: 1511986627}
   - {fileID: 168647065}
-  m_Father: {fileID: 1537231004}
+  m_Father: {fileID: 255080257}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 1, y: 1}
@@ -21894,7 +21899,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &762703716
 Transform:
   m_ObjectHideFlags: 0
@@ -22576,6 +22581,54 @@ PrefabInstance:
       propertyPath: chestPuzzle
       value: 
       objectReference: {fileID: 655720236}
+    - target: {fileID: 2367656400593098729, guid: 59be0e5fea92cb84fb3a799725708bdf, type: 3}
+      propertyPath: 'icons.Array.data[0]'
+      value: 
+      objectReference: {fileID: 1061144834}
+    - target: {fileID: 2367656400593098729, guid: 59be0e5fea92cb84fb3a799725708bdf, type: 3}
+      propertyPath: 'icons.Array.data[1]'
+      value: 
+      objectReference: {fileID: 1914283365}
+    - target: {fileID: 2367656400593098729, guid: 59be0e5fea92cb84fb3a799725708bdf, type: 3}
+      propertyPath: 'icons.Array.data[2]'
+      value: 
+      objectReference: {fileID: 1001831345}
+    - target: {fileID: 2367656400593098729, guid: 59be0e5fea92cb84fb3a799725708bdf, type: 3}
+      propertyPath: 'icons.Array.data[3]'
+      value: 
+      objectReference: {fileID: 846869579}
+    - target: {fileID: 2367656400593098729, guid: 59be0e5fea92cb84fb3a799725708bdf, type: 3}
+      propertyPath: 'buttons.Array.data[0]'
+      value: 
+      objectReference: {fileID: 1053257005}
+    - target: {fileID: 2367656400593098729, guid: 59be0e5fea92cb84fb3a799725708bdf, type: 3}
+      propertyPath: 'buttons.Array.data[1]'
+      value: 
+      objectReference: {fileID: 836402853}
+    - target: {fileID: 2367656400593098729, guid: 59be0e5fea92cb84fb3a799725708bdf, type: 3}
+      propertyPath: 'buttons.Array.data[2]'
+      value: 
+      objectReference: {fileID: 295832430}
+    - target: {fileID: 2367656400593098729, guid: 59be0e5fea92cb84fb3a799725708bdf, type: 3}
+      propertyPath: 'buttons.Array.data[3]'
+      value: 
+      objectReference: {fileID: 283802969}
+    - target: {fileID: 2367656400593098729, guid: 59be0e5fea92cb84fb3a799725708bdf, type: 3}
+      propertyPath: 'symbolSprites.Array.data[0]'
+      value: 
+      objectReference: {fileID: 21300000, guid: c20c6523e3da9c84b931229cb073c8cc, type: 3}
+    - target: {fileID: 2367656400593098729, guid: 59be0e5fea92cb84fb3a799725708bdf, type: 3}
+      propertyPath: 'symbolSprites.Array.data[1]'
+      value: 
+      objectReference: {fileID: 21300000, guid: 5438c629d0f512845815b0a64bd66a71, type: 3}
+    - target: {fileID: 2367656400593098729, guid: 59be0e5fea92cb84fb3a799725708bdf, type: 3}
+      propertyPath: 'symbolSprites.Array.data[2]'
+      value: 
+      objectReference: {fileID: 21300000, guid: 28e176232adb35e43a8956dee64d0769, type: 3}
+    - target: {fileID: 2367656400593098729, guid: 59be0e5fea92cb84fb3a799725708bdf, type: 3}
+      propertyPath: 'symbolSprites.Array.data[3]'
+      value: 
+      objectReference: {fileID: 21300000, guid: c1bc9cff6700f8a4d9b092a3680f324e, type: 3}
     - target: {fileID: 4574302937816349989, guid: 59be0e5fea92cb84fb3a799725708bdf, type: 3}
       propertyPath: m_IsActive
       value: 0
@@ -22583,6 +22636,10 @@ PrefabInstance:
     - target: {fileID: 7797644867317625895, guid: 59be0e5fea92cb84fb3a799725708bdf, type: 3}
       propertyPath: m_Name
       value: ChestPuzzle
+      objectReference: {fileID: 0}
+    - target: {fileID: 7797644867317625895, guid: 59be0e5fea92cb84fb3a799725708bdf, type: 3}
+      propertyPath: m_IsActive
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 8815366493775416028, guid: 59be0e5fea92cb84fb3a799725708bdf, type: 3}
       propertyPath: m_Pivot.x
@@ -26059,84 +26116,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::SpawnPoint
   spawnPointId: FromCorridor
---- !u!1 &1083415978
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 1083415979}
-  - component: {fileID: 1083415981}
-  - component: {fileID: 1083415980}
-  m_Layer: 9
-  m_Name: Box_Locked (1)
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!4 &1083415979
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1083415978}
-  serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 2.2, y: 0, z: 2.2}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 1557068245}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &1083415980
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1083415978}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 22665807a7d6ec24e95d7b08a855c371, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::Chest
-  activation: 2
-  maxInteractDistance: 2
-  oneShot: 0
-  uniqueId: 
-  clickArea: {fileID: 0}
-  requiredItem: {fileID: 0}
-  blockedMessage:
-    english: It is locked. I need a key.
-    thai: "\u0E25\u0E47\u0E2D\u0E01\u0E2D\u0E22\u0E39\u0E48 \u0E15\u0E49\u0E2D\u0E07\u0E43\u0E0A\u0E49\u0E01\u0E38\u0E0D\u0E41\u0E08"
-  mustBeHeld: 0
-  notHeldMessage: {fileID: 0}
-  interactSound: {fileID: 0}
---- !u!65 &1083415981
-BoxCollider:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1083415978}
-  m_Material: {fileID: 0}
-  m_IncludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_ExcludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_LayerOverridePriority: 0
-  m_IsTrigger: 1
-  m_ProvidesContacts: 0
-  m_Enabled: 1
-  serializedVersion: 3
-  m_Size: {x: 1.1, y: 0.95, z: 1.1}
-  m_Center: {x: 0, y: 0.45, z: 0}
 --- !u!1 &1115206739
 GameObject:
   m_ObjectHideFlags: 0
@@ -30683,7 +30662,19 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 1511986625}
   m_OnClick:
     m_PersistentCalls:
-      m_Calls: []
+      m_Calls:
+      - m_Target: {fileID: 1929762714}
+        m_TargetAssemblyTypeName: SceneButtons, Assembly-CSharp
+        m_MethodName: GoToScene
+        m_Mode: 5
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: boxpuzzle1
+          m_BoolArgument: 0
+        m_CallState: 2
 --- !u!114 &1511986625
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -31344,11 +31335,6 @@ Transform:
   - {fileID: 1769565539}
   m_Father: {fileID: 1396726461}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!224 &1537231004 stripped
-RectTransform:
-  m_CorrespondingSourceObject: {fileID: 8815366493775416028, guid: 59be0e5fea92cb84fb3a799725708bdf, type: 3}
-  m_PrefabInstance: {fileID: 809836031}
-  m_PrefabAsset: {fileID: 0}
 --- !u!1 &1543792053
 GameObject:
   m_ObjectHideFlags: 0
@@ -31627,7 +31613,6 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 762703716}
-  - {fileID: 1083415979}
   - {fileID: 448987151}
   - {fileID: 735385672}
   - {fileID: 74354462}
@@ -32045,6 +32030,51 @@ MeshFilter:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1585734531}
   m_Mesh: {fileID: 10210, guid: 0000000000000000e000000000000000, type: 0}
+--- !u!1 &1600899837
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1600899839}
+  - component: {fileID: 1600899838}
+  m_Layer: 0
+  m_Name: SpawnPoint
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &1600899838
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1600899837}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3985c076fb99b254187374f8468a8533, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::SpawnPoint
+  spawnPointId: Default
+--- !u!4 &1600899839
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1600899837}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 200.043, y: -0.05, z: 32.028}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1602114065
 GameObject:
   m_ObjectHideFlags: 0
@@ -32640,7 +32670,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!114 &1634234622
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -32654,7 +32684,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PuzzleManager
   boxImage: {fileID: 0}
-  boxPuzzle: {fileID: 0}
+  boxPuzzle: {fileID: 168647066}
   symbolSprites:
   - {fileID: 21300000, guid: c20c6523e3da9c84b931229cb073c8cc, type: 3}
   - {fileID: 21300000, guid: 5438c629d0f512845815b0a64bd66a71, type: 3}
@@ -38608,5 +38638,6 @@ SceneRoots:
   - {fileID: 1602114069}
   - {fileID: 9500002}
   - {fileID: 319462938}
-  - {fileID: 1752614202}
   - {fileID: 1634234626}
+  - {fileID: 1752614202}
+  - {fileID: 1600899839}
