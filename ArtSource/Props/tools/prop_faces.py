@@ -504,7 +504,12 @@ def unity(folder):
         renderer = blocks[first + 3].replace("f2b5d7147ece4446a852a82f8b4b811e", material_guids[face]) \
             .replace("0754515ceeb84633ba7150f61e9e2bd7", material_guids[face]).replace("dcf3a90845f247a28d83510f50f09c86", material_guids[face])
         body += [blocks[first], transform, blocks[first + 2], renderer]
-    children += [1122, 1132, 1142, 1152, 1162]
+    # Highlight outline: a box a little bigger than the prop, switched on by MeshHighlightEffect.
+    outline_gap = 0.04   # units on each side
+    outline = set_value(blocks[1172], "m_LocalPosition", vec([0, H / 2, 0]))
+    outline = set_value(outline, "m_LocalScale", vec([D + 2 * outline_gap, H + 2 * outline_gap, W + 2 * outline_gap]))
+    body += [blocks[1171], outline, blocks[1173], blocks[1174], blocks[1103]]
+    children += [1122, 1132, 1142, 1152, 1162, 1172]
 
     root = set_value(blocks[1101], "m_Name", name)
     root_transform = blocks[1102].split("  m_Children:")[0] + "  m_Children:\n" + \
