@@ -129,6 +129,7 @@ SpriteRenderer:
   m_SpriteTileMode: 0
   m_WasSpriteAssigned: 1
   m_SpriteSortPoint: 0
+  m_BlendShapeWeights: []
 --- !u!114 &1114
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -169,7 +170,7 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 1.05, z: 0}
-  m_LocalScale: {x: 0.45, y: 2.1, z: 1.0}
+  m_LocalScale: {x: 0.45, y: 2.1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 1102}
@@ -282,7 +283,7 @@ BoxCollider:
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 3
-  m_Size: {x: 0.45, y: 2.1, z: 1.0}
+  m_Size: {x: 0.45, y: 2.1, z: 1}
   m_Center: {x: 0, y: 0, z: 0}
 --- !u!1 &1141
 GameObject:
@@ -311,8 +312,8 @@ Transform:
   m_GameObject: {fileID: 1141}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0.7071068, z: 0, w: 0.7071068}
-  m_LocalPosition: {x: -0.2270, y: 1.1250, z: 0.0000}
-  m_LocalScale: {x: 1.3000, y: 2.2500, z: 1}
+  m_LocalPosition: {x: -0.227, y: 1.125, z: -0.0454}
+  m_LocalScale: {x: 1.3906593, y: 2.25, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 1102}
@@ -401,8 +402,8 @@ Transform:
   m_GameObject: {fileID: 1151}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0.0000, y: 1.1250, z: -0.5020}
-  m_LocalScale: {x: 0.7500, y: 2.2500, z: 1}
+  m_LocalPosition: {x: -0.2081, y: 1.125, z: -0.502}
+  m_LocalScale: {x: 1.1662405, y: 2.25, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 1102}
@@ -490,13 +491,13 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1161}
   serializedVersion: 2
-  m_LocalRotation: {x: 0.7071068, y: 0, z: 0, w: 0.7071068}
-  m_LocalPosition: {x: 0.0000, y: 2.1020, z: 0.0000}
-  m_LocalScale: {x: 0.7500, y: 1.3000, z: 1}
+  m_LocalRotation: {x: 0.5, y: -0.5, z: 0.5, w: 0.5}
+  m_LocalPosition: {x: 0.0042, y: 2.102, z: -0.0481}
+  m_LocalScale: {x: 1.392896, y: 1.6548419, z: 1.056}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 1102}
-  m_LocalEulerAnglesHint: {x: 90, y: 0, z: 0}
+  m_LocalEulerAnglesHint: {x: 90, y: 0, z: 90}
 --- !u!33 &1163
 MeshFilter:
   m_ObjectHideFlags: 0
