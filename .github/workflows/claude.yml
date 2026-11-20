@@ -49,6 +49,10 @@ env:
   # normally stop and wait for Oak (design change, locked rule, Oak-only core code) goes ahead, and they
   # may answer /merge on any issue. Separate logins with spaces.
   APPROVER_LOGINS: oak-kittanai littelRF-dotcom
+  # Oak asked (2026-11-20): give these logins the same level as Oak for 24 hours only. After
+  # TEMP_APPROVERS_UNTIL (UTC) they are treated like any other teammate again, with no edit needed.
+  TEMP_APPROVER_LOGINS: nasrintohmi2004-dev
+  TEMP_APPROVERS_UNTIL: "2026-11-21T02:05:00Z"
 
 jobs:
   # ---------------------------------------------------------------- review + work
@@ -128,6 +132,9 @@ jobs:
           OPENER: ${{ github.event.issue.user.login || github.event.pull_request.user.login }}
           ACTOR: ${{ github.actor }}
         run: |
+          if [ "$(date -u +%s)" -lt "$(date -u -d "$TEMP_APPROVERS_UNTIL" +%s)" ]; then
+            APPROVER_LOGINS="$APPROVER_LOGINS $TEMP_APPROVER_LOGINS"
+          fi
           approved=false
           for login in $APPROVER_LOGINS; do
             if [ "${OPENER,,}" = "${login,,}" ] || [ "${ACTOR,,}" = "${login,,}" ]; then approved=true; fi
@@ -311,7 +318,7 @@ jobs:
       github.event_name == 'issue_comment' && !github.event.issue.pull_request &&
       (startsWith(github.event.comment.body, '/merge') || startsWith(github.event.comment.body, '/nomerge')) &&
       (github.event.comment.user.login == github.event.issue.user.login ||
-        contains(fromJSON('["oak-kittanai","littelrf-dotcom","littelRF-dotcom"]'), github.event.comment.user.login))
+        contains(fromJSON('["oak-kittanai","littelrf-dotcom","littelRF-dotcom","nasrintohmi2004-dev"]'), github.event.comment.user.login))
     runs-on: ubuntu-latest
     timeout-minutes: 15
     permissions:
@@ -339,9 +346,17 @@ jobs:
           ISSUE_TITLE: ${{ github.event.issue.title }}
           COMMENT_BODY: ${{ github.event.comment.body }}
           COMMENTER: ${{ github.event.comment.user.login }}
+          ISSUE_AUTHOR: ${{ github.event.issue.user.login }}
         run: |
           branches=$(git ls-remote --heads origin "claude/issue-$ISSUE_NUMBER-*" | awk '{ sub("refs/heads/", "", $2); print $2 }' | sort)
           say() { printf '%s\n' "$1" | gh issue comment "$ISSUE_NUMBER" --repo "$GITHUB_REPOSITORY" --body-file -; }
+
+          # A temporary approver may answer on someone else's issue only until TEMP_APPROVERS_UNTIL.
+          if [ "${COMMENTER,,}" != "${ISSUE_AUTHOR,,}" ] && printf ' %s ' "${TEMP_APPROVER_LOGINS,,}" | grep -q " ${COMMENTER,,} " \
+             && [ "$(date -u +%s)" -ge "$(date -u -d "$TEMP_APPROVERS_UNTIL" +%s)" ]; then
+            say "สิทธิ์ชั่วคราวของ @$COMMENTER หมดแล้ว (ถึง $TEMP_APPROVERS_UNTIL UTC) คนที่ตอบ \`/merge\` ได้คือคนเปิด issue หรือ $APPROVER_LOGINS"
+            exit 0
+          fi
 
           if printf '%s' "$COMMENT_BODY" | grep -q '^/merge'; then
             if [ -z "$branches" ]; then
