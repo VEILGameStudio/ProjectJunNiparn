@@ -607,11 +607,11 @@ MonoBehaviour:
   boxImage: {fileID: 0}
   boxPuzzle: {fileID: 0}
   symbolSprites:
-  - {fileID: 21300000, guid: c20c6523e3da9c84b931229cb073c8cc, type: 3}
-  - {fileID: 21300000, guid: 5438c629d0f512845815b0a64bd66a71, type: 3}
-  - {fileID: 21300000, guid: 28e176232adb35e43a8956dee64d0769, type: 3}
-  - {fileID: 21300000, guid: c1bc9cff6700f8a4d9b092a3680f324e, type: 3}
-  code: 02000000000000000300000001000000
+  - {fileID: 21300000, guid: a162b04d50d6c2b4bb7bfdd488ab1906, type: 3}
+  - {fileID: 21300000, guid: d4b517a540776fd43afe5ac97f84db4a, type: 3}
+  - {fileID: 21300000, guid: 70683dfebc0abee41ab352c32c455460, type: 3}
+  - {fileID: 21300000, guid: 4f31b91d16eb14940bc27405b516e9de, type: 3}
+  code: 01000000030000000000000002000000
   chestPuzzle: {fileID: 504205602}
   icons:
   - {fileID: 525616573}
@@ -814,6 +814,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::LevelSettings
   cameraPreset: 0
+  allowCameraFlip: 0
   levelCamera: {fileID: 1717092547}
   playArea: {fileID: 0}
   cameraBounds: {fileID: 1783381060}
@@ -1459,7 +1460,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 21300000, guid: c20c6523e3da9c84b931229cb073c8cc, type: 3}
+  m_Sprite: {fileID: 21300000, guid: a162b04d50d6c2b4bb7bfdd488ab1906, type: 3}
   m_Type: 0
   m_PreserveAspect: 0
   m_FillCenter: 1
@@ -2095,7 +2096,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 21300000, guid: 28e176232adb35e43a8956dee64d0769, type: 3}
+  m_Sprite: {fileID: 21300000, guid: 70683dfebc0abee41ab352c32c455460, type: 3}
   m_Type: 0
   m_PreserveAspect: 0
   m_FillCenter: 1
@@ -2947,7 +2948,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 21300000, guid: 5438c629d0f512845815b0a64bd66a71, type: 3}
+  m_Sprite: {fileID: 21300000, guid: d4b517a540776fd43afe5ac97f84db4a, type: 3}
   m_Type: 0
   m_PreserveAspect: 0
   m_FillCenter: 1
@@ -4165,7 +4166,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 21300000, guid: c1bc9cff6700f8a4d9b092a3680f324e, type: 3}
+  m_Sprite: {fileID: 21300000, guid: 4f31b91d16eb14940bc27405b516e9de, type: 3}
   m_Type: 0
   m_PreserveAspect: 0
   m_FillCenter: 1
