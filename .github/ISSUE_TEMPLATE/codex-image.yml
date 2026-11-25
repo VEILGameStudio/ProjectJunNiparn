@@ -1,0 +1,46 @@
+name: สร้างรูปด้วย Codex (Image)
+description: ให้ Codex สร้างรูปใน issue นี้เลย โดยอ่าน GDD และงานภาพในโปรเจกต์ให้เข้ากัน ไม่สร้าง branch งาน
+title: "[รูป] "
+labels: ["codex-image"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Codex จะอ่านสรุป GDD (`Docs/GDD/`), กฎงานภาพใน `CLAUDE.md` และรูปที่มีอยู่แล้วใน `ArtSource/` กับ `Assets/_Project/Art/`
+        แล้วเลือกรูปอ้างอิงเองไม่เกิน 4 รูป เพื่อให้รูปใหม่เข้ากับเกม จากนั้นโพสต์รูปลงในนี้เลย
+        **ไม่สร้าง branch งาน ไม่แก้โปรเจกต์** (รูปเก็บไว้ที่ branch `codex-images` อันเดียวเพื่อให้แสดงในคอมเมนต์ได้)
+
+        **ต้องมีคำว่า `/codex-image` ในช่องสุดท้าย** อยากแก้รูป พิมพ์คอมเมนต์ใหม่ `/codex-image` ตามด้วยสิ่งที่อยากเปลี่ยน
+        รูปที่ได้เป็นภาพคอนเซ็ปต์ ถ้าจะเอาเข้า Unity เป็น sprite ยังต้องทำตามขั้นตอน import-sprite-art (ยืดภาพ, PPU, โฟลเดอร์ตามมุมกล้อง)
+  - type: dropdown
+    id: kind
+    attributes:
+      label: รูปแบบไหน
+      options:
+        - ตัวละคร / NPC / สัตว์
+        - ของ / props / ไอเท็ม / ไอคอน
+        - ฉาก ThreeQuarter (ห้องมองจากด้านบนเฉียง)
+        - ฉาก SideView (ทางเดินมองด้านข้าง)
+        - ฉากเปิดเรื่อง / คัตซีน / storyboard
+        - อื่นๆ
+    validations:
+      required: true
+  - type: textarea
+    id: what
+    attributes:
+      label: อยากได้รูปอะไร
+      description: เล่าให้ละเอียด เช่น ใคร ทำอะไร ที่ไหน อารมณ์ไหน เวลากลางวันหรือกลางคืน
+    validations:
+      required: true
+  - type: textarea
+    id: refs
+    attributes:
+      label: ไฟล์ในโปรเจกต์ที่อยากให้ดูเป็นตัวอย่าง (ถ้ามี)
+      description: ใส่ path เช่น ArtSource/Characters/Phawin/front-kit/assembled.png (Codex เปิดรูปที่แนบใน issue ไม่ได้)
+  - type: textarea
+    id: mention
+    attributes:
+      label: เรียก Codex
+      value: "/codex-image สร้างรูปตามนี้ ให้เข้ากับ GDD และงานภาพในเกม"
+    validations:
+      required: true

@@ -20,7 +20,7 @@
 #      Only the person who opened the issue, or Oak, can answer.
 #   4. `/merge` merges the branch into test-dev with Oak's git name (kittanai) as the author,
 #      closes the issue, and deletes the issue's branches. Closing an issue any other way also
-#      deletes its claude/issue-<number>-* branches.
+#      deletes its claude/issue-<number>-* branches (and codex/issue-<number>-* from codex.yml).
 # PR comments and reviews skip the Fable check and work as before.
 
 name: Claude
@@ -348,7 +348,8 @@ jobs:
           COMMENTER: ${{ github.event.comment.user.login }}
           ISSUE_AUTHOR: ${{ github.event.issue.user.login }}
         run: |
-          branches=$(git ls-remote --heads origin "claude/issue-$ISSUE_NUMBER-*" | awk '{ sub("refs/heads/", "", $2); print $2 }' | sort)
+          # codex/issue-<n>-* branches come from codex.yml (Oak asked 2026-11-25); /merge handles both.
+          branches=$(git ls-remote --heads origin "claude/issue-$ISSUE_NUMBER-*" "codex/issue-$ISSUE_NUMBER-*" | awk '{ sub("refs/heads/", "", $2); print $2 }' | sort)
           say() { printf '%s\n' "$1" | gh issue comment "$ISSUE_NUMBER" --repo "$GITHUB_REPOSITORY" --body-file -; }
 
           # A temporary approver may answer on someone else's issue only until TEMP_APPROVERS_UNTIL.
@@ -360,7 +361,7 @@ jobs:
 
           if printf '%s' "$COMMENT_BODY" | grep -q '^/merge'; then
             if [ -z "$branches" ]; then
-              say "ไม่เจอ branch ของ issue นี้ (\`claude/issue-$ISSUE_NUMBER-*\`) จึงไม่มีอะไรให้รวม issue ยังเปิดอยู่"
+              say "ไม่เจอ branch ของ issue นี้ (\`claude/issue-$ISSUE_NUMBER-*\` หรือ \`codex/issue-$ISSUE_NUMBER-*\`) จึงไม่มีอะไรให้รวม issue ยังเปิดอยู่"
               exit 0
             fi
             git config user.name "$MERGE_AUTHOR_NAME"
@@ -390,7 +391,7 @@ jobs:
           fi
 
   # ---------------------------------------------------------------- issue closed by hand
-  # Closing an issue deletes its claude/issue-<number>-* branches. (A close made by the merge job above does not
+  # Closing an issue deletes its claude/issue-<number>-* and codex/issue-<number>-* branches. (A close made by the merge job above does not
   # start this job, because GitHub does not trigger workflows from the workflow's own token; that job cleans up itself.)
   cleanup:
     if: github.event_name == 'issues' && github.event.action == 'closed'
@@ -406,7 +407,7 @@ jobs:
           ISSUE_NUMBER: ${{ github.event.issue.number }}
         run: |
           deleted=""
-          for b in $(gh api "repos/$GITHUB_REPOSITORY/git/matching-refs/heads/claude/issue-$ISSUE_NUMBER-" --jq '.[].ref' | sed 's#^refs/heads/##'); do
+          for b in $(for prefix in claude codex; do gh api "repos/$GITHUB_REPOSITORY/git/matching-refs/heads/$prefix/issue-$ISSUE_NUMBER-" --jq '.[].ref'; done | sed 's#^refs/heads/##'); do
             if gh api -X DELETE "repos/$GITHUB_REPOSITORY/git/refs/heads/$b" >/dev/null; then
               deleted="$deleted \`$b\`"
             fi

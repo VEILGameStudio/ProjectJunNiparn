@@ -1,0 +1,227 @@
+# Codex makes a picture inside a GitHub Issue that contains the command /codex-image.  (Oak asked 2026-11-25.)
+#
+# No work branch and no pull request: the picture is posted straight into the issue as a comment.
+#   1. Codex (read-only, no network) reads the issue, the GDD summary (Docs/GDD/), CLAUDE.md's art rules and
+#      the game's existing art on test-dev, then writes an image prompt and picks up to 4 existing pictures
+#      from the repo as style references.
+#   2. The workflow sends that prompt (plus the references) to the OpenAI Images API.
+#   3. The picture is stored on ONE shared branch, `codex-images` (only pictures, never merged anywhere), so the
+#      issue comment can show it. It is also attached to the Actions run as a download.
+#
+# Auth: the same OPENAI_API_KEY secret as codex.yml. Image models are billed per picture on platform.openai.com.
+# Optional repo variables (Settings > Secrets and variables > Actions > Variables):
+#   IMAGE_MODEL   default gpt-image-1        IMAGE_QUALITY   default auto (low / medium / high)
+#   CODEX_MODEL   model Codex uses to read the files and write the prompt; empty = Codex default
+#
+# This file must live on the default branch (main) for issue/comment events to trigger it.
+
+name: Codex Image
+
+on:
+  issues:
+    types: [opened]
+  issue_comment:
+    types: [created]
+
+concurrency:
+  group: codex-image-${{ github.event.issue.number }}
+  cancel-in-progress: false
+
+env:
+  ART_BRANCH: test-dev        # where the game's latest art and CLAUDE.md are read from
+  IMAGES_BRANCH: codex-images # the one shared branch that stores generated pictures
+  COMMIT_AUTHOR_NAME: kittanai
+  COMMIT_AUTHOR_EMAIL: 64689412+oak-kittanai@users.noreply.github.com
+
+jobs:
+  image:
+    if: |
+      !github.event.issue.pull_request &&
+      ((github.event_name == 'issues' &&
+         (contains(github.event.issue.body, '/codex-image') || contains(github.event.issue.title, '/codex-image'))) ||
+       (github.event_name == 'issue_comment' && github.event.comment.user.type != 'Bot' &&
+         contains(github.event.comment.body, '/codex-image')))
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    permissions:
+      contents: write
+      issues: write
+    steps:
+      - name: Checkout test-dev (art + spec)
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ env.ART_BRANCH }}
+          fetch-depth: 1
+          lfs: true                   # real PNGs, so they can be used as style references
+          persist-credentials: false
+
+      - name: Write the prompt and the issue thread
+        env:
+          GH_TOKEN: ${{ github.token }}
+          ISSUE_NUMBER: ${{ github.event.issue.number }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: |
+          gh label create codex-image --repo "$GITHUB_REPOSITORY" --color 10A37F --description "Picture requested from Codex (OpenAI)" --force >/dev/null
+          gh issue edit "$ISSUE_NUMBER" --repo "$GITHUB_REPOSITORY" --add-label codex-image >/dev/null || true
+          gh issue comment "$ISSUE_NUMBER" --repo "$GITHUB_REPOSITORY" --body "Codex กำลังอ่าน GDD กับงานภาพในโปรเจกต์เพื่อสร้างรูปให้ (ไม่สร้าง branch งาน) ดูความคืบหน้าได้ที่ [Actions]($RUN_URL)"
+
+          mkdir -p .codex-run
+          gh issue view "$ISSUE_NUMBER" --repo "$GITHUB_REPOSITORY" --comments > .codex-run/issue-thread.txt
+          cat > .codex-run/prompt.md <<EOF
+          You prepare one picture for Project Juniparn (the game ANODARD, a Unity HD-2D story-driven puzzle game
+          set in a Thai Himmapan x Solarpunk world, cozy hand-painted storybook look). You do NOT draw: you write the
+          prompt for an image model and choose style references. You do not edit any file.
+
+          1. Read .codex-run/issue-thread.txt: GitHub issue #$ISSUE_NUMBER, oldest first. The newest comment that
+             contains /codex-image is what to make now; earlier comments are context (for example "make it darker"
+             refers to the previous picture's prompt, which is quoted in an earlier comment).
+          2. Read the GDD summary in Docs/GDD/ (story, characters, realms, art direction). If the folder is missing,
+             say so in notes_th and work from CLAUDE.md and the art alone.
+          3. Read CLAUDE.md sections 1 and 7 for the look: HD-2D, the two camera presets ThreeQuarter (orthographic,
+             pitch 30, yaw 45, diorama from above) and SideView (perspective, pitch 10, side-scroller), and how
+             characters and props are drawn.
+          4. Look through the existing art in ArtSource/ and Assets/_Project/Art/ (PNG or JPG). Choose up to 4 files
+             that best show the style, character or place the picture must match. Prefer finished, assembled images
+             over single body-part layers. Give their paths relative to the repository root, exactly as on disk.
+             Use an empty list if nothing fits.
+
+          Then answer with JSON only:
+          - prompt: an English image prompt, at most 3000 characters. Describe subject, setting, camera angle (say
+            which preset it matches if it is a game scene), palette, lighting and mood, consistent with the GDD.
+            If references are given, say what to keep from them (for example "keep Phawin's face, hair and outfit
+            exactly as in the reference"). If it is a sprite or a prop, ask for a plain transparent or flat
+            background and the whole figure in frame.
+          - size: "1024x1024", "1536x1024" (wide, scenes) or "1024x1536" (tall, standing characters).
+          - background: "transparent" for a single character, prop or icon that will be cut out, else "opaque".
+          - references: the chosen file paths (0 to 4).
+          - notes_th: two to five short sentences in simple Thai for the teammate: what the picture shows, which
+            GDD facts and reference files you followed, and anything they should know (for example that a
+            generated picture is concept art, not a finished sprite, and that a sprite still needs the stretch
+            rule in CLAUDE.md section 7 before it goes into Unity).
+          EOF
+
+          cat > .codex-run/schema.json <<'EOF'
+          {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "prompt": { "type": "string" },
+              "size": { "type": "string", "enum": ["1024x1024", "1536x1024", "1024x1536"] },
+              "background": { "type": "string", "enum": ["transparent", "opaque"] },
+              "references": { "type": "array", "items": { "type": "string" }, "maxItems": 4 },
+              "notes_th": { "type": "string" }
+            },
+            "required": ["prompt", "size", "background", "references", "notes_th"]
+          }
+          EOF
+
+      - name: Codex reads the GDD and the art, and writes the image prompt
+        id: codex
+        continue-on-error: true
+        uses: openai/codex-action@v1
+        with:
+          openai-api-key: ${{ secrets.OPENAI_API_KEY }}
+          prompt-file: .codex-run/prompt.md
+          output-schema-file: .codex-run/schema.json
+          output-file: .codex-run/plan.json
+          permission-profile: ":read-only"
+          model: ${{ vars.CODEX_MODEL }}
+
+      - name: Make the picture and post it
+        if: always()
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PUSH_TOKEN: ${{ secrets.KITTANAI_TOKEN || github.token }}
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          IMAGE_MODEL: ${{ vars.IMAGE_MODEL || 'gpt-image-1' }}
+          IMAGE_QUALITY: ${{ vars.IMAGE_QUALITY || 'auto' }}
+          ISSUE_NUMBER: ${{ github.event.issue.number }}
+          CODEX_OUTCOME: ${{ steps.codex.outcome }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: |
+          say() { printf '%s\n' "$1" | gh issue comment "$ISSUE_NUMBER" --repo "$GITHUB_REPOSITORY" --body-file -; }
+
+          if [ -z "$OPENAI_API_KEY" ]; then
+            say "สร้างรูปไม่ได้ เพราะ repo นี้ยังไม่มี secret \`OPENAI_API_KEY\` @oak-kittanai ช่วยใส่ที่ Settings > Secrets and variables > Actions ด้วยครับ"
+            exit 1
+          fi
+          plan=.codex-run/plan.json
+          if [ "$CODEX_OUTCOME" != "success" ] || ! jq -e '.prompt | length > 0' "$plan" >/dev/null 2>&1; then
+            say "Codex อ่านไฟล์และเขียน prompt ไม่สำเร็จ (ดู log ที่ [Actions]($RUN_URL)) ลองพิมพ์ \`/codex-image\` ใหม่อีกครั้งได้ครับ"
+            exit 1
+          fi
+
+          prompt=$(jq -r '.prompt' "$plan")
+          size=$(jq -r '.size' "$plan")
+          background=$(jq -r '.background' "$plan")
+          notes=$(jq -r '.notes_th' "$plan")
+
+          # Keep only references that are real image files inside the checkout (not LFS pointers, not too big).
+          refs=()
+          while IFS= read -r ref; do
+            [ -z "$ref" ] && continue
+            case "$ref" in /*|*..*) continue ;; esac
+            [ -f "$ref" ] || continue
+            case "$(file -b --mime-type "$ref")" in image/png|image/jpeg|image/webp) ;; *) continue ;; esac
+            [ "$(stat -c %s "$ref")" -lt 20000000 ] || continue
+            refs+=("$ref")
+          done < <(jq -r '.references[]' "$plan")
+
+          if [ "${#refs[@]}" -gt 0 ]; then
+            args=(-F "model=$IMAGE_MODEL" -F "prompt=$prompt" -F "size=$size" -F "quality=$IMAGE_QUALITY" -F "background=$background")
+            for ref in "${refs[@]}"; do args+=(-F "image[]=@$ref"); done
+            curl -sS https://api.openai.com/v1/images/edits -H "Authorization: Bearer $OPENAI_API_KEY" "${args[@]}" -o .codex-run/response.json
+          else
+            jq -n --arg m "$IMAGE_MODEL" --arg p "$prompt" --arg s "$size" --arg q "$IMAGE_QUALITY" --arg b "$background" \
+              '{model: $m, prompt: $p, size: $s, quality: $q, background: $b, n: 1}' > .codex-run/request.json
+            curl -sS https://api.openai.com/v1/images/generations -H "Authorization: Bearer $OPENAI_API_KEY" \
+              -H "Content-Type: application/json" -d @.codex-run/request.json -o .codex-run/response.json
+          fi
+
+          if ! jq -e '.data[0].b64_json' .codex-run/response.json >/dev/null 2>&1; then
+            error=$(jq -r '.error.message // "no picture in the answer"' .codex-run/response.json 2>/dev/null)
+            say "OpenAI สร้างรูปไม่สำเร็จ: $error"
+            exit 1
+          fi
+
+          mkdir -p out
+          name="issue-$ISSUE_NUMBER/$(date -u +%Y%m%d-%H%M%S).png"
+          mkdir -p "out/$(dirname "$name")"
+          jq -r '.data[0].b64_json' .codex-run/response.json | base64 -d > "out/$name"
+
+          # Store the picture on the shared images branch (plain git, not LFS, so GitHub can show it in the comment).
+          auth="AUTHORIZATION: basic $(printf 'x-access-token:%s' "$PUSH_TOKEN" | base64 -w0)"
+          store=$(mktemp -d)
+          git init -q "$store"
+          git -C "$store" remote add origin "https://github.com/$GITHUB_REPOSITORY.git"
+          if git -C "$store" -c http.extraheader="$auth" fetch -q --depth 1 origin "$IMAGES_BRANCH" 2>/dev/null; then
+            git -C "$store" checkout -q -B "$IMAGES_BRANCH" FETCH_HEAD
+          else
+            git -C "$store" checkout -q --orphan "$IMAGES_BRANCH"
+            printf '* -filter -diff -merge binary\n.gitattributes text\n' > "$store/.gitattributes"
+            printf '# codex-images\n\nPictures made by /codex-image in GitHub issues. Never merged into any other branch.\n' > "$store/README.md"
+          fi
+          mkdir -p "$store/$(dirname "$name")"
+          cp "out/$name" "$store/$name"
+          git -C "$store" add -A
+          git -C "$store" -c user.name="$COMMIT_AUTHOR_NAME" -c user.email="$COMMIT_AUTHOR_EMAIL" commit -q -m "Picture for issue #$ISSUE_NUMBER"
+          git -C "$store" -c http.extraheader="$auth" push -q origin "HEAD:refs/heads/$IMAGES_BRANCH"
+
+          url="https://github.com/$GITHUB_REPOSITORY/blob/$IMAGES_BRANCH/$name?raw=true"
+          ref_list="(ไม่ได้ใช้รูปอ้างอิง)"
+          if [ "${#refs[@]}" -gt 0 ]; then ref_list=$(printf -- '- `%s`\n' "${refs[@]}"); fi
+          {
+            printf '![รูปจาก Codex](%s)\n\n%s\n\n' "$url" "$notes"
+            printf '**รูปอ้างอิงจากโปรเจกต์**\n%s\n\n' "$ref_list"
+            printf '<details><summary>Prompt ที่ใช้ (%s, %s)</summary>\n\n```text\n%s\n```\n</details>\n\n' "$IMAGE_MODEL" "$size" "$prompt"
+            printf 'อยากแก้รูป พิมพ์คอมเมนต์ใหม่ `/codex-image` ตามด้วยสิ่งที่อยากเปลี่ยน · [ไฟล์เต็ม](%s) · [Actions](%s)\n\n' "$url" "$RUN_URL"
+            printf '<sub>สร้างโดย Codex (OpenAI) · ไม่ได้สร้าง branch งาน รูปเก็บไว้ที่ branch `%s` อย่างเดียว</sub>\n' "$IMAGES_BRANCH"
+          } | gh issue comment "$ISSUE_NUMBER" --repo "$GITHUB_REPOSITORY" --body-file -
+
+      - name: Attach the picture to the run
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: codex-image-${{ github.event.issue.number }}-${{ github.run_id }}
+          path: out/
+          if-no-files-found: ignore
