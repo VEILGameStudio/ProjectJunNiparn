@@ -6,7 +6,7 @@
 
 | อยากได้อะไร | ใช้แบบไหน | พิมพ์อะไร | ใช้เงินจากไหน |
 |---|---|---|---|
-| ให้แก้หรือเพิ่มของในโปรเจกต์ (โค้ด ข้อมูล ไฟล์) ผ่าน Issue แล้ว `/merge` เข้า test-dev แบบเดียวกับ Claude | **แบบ 2: GitHub Action** (หลัก) | `/codex` ใน Issue | OpenAI API key (จ่ายตามใช้) |
+| ให้แก้หรือเพิ่มของในโปรเจกต์ (โค้ด ข้อมูล ไฟล์) ผ่าน Issue แล้ว `/merge` เข้า test-dev แบบเดียวกับ Claude | **แบบ 2: GitHub Action** (หลัก) | `/codex` ใน Issue | API key หรือโควตา ChatGPT ถ้ารันบนคอม Oak |
 | รูปภาพ ให้เข้ากับ GDD และงานภาพในเกม โพสต์ลงใน Issue เลย ไม่สร้าง branch งาน | **แบบ 3: สร้างรูป** | `/codex-image` ใน Issue | OpenAI API key (คิดเป็นรูป) |
 | ให้ Codex ตรวจ PR หรือสั่งงานจากหน้าเว็บ ChatGPT | **แบบ 1: ChatGPT Codex** (เสริม) | `@codex review` ใน PR | โควตา ChatGPT Plus/Pro ของคนที่ผูกบัญชี |
 
@@ -18,6 +18,9 @@
 ---
 
 ## แบบ 2: `/codex` ผ่าน GitHub Action (ไฟล์ `.github/workflows/codex.yml`)
+
+> **รันบนคอม Oak ได้ด้วย (ใช้โควตา ChatGPT แทน API key):** ตั้ง repo variable `CODEX_RUNNER=self-hosted`
+> และติดตั้ง runner ตาม [`CODEX-LOCAL-RUNNER.md`](CODEX-LOCAL-RUNNER.md) ถ้าไม่ตั้ง จะรันบนเครื่องของ GitHub และใช้ API key
 
 **ตั้งค่าครั้งเดียว (Oak ทำ)**
 1. สร้าง API key ที่ https://platform.openai.com/api-keys และเติมเครดิตใน Billing ของ platform (คนละส่วนกับ ChatGPT Plus)
