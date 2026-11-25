@@ -11,6 +11,12 @@
 # Optional: repo variable CODEX_MODEL (Settings > Secrets and variables > Actions > Variables) picks the
 # model; empty = Codex's default.
 #
+# Where Codex runs (Oak chose 2026-11-25): set the repo variable CODEX_RUNNER.
+#   empty / anything else -> GitHub's own machine, openai/codex-action, paid by OPENAI_API_KEY.
+#   self-hosted           -> Oak's own computer (a self-hosted runner with the label `codex`), Codex CLI signed in
+#                            with Oak's ChatGPT account, so it uses the ChatGPT plan instead of the API key.
+#                            Setup steps: .github/CODEX-LOCAL-RUNNER.md. Jobs wait in the queue while that computer is off.
+#
 # This file must live on the default branch (main) for issue/comment events to trigger it.
 #
 # How an issue flows (same shape as the @claude flow in claude.yml):
@@ -51,7 +57,10 @@ jobs:
        (github.event_name == 'issue_comment' && github.event.comment.user.type != 'Bot' &&
          !startsWith(github.event.comment.body, '/merge') && !startsWith(github.event.comment.body, '/nomerge') &&
          contains(github.event.comment.body, '/codex') && !contains(github.event.comment.body, '/codex-image')))
-    runs-on: ubuntu-latest
+    runs-on: ${{ vars.CODEX_RUNNER == 'self-hosted' && fromJSON('["self-hosted","codex"]') || 'ubuntu-latest' }}
+    defaults:
+      run:
+        shell: bash   # on Oak's Windows PC this must be Git for Windows' bash (see CODEX-LOCAL-RUNNER.md)
     timeout-minutes: 60
     permissions:
       contents: write
@@ -64,6 +73,18 @@ jobs:
           fetch-depth: 1
           lfs: true                   # real art files, so Codex can read PNGs like Claude does
           persist-credentials: false  # Codex must not find a GitHub token in .git/config
+
+      # codex-action checks this itself on GitHub's machine; on Oak's computer the workflow must check it.
+      - name: Only people with write access may start Codex
+        env:
+          GH_TOKEN: ${{ github.token }}
+          ACTOR: ${{ github.actor }}
+        run: |
+          role=$(gh api "repos/$GITHUB_REPOSITORY/collaborators/$ACTOR/permission" --jq '.permission' 2>/dev/null || echo none)
+          case "$role" in
+            admin|maintain|write) echo "$ACTOR has $role access" ;;
+            *) echo "::error::$ACTOR has '$role' access; /codex needs write access."; exit 1 ;;
+          esac
 
       # A first /codex starts a new branch from test-dev; a later /codex on the same issue continues its newest branch.
       - name: Pick the issue's branch
@@ -85,7 +106,7 @@ jobs:
             git -c http.extraheader="$auth" lfs pull || true
           else
             branch="codex/issue-$ISSUE_NUMBER-$(date -u +%Y%m%d-%H%M)"
-            git checkout -b "$branch"
+            git checkout -B "$branch"
           fi
           echo "name=$branch" >> "$GITHUB_OUTPUT"
           echo "base=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
@@ -156,8 +177,9 @@ jobs:
         run: |
           gh issue comment "$ISSUE_NUMBER" --repo "$GITHUB_REPOSITORY" --body "Codex เริ่มทำงานแล้ว ที่ branch \`$BRANCH\` (ต่อจาก \`$STAGING_BRANCH\`) ดูความคืบหน้าได้ที่ [Actions]($RUN_URL)"
 
-      - name: Run Codex
+      - name: Run Codex (GitHub's machine, API key)
         id: codex
+        if: vars.CODEX_RUNNER != 'self-hosted'
         continue-on-error: true
         uses: openai/codex-action@v1
         with:
@@ -165,6 +187,20 @@ jobs:
           prompt-file: .codex-run/prompt.md
           permission-profile: ":workspace"   # may edit the checkout; no network, no sudo
           model: ${{ vars.CODEX_MODEL }}
+
+      # Same prompt, run by the Codex CLI on Oak's computer, signed in with Oak's ChatGPT account (`codex login`).
+      # No GitHub token is passed to it; workspace-write lets it edit the checkout only.
+      - name: Run Codex (Oak's computer, ChatGPT plan)
+        id: codex_local
+        if: vars.CODEX_RUNNER == 'self-hosted'
+        continue-on-error: true
+        env:
+          CODEX_MODEL: ${{ vars.CODEX_MODEL }}
+        run: |
+          model_args=()
+          if [ -n "$CODEX_MODEL" ]; then model_args=(--model "$CODEX_MODEL"); fi
+          codex exec --sandbox workspace-write "${model_args[@]}" \
+            --output-last-message .codex-run/final-message.md - < .codex-run/prompt.md
 
       # Codex has no token, so the workflow commits and pushes for it, then reports on the issue.
       - name: Commit, push and report
@@ -176,12 +212,21 @@ jobs:
           ISSUE_TITLE: ${{ github.event.issue.title }}
           ISSUE_AUTHOR: ${{ github.event.issue.user.login }}
           BRANCH: ${{ steps.branch.outputs.name }}
-          CODEX_OUTCOME: ${{ steps.codex.outcome }}
+          RUNS_LOCAL: ${{ vars.CODEX_RUNNER == 'self-hosted' }}
+          CLOUD_OUTCOME: ${{ steps.codex.outcome }}
+          LOCAL_OUTCOME: ${{ steps.codex_local.outcome }}
           FINAL_MESSAGE: ${{ steps.codex.outputs.final-message }}
           HAS_KEY: ${{ secrets.OPENAI_API_KEY != '' }}
           RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
         run: |
           say() { printf '%s\n' "$1" | gh issue comment "$ISSUE_NUMBER" --repo "$GITHUB_REPOSITORY" --body-file -; }
+          if [ "$RUNS_LOCAL" = "true" ]; then
+            CODEX_OUTCOME="$LOCAL_OUTCOME"
+            FINAL_MESSAGE=$(cat .codex-run/final-message.md 2>/dev/null || true)
+            HAS_KEY=true   # not needed on Oak's computer
+          else
+            CODEX_OUTCOME="$CLOUD_OUTCOME"
+          fi
           rm -rf .codex-run
 
           if [ "$HAS_KEY" != "true" ]; then
@@ -194,7 +239,7 @@ jobs:
           fi
 
           if [ -n "$FINAL_MESSAGE" ]; then
-            printf '%s\n\n<sub>ตอบโดย Codex (OpenAI) ผ่าน GitHub Action</sub>\n' "$FINAL_MESSAGE" | gh issue comment "$ISSUE_NUMBER" --repo "$GITHUB_REPOSITORY" --body-file -
+            printf '%s\n\n<sub>ตอบโดย Codex (OpenAI)</sub>\n' "$FINAL_MESSAGE" | gh issue comment "$ISSUE_NUMBER" --repo "$GITHUB_REPOSITORY" --body-file -
           fi
 
           git add -A
