@@ -253,14 +253,6 @@ MonoBehaviour:
             m_StringArgument: 
             m_BoolArgument: 0
           m_CallState: 2
-  - screen: {fileID: 0}
-    openOnTop: 1
-    onOpened:
-      m_PersistentCalls:
-        m_Calls: []
-    onClosed:
-      m_PersistentCalls:
-        m_Calls: []
   firstScreen: {fileID: 0}
   openAnimationId: open
   closeAnimationId: close
@@ -554,7 +546,7 @@ SpriteRenderer:
   m_GlobalIlluminationMeshLod: 0
   m_SortingLayerID: 0
   m_SortingLayer: 0
-  m_SortingOrder: 0
+  m_SortingOrder: -1
   m_MaskInteraction: 0
   m_Sprite: {fileID: 21300000, guid: 13ef0a69d68c0944f8c739d813a13fa0, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
@@ -693,6 +685,10 @@ PrefabInstance:
     - target: {fileID: 2135514584512680554, guid: 8aa5828ad5874354883660e5a8179861, type: 3}
       propertyPath: m_Name
       value: GameSystems
+      objectReference: {fileID: 0}
+    - target: {fileID: 2135514584512680554, guid: 8aa5828ad5874354883660e5a8179861, type: 3}
+      propertyPath: m_IsActive
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 2370642089203661846, guid: 8aa5828ad5874354883660e5a8179861, type: 3}
       propertyPath: m_LocalPosition.x
@@ -1768,6 +1764,10 @@ PrefabInstance:
       propertyPath: m_Enabled
       value: 1
       objectReference: {fileID: 0}
+    - target: {fileID: 6212399987289571863, guid: d13c17412392db04dabc1122a5e3cc8f, type: 3}
+      propertyPath: item
+      value: 
+      objectReference: {fileID: 11400000, guid: 4c972315430309743ab776e1b482f8bc, type: 2}
     - target: {fileID: 6242975815229992178, guid: d13c17412392db04dabc1122a5e3cc8f, type: 3}
       propertyPath: m_LocalScale.x
       value: 10
@@ -2376,11 +2376,11 @@ SceneRoots:
   - {fileID: 900941504}
   - {fileID: 927998020}
   - {fileID: 1273867044}
-  - {fileID: 1958864698}
   - {fileID: 1856307017}
   - {fileID: 157516180}
   - {fileID: 906248047}
   - {fileID: 480516359}
+  - {fileID: 1958864698}
   - {fileID: 192163782}
   - {fileID: 158163739}
   - {fileID: 1857750099}
