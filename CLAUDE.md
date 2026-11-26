@@ -805,7 +805,7 @@ every level that has anything to pick up, so it is not a detail to leave for lat
 
 **Settings.** Music and Sound sliders through an AudioMixer. Brightness through a URP Global Volume, Color Adjustments → Post Exposure: slider minimum **10** is the normal default (Post Exposure 0), and the slider maximum is an Inspector field clamped between **50 and 70**. Language dropdown. All stored in the global save. Nothing outside the settings system calls the brightness code — a door or a puzzle that sets brightness is a bug, not a feature.
 
-**Highlight.** A soft white outline on interactable objects via URP Shader Graph, following the object's silhouette. Shown when the player is near, and also when the player has not interacted with anything for a configurable idle time (hint system).
+**Highlight.** A soft white outline on interactable objects via URP Shader Graph, following the object's silhouette. Shown while the mouse points at the object (one raycast per frame in `MouseHoverTarget`, nothing while the mouse is over UI or the game is not playing). Changed on issue #58, approved by Oak's side (2026-11-26): the old "player is near" and idle-hint triggers were removed, so a gamepad-only player sees no highlight.
 
 **Cutscenes.** Either a Timeline (`PlayableDirector`) or a video clip (`VideoPlayer`), with a Skip button. Used for: the storybook intro, the start of the game, and before collecting the puzzle gem. Player input is locked while one plays.
 
