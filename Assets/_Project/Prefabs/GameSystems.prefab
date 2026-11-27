@@ -20,6 +20,8 @@ GameObject:
   - component: {fileID: 3904868050595052090}
   - component: {fileID: 4631908901013308730}
   - component: {fileID: 8456040343832685535}
+  - component: {fileID: 2782331259090816753}
+  - component: {fileID: 7459085190746637864}
   m_Layer: 0
   m_Name: Managers
   m_TagString: Untagged
@@ -203,6 +205,35 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::InputBootstrap
   inputReader: {fileID: 11400000, guid: f19d2595478f8ad4ca1a48721d4df4e6, type: 2}
+--- !u!114 &2782331259090816753
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 847504047748348768}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7c3e91a2d4b84f6e9a1b5d8c2f0e3a67, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::CameraFlipController
+  inputReader: {fileID: 11400000, guid: f19d2595478f8ad4ca1a48721d4df4e6, type: 2}
+--- !u!114 &7459085190746637864
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 847504047748348768}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 89b49d3b1ed9b594692c25482c21e8bc, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::ScreenSwitcher
+  screens: []
+  firstScreen: {fileID: 0}
+  openAnimationId: open
+  closeAnimationId: close
 --- !u!1 &2135514584512680554
 GameObject:
   m_ObjectHideFlags: 0
@@ -581,7 +612,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 3252737388290768016, guid: d11281585fc17a74cb519d150c651dca, type: 3}
       propertyPath: m_Value
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 3366414885438409202, guid: d11281585fc17a74cb519d150c651dca, type: 3}
       propertyPath: m_AnchorMax.y

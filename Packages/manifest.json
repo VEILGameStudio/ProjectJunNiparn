@@ -1,5 +1,6 @@
 {
   "dependencies": {
+    "com.phengine.thaitextcare": "https://github.com/phanphantz/ThaiTextCare-for-Unity.git",
     "com.unity.2d.animation": "15.1.0",
     "com.unity.2d.pixel-perfect": "6.0.0",
     "com.unity.2d.psdimporter": "14.0.3",
